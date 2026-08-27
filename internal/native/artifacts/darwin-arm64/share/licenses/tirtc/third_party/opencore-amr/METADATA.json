@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "name": "opencore-amr",
+  "version": "0.1.6",
+  "kind": "source",
+  "upstream": {
+    "url": "https://sourceforge.net/projects/opencore-amr/",
+    "tag": "opencore-amr-0.1.6",
+    "revision": "483eb4061088e2b34b358e47540b5d495a96cd468e361050fae615b1809dc4a1"
+  },
+  "source": {
+    "root": "src",
+    "archive_sha256": "483eb4061088e2b34b358e47540b5d495a96cd468e361050fae615b1809dc4a1",
+    "tree_sha256": "f4af11e25f777be7d9c2ea28ff51eb4c2dbac6833dfbb71abaff7f7852e9e93c"
+  },
+  "licenses": [
+    {
+      "spdx": "Apache-2.0",
+      "path": "LICENSES/LICENSE",
+      "sha256": "8b3f1762349248d444ab9acbafe73941254e36e1064954da56bb9ddbd5873ddb"
+    },
+    {
+      "spdx": "LicenseRef-OpenCORE-AMR-NOTICE",
+      "path": "LICENSES/NOTICE",
+      "sha256": "d106802b5e406073c1d10fbe9f638234c6973ebce37df71773179642085eb489"
+    },
+    {
+      "spdx": "LicenseRef-OpenCORE-AMR-Patent-Disclaimer",
+      "path": "LICENSES/patent_disclaimer.txt",
+      "sha256": "f91a72705d38de34a9749c214a4cbc6ffa1da753b34b2cd11f3d6798f24ae59f"
+    }
+  ],
+  "local_changes": [
+    "The retained release source closure contains the AMR-NB encoder and decoder implementation; AMR-WB, examples, generated build trees and platform makefiles are excluded.",
+    "The TiRTC wrapper invokes the unmodified release configure script out of tree and builds only the AMR-NB encoder from the amrnb subdirectory. FFmpeg owns Runtime AMR-NB decoding."
+  ]
+}

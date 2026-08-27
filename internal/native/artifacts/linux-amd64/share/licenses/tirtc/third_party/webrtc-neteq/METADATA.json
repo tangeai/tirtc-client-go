@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "name": "webrtc-neteq",
+  "version": "M131.0.6778.200",
+  "kind": "source",
+  "upstream": {
+    "url": "https://webrtc.googlesource.com/src",
+    "branch": "refs/branch-heads/6778",
+    "revision": "79aff54b0fa9238ce3518dd9eaf9610cd6f22e82"
+  },
+  "source": {
+    "root": "src",
+    "tree_sha256": "f90d5b9c0cb9b60da0e3991edef1f73a40a1731ee34824f90a81e21aa9d99bc9",
+    "components": []
+  },
+  "licenses": [
+    {
+      "spdx": "BSD-3-Clause",
+      "path": "LICENSES/webrtc-LICENSE",
+      "sha256": "ab00a482b6a3902e40211b43c5d0441962ea99b6cc7c25c0f243fa270b78d482"
+    },
+    {
+      "spdx": "LicenseRef-WebRTC-Patent-Grant",
+      "path": "LICENSES/webrtc-PATENTS",
+      "sha256": "01462e2068d1a04c2274f3389773014c14ed9bc3446b28303543bd3e3c064145"
+    }
+  ],
+  "local_changes": [
+    "The decoded-PCM playout closure is limited to PacketBuffer, Expand/Merge, Accelerate and its time-stretch dependency, the L16 raw-PCM decoder, and their direct dependencies. DelayManager, DecisionLogic, PacketArrivalHistory, PreemptiveExpand, NetEqImpl, AudioCodingModule, RTP receiver, NACK, and the rest of libwebrtc are excluded because this boundary does not receive the original transport sequence and loss contract required to make their decisions correctly. The media latency owner supplies explicit whole-pipeline catch-up control instead.",
+    "Shared api, common_audio, rtc_base, and Abseil headers and symbols are reused from the existing webrtc-apm 2.1 source closure at the same WebRTC M131 revision 79aff54b0fa9238ce3518dd9eaf9610cd6f22e82, avoiding duplicate strong symbols."
+  ]
+}

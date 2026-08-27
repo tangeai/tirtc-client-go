@@ -1,0 +1,318 @@
+package storage // import "github.com/tangeai/tirtc-client-go/v2/storage"
+
+
+CONSTANTS
+
+const (
+	AudioCodecNone  = tirtc.AudioCodecNone
+	AudioCodecG711A = tirtc.AudioCodecG711A
+	AudioCodecAAC   = tirtc.AudioCodecAAC
+	AudioCodecPCM   = tirtc.AudioCodecPCM
+	AudioCodecOpus  = tirtc.AudioCodecOpus
+	AudioCodecAMR   = tirtc.AudioCodecAMR
+
+	VideoCodecNone  = tirtc.VideoCodecNone
+	VideoCodecH264  = tirtc.VideoCodecH264
+	VideoCodecH265  = tirtc.VideoCodecH265
+	VideoCodecMJPEG = tirtc.VideoCodecMJPEG
+
+	AudioBitstreamNone                  = tirtc.AudioBitstreamNone
+	AudioBitstreamG711APacket           = tirtc.AudioBitstreamG711APacket
+	AudioBitstreamAACADTS               = tirtc.AudioBitstreamAACADTS
+	AudioBitstreamAACRawAccessUnit      = tirtc.AudioBitstreamAACRawAccessUnit
+	AudioBitstreamPCMInt16LEInterleaved = tirtc.AudioBitstreamPCMInt16LEInterleaved
+	AudioBitstreamOpusPacket            = tirtc.AudioBitstreamOpusPacket
+	AudioBitstreamAMRNBFrame            = tirtc.AudioBitstreamAMRNBFrame
+
+	VideoBitstreamNone       = tirtc.VideoBitstreamNone
+	VideoBitstreamH264AnnexB = tirtc.VideoBitstreamH264AnnexB
+	VideoBitstreamH265AnnexB = tirtc.VideoBitstreamH265AnnexB
+	VideoBitstreamMJPEGJFIF  = tirtc.VideoBitstreamMJPEGJFIF
+
+	AudioSampleNone               = tirtc.AudioSampleNone
+	AudioSampleInt16LEInterleaved = tirtc.AudioSampleInt16LEInterleaved
+	PixelNone                     = tirtc.PixelNone
+	PixelI420                     = tirtc.PixelI420
+	PixelNV12                     = tirtc.PixelNV12
+	PixelRGBA8888                 = tirtc.PixelRGBA8888
+	OutputIdle                    = tirtc.OutputIdle
+	OutputBuffering               = tirtc.OutputBuffering
+	OutputDelivering              = tirtc.OutputDelivering
+	OutputFailed                  = tirtc.OutputFailed
+	OutputPaused                  = tirtc.OutputPaused
+	OutputCompleted               = tirtc.OutputCompleted
+)
+
+VARIABLES
+
+var (
+	ErrInvalidArgument     = errors.New("storage: invalid argument")
+	ErrNotInitialized      = errors.New("storage: not initialized")
+	ErrTokenExpired        = errors.New("storage: token expired")
+	ErrAlreadyInitialized  = errors.New("storage: already initialized")
+	ErrPermissionDenied    = errors.New("storage: permission denied")
+	ErrInUse               = errors.New("storage: resource in use")
+	ErrNotStarted          = errors.New("storage: not started")
+	ErrNotBound            = errors.New("storage: not bound")
+	ErrNotConfigured       = errors.New("storage: not configured")
+	ErrResourceExhausted   = errors.New("storage: resource exhausted")
+	ErrUnsupportedFormat   = errors.New("storage: unsupported format")
+	ErrIO                  = errors.New("storage: I/O failed")
+	ErrCancelled           = errors.New("storage: cancelled")
+	ErrRangeTooLarge       = errors.New("storage: range too large")
+	ErrNoFrame             = errors.New("storage: no frame")
+	ErrNoRecordableMedia   = errors.New("storage: no recordable media")
+	ErrRecordingOverrun    = errors.New("storage: recording overrun")
+	ErrRecordingUnreadable = errors.New("storage: recording unreadable")
+	ErrUnavailable         = errors.New("storage: unavailable")
+	ErrStopped             = errors.New("storage: stopped")
+	ErrClosed              = errors.New("storage: closed")
+)
+
+FUNCTIONS
+
+func ErrorName(code int32) string
+func Init(options InitOptions) error
+func Shutdown() error
+
+TYPES
+
+type AudioBitstreamFormat = tirtc.AudioBitstreamFormat
+
+type AudioCodec = tirtc.AudioCodec
+
+type AudioFrame = tirtc.AudioFrame
+
+type AudioOutput struct {
+	// Has unexported fields.
+}
+
+func NewAudioOutput(options AudioOutputOptions) (*AudioOutput, error)
+
+func (o *AudioOutput) Attach(replay *Replay, channelID uint8) error
+
+func (o *AudioOutput) Close() error
+
+func (o *AudioOutput) Detach() error
+
+func (o *AudioOutput) State() OutputState
+
+type AudioOutputOptions struct {
+	OnFrame        func(AudioFrame)
+	OnStateChanged func(OutputState)
+	OnError        func(error)
+}
+
+type AudioSampleFormat = tirtc.AudioSampleFormat
+
+type CloudStorage struct {
+	// Has unexported fields.
+}
+
+func New(token string) (*CloudStorage, error)
+
+func (s *CloudStorage) Close() (resultErr error)
+
+func (s *CloudStorage) ExportRecording(options ExportOptions) (*ExportTask, error)
+
+func (s *CloudStorage) ListRecordingDays(ctx context.Context, startDate, endDate string) ([]RecordingDay, error)
+
+func (s *CloudStorage) ListRecordingDaysInTimeZone(
+	ctx context.Context,
+	startDate string,
+	endDate string,
+	timeZoneID string,
+) (result []RecordingDay, resultErr error)
+
+func (s *CloudStorage) ListRecordings(ctx context.Context, startTime, endTime time.Time) (result []RecordingRange, resultErr error)
+
+func (s *CloudStorage) NewReplay(options ReplayOptions) (*Replay, error)
+
+func (s *CloudStorage) UpdateToken(token string) error
+
+type EncodedAudioFrame = tirtc.EncodedAudioFrame
+
+type EncodedAudioOutput struct {
+	// Has unexported fields.
+}
+
+func NewEncodedAudioOutput(options EncodedAudioOutputOptions) (*EncodedAudioOutput, error)
+
+func (o *EncodedAudioOutput) Attach(replay *Replay, channelID uint8) error
+
+func (o *EncodedAudioOutput) Close() error
+
+func (o *EncodedAudioOutput) Detach() error
+
+func (o *EncodedAudioOutput) State() OutputState
+
+type EncodedAudioOutputOptions struct {
+	OnFrame        func(EncodedAudioFrame)
+	OnStateChanged func(OutputState)
+	OnError        func(error)
+}
+
+type EncodedVideoFrame = tirtc.EncodedVideoFrame
+
+type EncodedVideoOutput struct {
+	// Has unexported fields.
+}
+
+func NewEncodedVideoOutput(options EncodedVideoOutputOptions) (*EncodedVideoOutput, error)
+
+func (o *EncodedVideoOutput) Attach(replay *Replay, channelID uint8) error
+
+func (o *EncodedVideoOutput) Close() error
+
+func (o *EncodedVideoOutput) Detach() error
+
+func (o *EncodedVideoOutput) State() OutputState
+
+type EncodedVideoOutputOptions struct {
+	OnFrame        func(EncodedVideoFrame)
+	OnStateChanged func(OutputState)
+	OnError        func(error)
+}
+
+type Error struct{ Code int32 }
+
+func (e *Error) Error() string
+
+func (e *Error) Unwrap() error
+
+type ExportOptions struct {
+	StartTime      time.Time
+	EndTime        time.Time
+	VideoChannelID uint8
+	AudioChannelID *uint8
+}
+
+type ExportTask struct {
+	// Has unexported fields.
+}
+
+func (t *ExportTask) Progress() float64
+
+func (t *ExportTask) Stop() (RecordingFile, error)
+
+func (t *ExportTask) Wait() (RecordingFile, error)
+
+type InitOptions struct {
+	AppID             string
+	CacheDir          string
+	Endpoint          string
+	ConsoleLogEnabled bool
+}
+
+type OutputState = tirtc.OutputState
+
+type PixelFormat = tirtc.PixelFormat
+
+type RecordingDay struct {
+	Date         string
+	HasRecording bool
+}
+
+type RecordingFile struct {
+	Path     string
+	Duration time.Duration
+}
+
+func (f RecordingFile) Delete() error
+    Delete synchronously removes this Runtime-owned temporary media file.
+
+type RecordingRange struct {
+	StartTime time.Time
+	EndTime   time.Time
+}
+
+type RecordingTask struct {
+	// Has unexported fields.
+}
+
+func (t *RecordingTask) Stop() (file RecordingFile, resultErr error)
+
+type Replay struct {
+	// Has unexported fields.
+}
+
+func (r *Replay) Close() (resultErr error)
+
+func (r *Replay) CurrentTime() (time.Time, bool, error)
+
+func (r *Replay) Pause() error
+
+func (r *Replay) Play(startTime, endTime time.Time) error
+
+func (r *Replay) PlayAt(startTime, endTime, initialTime time.Time) error
+
+func (r *Replay) Resume() error
+
+func (r *Replay) Seek(target time.Time) error
+
+func (r *Replay) SetSpeed(speed ReplaySpeed) error
+
+func (r *Replay) Speed() ReplaySpeed
+
+func (r *Replay) StartRecording(options StartRecordingOptions) (*RecordingTask, error)
+
+func (r *Replay) Stop() error
+
+type ReplayOptions struct {
+	OnTimeChanged func(time.Time)
+	OnCompleted   func()
+	OnError       func(error)
+}
+
+type ReplaySpeed uint8
+
+const (
+	ReplaySpeed1x     ReplaySpeed = 0
+	ReplaySpeed2x     ReplaySpeed = 1
+	ReplaySpeed4x     ReplaySpeed = 2
+	ReplaySpeed8x     ReplaySpeed = 3
+	ReplaySpeed0_5x   ReplaySpeed = 4
+	ReplaySpeed0_25x  ReplaySpeed = 5
+	ReplaySpeed0_125x ReplaySpeed = 6
+)
+type SnapshotFile struct {
+	Path string
+}
+
+func (f SnapshotFile) Delete() error
+    Delete synchronously removes this Runtime-owned temporary media file.
+
+type StartRecordingOptions struct {
+	VideoChannelID uint8
+	AudioChannelID *uint8
+}
+
+type VideoBitstreamFormat = tirtc.VideoBitstreamFormat
+
+type VideoCodec = tirtc.VideoCodec
+
+type VideoFrame = tirtc.VideoFrame
+
+type VideoOutput struct {
+	// Has unexported fields.
+}
+
+func NewVideoOutput(options VideoOutputOptions) (*VideoOutput, error)
+
+func (o *VideoOutput) Attach(replay *Replay, channelID uint8) error
+
+func (o *VideoOutput) Close() error
+
+func (o *VideoOutput) Detach() error
+
+func (o *VideoOutput) State() OutputState
+
+func (o *VideoOutput) TakeSnapshot() (SnapshotFile, error)
+
+type VideoOutputOptions struct {
+	OnFrame        func(VideoFrame)
+	OnStateChanged func(OutputState)
+	OnError        func(error)
+}
+
+type VideoPlane = tirtc.VideoPlane

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "name": "ffmpeg",
+  "version": "8.0.git",
+  "kind": "source",
+  "upstream": {
+    "url": "https://git.ffmpeg.org/ffmpeg.git",
+    "revision": "711b1a52bd0b631f7ca999419110242c8361f38d"
+  },
+  "source": {
+    "root": "src",
+    "tree_sha256": "5ba0a8cd7eb681f81b46166bed91507b100e46de3fa473b8c7ed80fc921c8829"
+  },
+  "licenses": [
+    {
+      "spdx": "LGPL-2.1-or-later",
+      "path": "LICENSES/COPYING.LGPLv2.1",
+      "sha256": "246041b6ecf9bc32d718a62c57877c78b5eb397b6467e74ed7ae2626ab189c30"
+    },
+    {
+      "spdx": "LicenseRef-FFmpeg-License-Notice",
+      "path": "LICENSES/LICENSE.md",
+      "sha256": "2e1d16c72fd74e12063776371da757322f8b77589386532f4fd8634bde7de1af"
+    }
+  ],
+  "local_changes": [
+    "The official revision is retained as the offline build closure for libavformat, libavcodec, libavutil, libswresample and libswscale; programs, documentation bodies, reference media, disabled library trees and unrelated test sources are excluded.",
+    "The optional GPL-only libavcodec x86 files and the disabled x264, x265, OpenH264 and OpenCORE codec wrapper sources are excluded from the retained closure.",
+    "The outer CMake owner drives the unmodified retained sources as static PIC libraries with the checked FFmpegProfile.cmake allowlist; no patch is applied during the build."
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "name": "webrtc-apm",
+  "version": "2.1",
+  "kind": "source",
+  "upstream": {
+    "url": "https://gitlab.freedesktop.org/pulseaudio/webrtc-audio-processing",
+    "tag": "v2.1",
+    "revision": "846fe90a289f58b7c9303a635142aa2c7caa93e5"
+  },
+  "source": {
+    "root": "src",
+    "tree_sha256": "46ff47d59a21bfe5ac1f173494235f2d0b0eb8b76ce9cebfc569deac8270228d",
+    "components": [
+      {
+        "name": "abseil-cpp",
+        "root": "deps/abseil-cpp",
+        "version": "20240722.0",
+        "upstream_url": "https://github.com/abseil/abseil-cpp",
+        "revision": "4447c7562e3bc702ade25105912dce503f0c4010",
+        "archive_sha256": "f50e5ac311a81382da7fa75b97310e4b9006474f9560ac46f54a9967f07d4ae3",
+        "wrap_patch_version": "20240722.0-3",
+        "wrap_patch_sha256": "12dd8df1488a314c53e3751abd2750cf233b830651d168b6a9f15e7d0cf71f7b",
+        "tree_sha256": "393795fbddd27c7066853ee078930b1e4337af2f7a890ddf8471d79d07f7a12a"
+      }
+    ]
+  },
+  "licenses": [
+    {
+      "spdx": "BSD-3-Clause",
+      "path": "LICENSES/webrtc-audio-processing-COPYING",
+      "sha256": "9b79539028e216e813e152d45f5c1ed5fdd0554426ad50270fb03134e7082dac"
+    },
+    {
+      "spdx": "BSD-3-Clause",
+      "path": "LICENSES/webrtc-LICENSE",
+      "sha256": "ab00a482b6a3902e40211b43c5d0441962ea99b6cc7c25c0f243fa270b78d482"
+    },
+    {
+      "spdx": "LicenseRef-WebRTC-Patent-Grant",
+      "path": "LICENSES/webrtc-PATENTS",
+      "sha256": "01462e2068d1a04c2274f3389773014c14ed9bc3446b28303543bd3e3c064145"
+    },
+    {
+      "spdx": "BSD-3-Clause",
+      "path": "LICENSES/rnnoise-COPYING",
+      "sha256": "e2f59ff41d9d03adc3dcf3deff170f8c8cf4a6eb4a9b174762a7656d23200ffa"
+    },
+    {
+      "spdx": "LicenseRef-Ooura-FFT",
+      "path": "LICENSES/ooura-LICENSE",
+      "sha256": "25b7731b70c77ecd5f3bb19303fbaa99be18860f81d44f71da670fdcd04829db"
+    },
+    {
+      "spdx": "LicenseRef-WebRTC-SPL-Sqrt-Floor-Public-Domain",
+      "path": "LICENSES/spl-sqrt-floor-LICENSE",
+      "sha256": "41d791701e3e1c1073470403de7e342442d1e6a2af72681023b13a2f45f2125c"
+    },
+    {
+      "spdx": "BSD-3-Clause",
+      "path": "LICENSES/pffft-LICENSE",
+      "sha256": "a46200592eb193853527250da098e6bb0c75424e7a2c7db8da526c4f301c3d88"
+    },
+    {
+      "spdx": "Apache-2.0",
+      "path": "LICENSES/abseil-LICENSE",
+      "sha256": "c79a7fea0e3cac04cd43f20e7b648e5a0ff8fa5344e644b0ee09ca1162b62747"
+    },
+    {
+      "spdx": "MIT",
+      "path": "LICENSES/abseil-meson-LICENSE",
+      "sha256": "7939f4c45423cec4a18236ad0a88570e33508dd7462e07b1038001f90ece65fb"
+    }
+  ],
+  "local_changes": [
+    "The standalone WebRTC APM tree is reduced to its Meson build closure; GN build descriptions and unused patch documentation are excluded.",
+    "Abseil keeps the complete upstream absl/ source subtree from official 20240722.0 plus the WrapDB 20240722.0-3 Meson definitions. Alternate build systems, CI, examples and documentation outside that source subtree are excluded.",
+    "The build stages both source components into a disposable fingerprint cache, forces the bundled Abseil fallback with Meson wrap downloads disabled, and explicitly keeps NEON disabled to match the established Rapid artifacts while retaining upstream inline SSE behavior on x86.",
+    "The Meson definition enables WEBRTC_ENABLE_SYMBOL_EXPORT only for shared-library builds so Runtime's Windows static archive does not import its own symbols.",
+    "Abseil's WinRT local-time-zone lookup remains disabled for MinGW because the MinGW header model aliases Windows boolean and BYTE specializations; WebRTC APM does not consume local-time-zone resolution.",
+    "Retained WebRTC headers that use fixed-width integer types include cstdint directly instead of relying on transitive standard-library includes."
+  ]
+}

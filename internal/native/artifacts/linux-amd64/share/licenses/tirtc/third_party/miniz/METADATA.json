@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "name": "miniz",
+  "version": "3.0.0",
+  "kind": "source",
+  "upstream": {
+    "url": "https://github.com/richgel999/miniz",
+    "tag": "3.0.0",
+    "revision": "39f65158c7e5a830e390f3aece08de654c763981"
+  },
+  "source": {
+    "root": "src",
+    "tree_sha256": "94f14d2c2248cdb32074812c781ace555d7d2825ddae6ad8ab4fd5177aeb8e8a"
+  },
+  "licenses": [
+    {
+      "spdx": "MIT",
+      "path": "LICENSES/LICENSE",
+      "sha256": "0115478d567121238cf6cc1c0c361926cf07a49d9e4c9e66da97fac6a01646b3"
+    }
+  ],
+  "local_changes": [
+    "The existing Runtime amalgamated header/source snapshot is retained byte-for-byte except for its local include path. It defines MINIZ_EXPORT locally and reports MZ_VERSION 11.0.2."
+  ]
+}

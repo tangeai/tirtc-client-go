@@ -1,0 +1,347 @@
+package tirtc // import "github.com/tangeai/tirtc-client-go/v2"
+
+
+VARIABLES
+
+var (
+	ErrInvalidArgument      = errors.New("tirtc: invalid argument")
+	ErrNotInitialized       = errors.New("tirtc: not initialized")
+	ErrAuthenticationFailed = errors.New("tirtc: authentication failed")
+	ErrTimeout              = errors.New("tirtc: timeout")
+	ErrRemoteClosed         = errors.New("tirtc: remote closed")
+	ErrTokenExpired         = errors.New("tirtc: token expired")
+	ErrAlreadyInitialized   = errors.New("tirtc: already initialized")
+	ErrPermissionDenied     = errors.New("tirtc: permission denied")
+	ErrInUse                = errors.New("tirtc: resource in use")
+	ErrNotStarted           = errors.New("tirtc: not started")
+	ErrNotConnected         = errors.New("tirtc: not connected")
+	ErrNotBound             = errors.New("tirtc: not bound")
+	ErrNotConfigured        = errors.New("tirtc: not configured")
+	ErrResourceExhausted    = errors.New("tirtc: resource exhausted")
+	ErrLogExport            = errors.New("tirtc: log export failed")
+	ErrLogUpload            = errors.New("tirtc: log upload failed")
+	ErrUnsupported          = errors.New("tirtc: unsupported")
+	ErrUnsupportedFormat    = errors.New("tirtc: unsupported format")
+	ErrIO                   = errors.New("tirtc: I/O failed")
+	ErrNoFrame              = errors.New("tirtc: no frame")
+	ErrNoRecordableMedia    = errors.New("tirtc: no recordable media")
+	ErrRecordingOverrun     = errors.New("tirtc: recording overrun")
+	ErrClosed               = errors.New("tirtc: closed")
+)
+
+FUNCTIONS
+
+func ErrorName(code int32) string
+func Init(options InitOptions) error
+func Shutdown() error
+func UploadLogs() (string, error)
+
+TYPES
+
+type AudioBitstreamFormat uint8
+
+const (
+	AudioBitstreamNone AudioBitstreamFormat = iota
+	AudioBitstreamG711APacket
+	AudioBitstreamAACADTS
+	AudioBitstreamAACRawAccessUnit
+	AudioBitstreamPCMInt16LEInterleaved
+	AudioBitstreamOpusPacket
+	AudioBitstreamAMRNBFrame
+)
+type AudioCodec uint8
+
+const (
+	AudioCodecNone  AudioCodec = 0
+	AudioCodecG711A AudioCodec = 1
+	AudioCodecAAC   AudioCodec = 2
+	AudioCodecPCM   AudioCodec = 3
+	AudioCodecOpus  AudioCodec = 4
+	AudioCodecAMR   AudioCodec = 5
+)
+type AudioFrame struct {
+	Data              []byte
+	PTS               time.Duration
+	SourceTime        time.Time
+	Format            AudioSampleFormat
+	SampleRateHz      int
+	Channels          int
+	SamplesPerChannel int
+	Discontinuity     bool
+}
+
+type AudioOutput struct {
+	// Has unexported fields.
+}
+
+func NewAudioOutput(options AudioOutputOptions) (*AudioOutput, error)
+
+func (o *AudioOutput) Attach(connection *Conn, streamID uint8) (resultErr error)
+
+func (o *AudioOutput) Close() (resultErr error)
+
+func (o *AudioOutput) Detach() (resultErr error)
+
+func (o *AudioOutput) State() OutputState
+
+type AudioOutputOptions struct {
+	AGCLevel       AudioProcessingLevel
+	ANSLevel       AudioProcessingLevel
+	Buffer         OutputBufferOptions
+	OnFrame        func(frame AudioFrame)
+	OnStateChanged func(state OutputState)
+	OnError        func(err error)
+}
+
+type AudioProcessingLevel uint8
+
+const (
+	AudioProcessingDisabled AudioProcessingLevel = iota
+	AudioProcessingLow
+	AudioProcessingMedium
+	AudioProcessingHigh
+)
+type AudioSampleFormat uint8
+
+const (
+	AudioSampleNone AudioSampleFormat = iota
+	AudioSampleInt16LEInterleaved
+)
+type Conn struct {
+	// Has unexported fields.
+}
+
+func NewConn(options ConnOptions) (*Conn, error)
+
+func (c *Conn) Close() (resultErr error)
+
+func (c *Conn) Connect(remoteID, token string) error
+
+func (c *Conn) Disconnect() error
+
+func (c *Conn) RequestVideoKeyframe(streamID uint8) error
+
+func (c *Conn) SendCommand(commandID uint32, data []byte) error
+
+func (c *Conn) SendStreamMessage(streamID uint8, timestamp time.Duration, data []byte) error
+
+func (c *Conn) StartRecording(options StartRecordingOptions) (*RecordingTask, error)
+
+func (c *Conn) State() ConnState
+
+func (c *Conn) SubscribeAudio(streamID uint8) error
+
+func (c *Conn) SubscribeVideo(streamID uint8) error
+
+func (c *Conn) UnsubscribeAudio(streamID uint8) error
+
+func (c *Conn) UnsubscribeVideo(streamID uint8) error
+
+type ConnOptions struct {
+	OnStateChanged  func(state ConnState, err error)
+	OnCommand       func(commandID uint32, data []byte)
+	OnStreamMessage func(streamID uint8, timestamp time.Duration, data []byte)
+}
+
+type ConnState uint8
+
+const (
+	ConnIdle ConnState = iota
+	ConnConnecting
+	ConnConnected
+	ConnDisconnected
+)
+type EncodedAudioFrame struct {
+	Data            []byte
+	CodecConfig     []byte
+	PTS             time.Duration
+	SourceTime      time.Time
+	Codec           AudioCodec
+	BitstreamFormat AudioBitstreamFormat
+	SampleRateHz    int
+	Channels        int
+	Discontinuity   bool
+}
+
+type EncodedAudioOutput struct {
+	// Has unexported fields.
+}
+
+func NewEncodedAudioOutput(options EncodedAudioOutputOptions) (*EncodedAudioOutput, error)
+
+func (o *EncodedAudioOutput) Attach(connection *Conn, streamID uint8) (resultErr error)
+
+func (o *EncodedAudioOutput) Close() (resultErr error)
+
+func (o *EncodedAudioOutput) Detach() (resultErr error)
+
+func (o *EncodedAudioOutput) State() OutputState
+
+type EncodedAudioOutputOptions struct {
+	OnFrame        func(frame EncodedAudioFrame)
+	OnStateChanged func(state OutputState)
+	OnError        func(err error)
+}
+
+type EncodedVideoFrame struct {
+	Data            []byte
+	CodecConfig     []byte
+	PTS             time.Duration
+	SourceTime      time.Time
+	Codec           VideoCodec
+	BitstreamFormat VideoBitstreamFormat
+	Width           int
+	Height          int
+	KeyFrame        bool
+	Discontinuity   bool
+}
+
+type EncodedVideoOutput struct {
+	// Has unexported fields.
+}
+
+func NewEncodedVideoOutput(options EncodedVideoOutputOptions) (*EncodedVideoOutput, error)
+
+func (o *EncodedVideoOutput) Attach(connection *Conn, streamID uint8) (resultErr error)
+
+func (o *EncodedVideoOutput) Close() (resultErr error)
+
+func (o *EncodedVideoOutput) Detach() (resultErr error)
+
+func (o *EncodedVideoOutput) State() OutputState
+
+type EncodedVideoOutputOptions struct {
+	OnFrame        func(frame EncodedVideoFrame)
+	OnStateChanged func(state OutputState)
+	OnError        func(err error)
+}
+
+type Error struct{ Code int32 }
+
+func (e *Error) Error() string
+
+func (e *Error) Unwrap() error
+
+type InitOptions struct {
+	AppID             string
+	CacheDir          string
+	Endpoint          string
+	ConsoleLogEnabled bool
+}
+
+type OutputBufferOptions struct {
+	Strategy           OutputBufferStrategy
+	MaxBufferWatermark *time.Duration
+}
+
+type OutputBufferStrategy uint8
+
+const (
+	OutputBufferAutomatic OutputBufferStrategy = iota
+	OutputBufferNoBuffer
+)
+type OutputState uint8
+
+const (
+	OutputIdle OutputState = iota
+	OutputBuffering
+	OutputDelivering
+	OutputFailed
+	OutputPaused
+	OutputCompleted
+)
+type PixelFormat uint8
+
+const (
+	PixelNone PixelFormat = iota
+	PixelI420
+	PixelNV12
+	PixelRGBA8888
+)
+type RecordingFile struct {
+	Path     string
+	Duration time.Duration
+}
+
+func (f RecordingFile) Delete() error
+    Delete synchronously removes this Runtime-owned temporary media file.
+
+type RecordingTask struct {
+	// Has unexported fields.
+}
+
+func (t *RecordingTask) Stop() (file RecordingFile, resultErr error)
+
+type SnapshotFile struct {
+	Path string
+}
+
+func (f SnapshotFile) Delete() error
+    Delete synchronously removes this Runtime-owned temporary media file.
+
+type StartRecordingOptions struct {
+	VideoStreamID uint8
+	AudioStreamID *uint8
+}
+
+type VideoBitstreamFormat uint8
+
+const (
+	VideoBitstreamNone VideoBitstreamFormat = iota
+	VideoBitstreamH264AnnexB
+	VideoBitstreamH265AnnexB
+	VideoBitstreamMJPEGJFIF
+)
+type VideoCodec uint8
+
+const (
+	VideoCodecNone  VideoCodec = 0
+	VideoCodecH264  VideoCodec = 65
+	VideoCodecH265  VideoCodec = 66
+	VideoCodecMJPEG VideoCodec = 67
+)
+type VideoDecoderPreference uint8
+
+const (
+	VideoDecoderAuto VideoDecoderPreference = iota
+	VideoDecoderSoftware
+	VideoDecoderHardware
+)
+type VideoFrame struct {
+	PTS           time.Duration
+	SourceTime    time.Time
+	PixelFormat   PixelFormat
+	Width         int
+	Height        int
+	Planes        []VideoPlane
+	Discontinuity bool
+}
+
+type VideoOutput struct {
+	// Has unexported fields.
+}
+
+func NewVideoOutput(options VideoOutputOptions) (*VideoOutput, error)
+
+func (o *VideoOutput) Attach(connection *Conn, streamID uint8) (resultErr error)
+
+func (o *VideoOutput) Close() (resultErr error)
+
+func (o *VideoOutput) Detach() (resultErr error)
+
+func (o *VideoOutput) State() OutputState
+
+func (o *VideoOutput) TakeSnapshot() (file SnapshotFile, resultErr error)
+
+type VideoOutputOptions struct {
+	DecoderPreference VideoDecoderPreference
+	Buffer            OutputBufferOptions
+	OnFrame           func(frame VideoFrame)
+	OnStateChanged    func(state OutputState)
+	OnError           func(err error)
+}
+
+type VideoPlane struct {
+	Stride int
+	Data   []byte
+}

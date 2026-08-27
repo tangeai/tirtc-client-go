@@ -1,0 +1,232 @@
+{
+  "baseline_sha256": "e907e11cb15be9b903fe0dc6f95f94bf9126dd5784f19a9a6ca56e34f9f48100",
+  "build_identity": {
+    "fingerprint": "0c00f2da642a143c2a02be896926e6ba71fdd166bd6983ab6948fcd594ec6e81",
+    "platform": "linux-x64",
+    "profile_sha256": "bf5a4308b0e8fd168a760da022e949bda0c3654fe03c2efcdf864fb5347b4108",
+    "source_tree_sha256": "5ba0a8cd7eb681f81b46166bed91507b100e46de3fa473b8c7ed80fc921c8829"
+  },
+  "commands": [
+    {
+      "arguments": [
+        "-fPIC",
+        "-O3",
+        "-DNDEBUG",
+        "-shared",
+        "-Wl,--version-script={INPUT_ROOT}/files/69247e0e25f115cc-tirtc_media_exports_linux.map",
+        "-Wl,-soname,libtirtc_media.so",
+        "-Wl,-soname,libtirtc_media.so",
+        "-o",
+        "{OUTPUT_DIR}/libtirtc_media.so",
+        "{INPUT_ROOT}/files/32be810261c5b520-tirtc_media_aggregate_anchor.c.o",
+        "-L{INPUT_ROOT}/library-dirs/229d6fba2e110afd",
+        "-Wl,-rpath,$ORIGIN",
+        "-Wl,--push-state,--whole-archive",
+        "{INPUT_ROOT}/files/6dc1bac641569bd8-libtirtc_runtime_facade.a",
+        "{INPUT_ROOT}/files/a791eef755712e5c-libtirtc_runtime_storage.a",
+        "{INPUT_ROOT}/files/e1ecaea1be675f79-libtirtc_runtime_transport.a",
+        "{INPUT_ROOT}/files/19e8d50e38093483-libtirtc_runtime_media.a",
+        "{INPUT_ROOT}/files/6b5e3a76619bb8df-libtirtc_runtime_audio.a",
+        "{INPUT_ROOT}/files/b39e96a9480e9bca-libtirtc_runtime_video.a",
+        "{INPUT_ROOT}/files/e512024453f21b3e-libtirtc_runtime_foundation_logging.a",
+        "{INPUT_ROOT}/files/97578828393c811e-libtirtc_runtime_foundation_http.a",
+        "{INPUT_ROOT}/files/41f2ec41be39b288-libtirtc_runtime_media_contract.a",
+        "-Wl,--pop-state",
+        "{INPUT_ROOT}/files/9a4e847504fac54d-libopus.a",
+        "{INPUT_ROOT}/files/7be182b37265fcbb-libopencore-amrnb.a",
+        "{INPUT_ROOT}/files/b2214d128ceccbd1-libwebrtc-audio-processing-2.a",
+        "{INPUT_ROOT}/files/6ae14988509b19cf-libtirtc_third_webrtc_neteq.a",
+        "{INPUT_ROOT}/files/69b6cee8e8f21930-libtirtc_third_tencent_xlog.a",
+        "-ldl",
+        "-lm",
+        "-Wl,--no-as-needed",
+        "-lz",
+        "-Wl,--as-needed",
+        "-lTiRTC",
+        "{INPUT_ROOT}/files/b2214d128ceccbd1-libwebrtc-audio-processing-2.a",
+        "/usr/lib/x86_64-linux-gnu/librt.a",
+        "-Wl,--start-group",
+        "{FFMPEG_LIB_DIR}/libavformat.a",
+        "{FFMPEG_LIB_DIR}/libavcodec.a",
+        "{FFMPEG_LIB_DIR}/libswresample.a",
+        "{FFMPEG_LIB_DIR}/libswscale.a",
+        "{FFMPEG_LIB_DIR}/libavutil.a",
+        "-Wl,--end-group",
+        "-lm",
+        "-Wl,--start-group",
+        "{INPUT_ROOT}/files/9576276d21d6c17c-libtirtc_third_tencent_xlog_comm.a",
+        "{INPUT_ROOT}/files/2b268c398719405e-libtirtc_third_tencent_xlog_boost.a",
+        "-Wl,--end-group",
+        "{INPUT_ROOT}/files/00516fbed815d95b-libtirtc_third_tencent_xlog_zstd.a",
+        "/usr/lib/x86_64-linux-gnu/libz.so",
+        "{INPUT_ROOT}/files/8d75b67973353bf6-libssl.a",
+        "{INPUT_ROOT}/files/e7f95421b8456f9d-libcrypto.a",
+        "{INPUT_ROOT}/files/a4d7c85aea4667d3-libtirtc_third_miniz.a"
+      ],
+      "tool": "/usr/bin/g++",
+      "tool_basename": "g++"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "files/00516fbed815d95b-libtirtc_third_tencent_xlog_zstd.a",
+      "sha256": "00516fbed815d95b13198527824423bcd938ec791507f5b3ceebda6705709fd6",
+      "size": 586612
+    },
+    {
+      "path": "files/19e8d50e38093483-libtirtc_runtime_media.a",
+      "sha256": "19e8d50e3809348340b835e620e7cfee59ef944a93f5f47bbf9793f47c03eab6",
+      "size": 768778
+    },
+    {
+      "path": "files/2b268c398719405e-libtirtc_third_tencent_xlog_boost.a",
+      "sha256": "2b268c398719405e9ee0b5f7a04ea47bb312450f2de59cb0e0ea8cab91a1ca37",
+      "size": 320810
+    },
+    {
+      "path": "files/32be810261c5b520-tirtc_media_aggregate_anchor.c.o",
+      "sha256": "32be810261c5b52015dc52a54264e114dff1149cabcf613fd066db51061cf58d",
+      "size": 1248
+    },
+    {
+      "path": "files/41f2ec41be39b288-libtirtc_runtime_media_contract.a",
+      "sha256": "41f2ec41be39b2882b1ef60916ad4e208dee4bb7a70051b8a951fe9fe909d75d",
+      "size": 42744
+    },
+    {
+      "path": "files/69247e0e25f115cc-tirtc_media_exports_linux.map",
+      "sha256": "69247e0e25f115cc4397a13275b80df55dda0640f68e28f68f19e9188cf1f6aa",
+      "size": 6053
+    },
+    {
+      "path": "files/69b6cee8e8f21930-libtirtc_third_tencent_xlog.a",
+      "sha256": "69b6cee8e8f21930e3c5f35f8ea50429a97f671a26881bd5cfa781719b8628dc",
+      "size": 387094
+    },
+    {
+      "path": "files/6ae14988509b19cf-libtirtc_third_webrtc_neteq.a",
+      "sha256": "6ae14988509b19cfc5fe2001225b2c65baf050b5390807aacd38df57bcdac83e",
+      "size": 328596
+    },
+    {
+      "path": "files/6b5e3a76619bb8df-libtirtc_runtime_audio.a",
+      "sha256": "6b5e3a76619bb8dfd185610503b335e76af1af1a1ad74a9355ace3d5077c304a",
+      "size": 192030
+    },
+    {
+      "path": "files/6dc1bac641569bd8-libtirtc_runtime_facade.a",
+      "sha256": "6dc1bac641569bd8d398fc8d9732896acfeefc97695d74c61e9ac6573a61a19e",
+      "size": 1550388
+    },
+    {
+      "path": "files/7be182b37265fcbb-libopencore-amrnb.a",
+      "sha256": "7be182b37265fcbbd9954cf12e226d20a6b4076310a50a46a29cd915ad9f626a",
+      "size": 386942
+    },
+    {
+      "path": "files/8d75b67973353bf6-libssl.a",
+      "sha256": "8d75b67973353bf632daefa605eae9af528dcf0d51d97412b67b236bc9cfcd51",
+      "size": 2227608
+    },
+    {
+      "path": "files/9576276d21d6c17c-libtirtc_third_tencent_xlog_comm.a",
+      "sha256": "9576276d21d6c17c91c64133eed532e453bd9453cd6f511282f4cf65c1c30c85",
+      "size": 153166
+    },
+    {
+      "path": "files/97578828393c811e-libtirtc_runtime_foundation_http.a",
+      "sha256": "97578828393c811e38e68e785e99b8e91181695397bc8ba65c4d151ecda65f68",
+      "size": 1327344
+    },
+    {
+      "path": "files/9a4e847504fac54d-libopus.a",
+      "sha256": "9a4e847504fac54d3f387b9343cee7baddaf717f283848aaf0a25b204c72a1f5",
+      "size": 963822
+    },
+    {
+      "path": "files/a4d7c85aea4667d3-libtirtc_third_miniz.a",
+      "sha256": "a4d7c85aea4667d3d1a6d25d1082411ab62503786ccb84b10131004b2d42f0fe",
+      "size": 132908
+    },
+    {
+      "path": "files/a791eef755712e5c-libtirtc_runtime_storage.a",
+      "sha256": "a791eef755712e5c80059a4ad73323898c5ab9a1fcfaec97557c0a92d61bcd25",
+      "size": 609684
+    },
+    {
+      "path": "files/b2214d128ceccbd1-libwebrtc-audio-processing-2.a",
+      "sha256": "b2214d128ceccbd1cfa2635c92be47fa682d033f44903a0d4e38feb0fd91ce30",
+      "size": 6075896
+    },
+    {
+      "path": "files/b39e96a9480e9bca-libtirtc_runtime_video.a",
+      "sha256": "b39e96a9480e9bca486d3750840d58ddae6f97e80e12a34f361215c83db33dcc",
+      "size": 153816
+    },
+    {
+      "path": "files/e1ecaea1be675f79-libtirtc_runtime_transport.a",
+      "sha256": "e1ecaea1be675f79ce32aa7a9d41fdb0e07c7d208e4af3d3b515815bba3c60cd",
+      "size": 235072
+    },
+    {
+      "path": "files/e512024453f21b3e-libtirtc_runtime_foundation_logging.a",
+      "sha256": "e512024453f21b3e6fe61f053a056204caa34098fd7c0a60b380e12c38e99273",
+      "size": 740016
+    },
+    {
+      "path": "files/e7f95421b8456f9d-libcrypto.a",
+      "sha256": "e7f95421b8456f9d420449ec926d80a7ed772ab1c7c6aadbaf4433894fc60ecc",
+      "size": 11823898
+    },
+    {
+      "path": "library-dirs/229d6fba2e110afd/libTiRTC.a",
+      "sha256": "d94c257487ca01ff1caae22cd9f54d1e5b51197f2790a993b6faa5bb9eee9cee",
+      "size": 1969358
+    },
+    {
+      "path": "library-dirs/229d6fba2e110afd/libTiRTC.so",
+      "sha256": "af50d237066124c5856270de0135b7e52e9900d4c341c06b2ab63e6ceca95345",
+      "size": 1149896
+    },
+    {
+      "path": "library-dirs/229d6fba2e110afd/libwebrtc.so",
+      "sha256": "d103646ce47320235df5e2a9333ec234f87fc768bd83144feca022c93c2b1456",
+      "size": 82255192
+    }
+  ],
+  "library_directories": [
+    "library-dirs/229d6fba2e110afd"
+  ],
+  "output_name": "libtirtc_media.so",
+  "platform": "linux-x64",
+  "required_ffmpeg_archives": [
+    "libavcodec.a",
+    "libavformat.a",
+    "libavutil.a",
+    "libswresample.a",
+    "libswscale.a"
+  ],
+  "schema_version": 2,
+  "toolchain": {
+    "ar": "/usr/bin/ar",
+    "build_type": "Release",
+    "c_flags": "-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections",
+    "cc": "/usr/bin/gcc",
+    "cmake_generator": "Ninja",
+    "cmake_version": "4.4.0",
+    "compiler_id": "GNU",
+    "compiler_target": "",
+    "compiler_version": "11.4.0",
+    "cxx": "/usr/bin/g++",
+    "cxx_flags": "-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections",
+    "deployment_target": "",
+    "ld_flags": "-fPIC -Wl,--gc-sections",
+    "make": "/usr/bin/gmake",
+    "nm": "/usr/bin/nm",
+    "ranlib": "/usr/bin/ranlib",
+    "sdk_sysroot": "",
+    "strip": "/usr/bin/strip",
+    "toolchain_file": "",
+    "toolchain_file_sha256": ""
+  }
+}

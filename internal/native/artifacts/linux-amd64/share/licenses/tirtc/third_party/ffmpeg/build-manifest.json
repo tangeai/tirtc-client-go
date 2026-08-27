@@ -1,0 +1,96 @@
+{
+  "artifacts": [
+    {
+      "path": "lib/libavcodec.a",
+      "sha256": "3367c0e9d9815c50806bc84144c00b7ace9cd9cd32c4254d73ec987163112ca3"
+    },
+    {
+      "path": "lib/libavformat.a",
+      "sha256": "a51b8f98c067cd8af97b8c9fbef275017a93f285a1d15fb532ab556b518cc0a1"
+    },
+    {
+      "path": "lib/libavutil.a",
+      "sha256": "53b29d494c0634d3037010028f798f4b7537a8a349b5514dc907105e53dccfeb"
+    },
+    {
+      "path": "lib/libswresample.a",
+      "sha256": "2aed0e54ffa554a3f61a1e82ba0164a59625f77b8f1b2a9ae52a80beaf8bd06e"
+    },
+    {
+      "path": "lib/libswscale.a",
+      "sha256": "7956140a767a5feaf616775d35025770cf5654a6c432c232aa2f47bd862fe9d3"
+    }
+  ],
+  "capabilities": {
+    "bitstream_filters": [
+      "aac_adtstoasc",
+      "vp9_superframe"
+    ],
+    "decoders": [
+      "aac",
+      "amrnb",
+      "h264",
+      "hevc",
+      "mjpeg",
+      "opus"
+    ],
+    "encoders": [
+      "aac",
+      "mjpeg"
+    ],
+    "muxers": [
+      "mov",
+      "mp4"
+    ],
+    "parsers": [
+      "ac3",
+      "h264",
+      "hevc"
+    ],
+    "protocols": [
+      "file"
+    ]
+  },
+  "configuration": "--prefix=/ --disable-autodetect --disable-shared --enable-static --enable-pic --disable-programs --disable-doc --disable-everything --enable-small --enable-avcodec --enable-avutil --enable-swresample --enable-swscale --disable-avdevice --disable-avfilter --enable-avformat --disable-network --disable-protocols --disable-demuxers --disable-muxers --disable-filters --disable-bsfs --disable-indevs --disable-outdevs --disable-hwaccels --disable-bzlib --disable-iconv --disable-lzma --disable-sdl2 --disable-xlib --disable-zlib --disable-appkit --disable-audiotoolbox --disable-avfoundation --disable-coreimage --disable-metal --disable-securetransport --disable-videotoolbox --disable-vulkan --disable-debug --enable-muxer=mp4 --enable-protocol=file --enable-decoder=h264 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=aac --enable-decoder=amrnb --enable-decoder=opus --enable-encoder=mjpeg --enable-encoder=aac --enable-parser=h264 --enable-parser=hevc --arch=x86_64 --target-os=linux --disable-x86asm --pkg-config=/usr/bin/false --cc=/usr/bin/gcc --cxx=/usr/bin/g++ --ar=/usr/bin/ar --ranlib=/usr/bin/ranlib --strip=/usr/bin/strip --nm=/usr/bin/nm --extra-cflags='-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections -Os' --extra-ldflags='-fPIC -Wl,--gc-sections'",
+  "fingerprint": "0c00f2da642a143c2a02be896926e6ba71fdd166bd6983ab6948fcd594ec6e81",
+  "libraries": [
+    "avformat",
+    "avcodec",
+    "swresample",
+    "swscale",
+    "avutil"
+  ],
+  "license": "LGPL version 2.1 or later",
+  "name": "ffmpeg",
+  "native_runtime_probe": "not-runnable-cross-build",
+  "platform": "linux-x64",
+  "profile_sha256": "bf5a4308b0e8fd168a760da022e949bda0c3654fe03c2efcdf864fb5347b4108",
+  "schema_version": 2,
+  "source_tree_sha256": "5ba0a8cd7eb681f81b46166bed91507b100e46de3fa473b8c7ed80fc921c8829",
+  "toolchain": {
+    "ar": "/usr/bin/ar",
+    "build_type": "Release",
+    "c_flags": "-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections",
+    "cc": "/usr/bin/gcc",
+    "cmake_generator": "Ninja",
+    "cmake_version": "4.4.0",
+    "compiler_id": "GNU",
+    "compiler_target": "",
+    "compiler_version": "11.4.0",
+    "cxx": "/usr/bin/g++",
+    "cxx_flags": "-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections",
+    "deployment_target": "",
+    "ld_flags": "-fPIC -Wl,--gc-sections",
+    "make": "/usr/bin/gmake",
+    "nm": "/usr/bin/nm",
+    "ranlib": "/usr/bin/ranlib",
+    "sdk_sysroot": "",
+    "strip": "/usr/bin/strip",
+    "toolchain_file": "",
+    "toolchain_file_sha256": ""
+  },
+  "upstream": {
+    "revision": "711b1a52bd0b631f7ca999419110242c8361f38d",
+    "url": "https://git.ffmpeg.org/ffmpeg.git"
+  }
+}

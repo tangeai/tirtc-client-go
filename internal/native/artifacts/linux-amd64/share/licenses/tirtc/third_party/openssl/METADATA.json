@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "name": "openssl",
+  "version": "3.5.6",
+  "kind": "source",
+  "upstream": {
+    "url": "https://github.com/openssl/openssl",
+    "tag": "openssl-3.5.6",
+    "revision": "286ddeaac037533bbdce65b3c689e3f7ffebf0f6"
+  },
+  "source": {
+    "root": "src",
+    "tree_sha256": "890091ba49a19a567f5a4f026060bb6899d7c05fc26e4fbeb57b832f2f621289"
+  },
+  "licenses": [
+    {
+      "spdx": "Apache-2.0",
+      "path": "LICENSES/Apache-2.0.txt",
+      "sha256": "7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a"
+    }
+  ],
+  "local_changes": [
+    "The complete clean official release tree is retained without Git history, local build outputs or caches.",
+    "The outer CMake owner drives the official Configure and make build entirely from local source, produces static PIC libraries, and disables apps, tests, dynamic modules, engines and algorithms absent from the established Apple production feature set."
+  ]
+}

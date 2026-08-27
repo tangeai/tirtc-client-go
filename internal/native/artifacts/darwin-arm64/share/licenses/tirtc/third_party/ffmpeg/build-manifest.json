@@ -1,0 +1,96 @@
+{
+  "artifacts": [
+    {
+      "path": "lib/libavcodec.a",
+      "sha256": "cc3e810b86b6e99fb8381cebbdbbaf0becd1e7a0c613b3c73e6d3616856ef144"
+    },
+    {
+      "path": "lib/libavformat.a",
+      "sha256": "e997da13ada351ca9de764796dbc1cb8f601851a68f7483e245bd5a870e45187"
+    },
+    {
+      "path": "lib/libavutil.a",
+      "sha256": "e0c2e30930e8a6767fe68202ca4c89f041041106f65e5dd6b3546fa40feb674b"
+    },
+    {
+      "path": "lib/libswresample.a",
+      "sha256": "693df40cb237f9b33c3fb7f9c0a10385d6156c81a3221ff71aa94fb401f1a812"
+    },
+    {
+      "path": "lib/libswscale.a",
+      "sha256": "11fffa9d89c267cefc9a91b017c6a29b32a954e8a697257cd630c3c3dd4bb6ae"
+    }
+  ],
+  "capabilities": {
+    "bitstream_filters": [
+      "aac_adtstoasc",
+      "vp9_superframe"
+    ],
+    "decoders": [
+      "aac",
+      "amrnb",
+      "h264",
+      "hevc",
+      "mjpeg",
+      "opus"
+    ],
+    "encoders": [
+      "aac",
+      "mjpeg"
+    ],
+    "muxers": [
+      "mov",
+      "mp4"
+    ],
+    "parsers": [
+      "ac3",
+      "h264",
+      "hevc"
+    ],
+    "protocols": [
+      "file"
+    ]
+  },
+  "configuration": "--prefix=/ --disable-autodetect --disable-shared --enable-static --enable-pic --disable-programs --disable-doc --disable-everything --enable-small --enable-avcodec --enable-avutil --enable-swresample --enable-swscale --disable-avdevice --disable-avfilter --enable-avformat --disable-network --disable-protocols --disable-demuxers --disable-muxers --disable-filters --disable-bsfs --disable-indevs --disable-outdevs --disable-hwaccels --disable-bzlib --disable-iconv --disable-lzma --disable-sdl2 --disable-xlib --disable-zlib --disable-appkit --disable-audiotoolbox --disable-avfoundation --disable-coreimage --disable-metal --disable-securetransport --disable-videotoolbox --disable-vulkan --disable-debug --enable-muxer=mp4 --enable-protocol=file --enable-decoder=h264 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=aac --enable-decoder=amrnb --enable-decoder=opus --enable-encoder=mjpeg --enable-encoder=aac --enable-parser=h264 --enable-parser=hevc --arch=arm64 --target-os=darwin --pkg-config=/usr/bin/false --cc=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang --cxx=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ --ar=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar --ranlib=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib --strip=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip --nm=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/nm --extra-cflags='-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections -arch arm64 -Werror=unguarded-availability-new -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -mmacosx-version-min=11.5 -Os' --extra-ldflags='-fPIC -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -mmacosx-version-min=11.5' --sysroot=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk --host-cc=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang --host-cflags='-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections -arch arm64 -Werror=unguarded-availability-new -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -mmacosx-version-min=11.5'",
+  "fingerprint": "5b606f8036344b58e9f3f8a721841ded4e2959df39fef66e1e0362c0a6c55b8c",
+  "libraries": [
+    "avformat",
+    "avcodec",
+    "swresample",
+    "swscale",
+    "avutil"
+  ],
+  "license": "LGPL version 2.1 or later",
+  "name": "ffmpeg",
+  "native_runtime_probe": "not-runnable-cross-build",
+  "platform": "macos-arm64",
+  "profile_sha256": "bf5a4308b0e8fd168a760da022e949bda0c3654fe03c2efcdf864fb5347b4108",
+  "schema_version": 2,
+  "source_tree_sha256": "5ba0a8cd7eb681f81b46166bed91507b100e46de3fa473b8c7ed80fc921c8829",
+  "toolchain": {
+    "ar": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar",
+    "build_type": "Release",
+    "c_flags": "-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections -arch arm64 -Werror=unguarded-availability-new -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -mmacosx-version-min=11.5",
+    "cc": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
+    "cmake_generator": "Ninja",
+    "cmake_version": "4.2.3",
+    "compiler_id": "AppleClang",
+    "compiler_target": "",
+    "compiler_version": "21.0.0.21000101",
+    "cxx": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++",
+    "cxx_flags": "-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections -arch arm64 -Werror=unguarded-availability-new -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -mmacosx-version-min=11.5",
+    "deployment_target": "11.5",
+    "ld_flags": "-fPIC -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -mmacosx-version-min=11.5",
+    "make": "/usr/bin/make",
+    "nm": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/nm",
+    "ranlib": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib",
+    "sdk_sysroot": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+    "strip": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip",
+    "toolchain_file": "",
+    "toolchain_file_sha256": ""
+  },
+  "upstream": {
+    "revision": "711b1a52bd0b631f7ca999419110242c8361f38d",
+    "url": "https://git.ffmpeg.org/ffmpeg.git"
+  }
+}

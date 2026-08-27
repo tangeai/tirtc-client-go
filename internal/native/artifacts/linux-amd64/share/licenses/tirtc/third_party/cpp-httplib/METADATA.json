@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "name": "cpp-httplib",
+  "version": "0.15.3",
+  "kind": "source",
+  "upstream": {
+    "url": "https://github.com/yhirose/cpp-httplib",
+    "tag": "v0.15.3",
+    "revision": "5c00bbf36ba8ff47b4fb97712fc38cb2884e5b98"
+  },
+  "source": {
+    "root": "src",
+    "tree_sha256": "844e8db38a8de1af6be0c30954e0a36468278a7a9c077ab0507a3b7efe14ced4"
+  },
+  "licenses": [
+    {
+      "spdx": "MIT",
+      "path": "LICENSES/LICENSE",
+      "sha256": "4b45cbe16d7b71b89ae6127e26e0d90a029198ca5e958ad8e3d0b8bbed364d8b"
+    }
+  ],
+  "local_changes": [
+    "Relative to v0.15.3 the Runtime snapshot contains TiRTC clang-tidy annotations, SSL private-key password support, and Win32 desktop file-mapping calls that remain available to the MinGW Windows build; Git is the canonical current source."
+  ]
+}

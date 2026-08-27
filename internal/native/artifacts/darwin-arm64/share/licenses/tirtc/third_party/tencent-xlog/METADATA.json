@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "name": "tencent-xlog",
+  "version": "rapid_kit-customized-bce80dcd",
+  "kind": "source",
+  "upstream": {
+    "url": "https://gitlab.tange-ai.com/tirtc/xlog",
+    "branch": "rapid_kit-customized",
+    "revision": "bce80dcd2ccefc8239d5152eb5ec335e0c712743"
+  },
+  "official_upstream": {
+    "url": "https://github.com/Tencent/mars",
+    "base_revision": "2d7cb77632b1328a572cc6c48dac6cf0ce0e7b24"
+  },
+  "production_binary_baseline": {
+    "rapid_gitlink_revision": "281feafaba844cc5c57def40e3f1672602997567",
+    "relationship": "behavioral-golden-only"
+  },
+  "source": {
+    "root": "src",
+    "tree_sha256": "7cec831caf0ce7ea0fdf1d9d09f76a9e95ecabb6ac85e2b1627da043be3b1521",
+    "components": [
+      {
+        "name": "xlog",
+        "root": "src/mars/xlog",
+        "tree_sha256": "d8d96857fb50f735ad14e4f60bee608b1e3dc569091c21ac9efb9730812df956"
+      },
+      {
+        "name": "comm",
+        "root": "src/mars/comm",
+        "tree_sha256": "001f694ccabfa48c6e0dc6d45a8140073e8a8438ab86104608f106a0c9311c61"
+      },
+      {
+        "name": "boost-closure",
+        "root": "src/mars/boost",
+        "tree_sha256": "f1dfa373d0c20e0e3e8d99532ec3e73660b17d3915156fda64cb34d8f9e124a6"
+      },
+      {
+        "name": "zstandard",
+        "root": "src/mars/zstd",
+        "tree_sha256": "d0dbf04d1e567797ef4e2b5e6c6464caaa529eab64739b802236a1b03ae2357d"
+      }
+    ]
+  },
+  "licenses": [
+    {
+      "spdx": "LicenseRef-Tencent-Mars",
+      "path": "LICENSES/Tencent-Mars.txt",
+      "sha256": "49e85353b86dd8de32cd8558a4ba06053e831ac698b28ee0ea55e2d58715140b"
+    },
+    {
+      "spdx": "BSD-3-Clause",
+      "path": "LICENSES/Zstandard-BSD-3-Clause.txt",
+      "sha256": "2c1a7fa704df8f3a606f6fc010b8b5aaebf403f3aeec339a12048f1ba7331a0b"
+    },
+    {
+      "spdx": "BSD-2-Clause",
+      "path": "LICENSES/micro-ecc-BSD-2-Clause.txt",
+      "sha256": "ffd8b033d2df7568c25a98866bd92b1656f7da82d7f813c0b2eb85ec36611193"
+    }
+  ],
+  "local_changes": [
+    "The source owner contains only the xlog, comm, Mars Boost, Zstandard compression and micro-ecc closure; STN, boot, app, baseevent, SDT, bundled OpenSSL, JNI bindings, tests and generated build trees are excluded.",
+    "The outer CMake owner compiles static PIC component archives, exposes only tirtc_third::tencent_xlog, defines MARS_NO_OPENSSL, and generates deterministic Mars revision metadata outside the source tree.",
+    "The Mars Boost source tree retains its embedded header closure while compiled sources are limited to filesystem, mapped-file and error-code objects used by xlog. Zstandard is reduced to common and compression sources because Runtime configures xlog for write-only zlib/zstd logging.",
+    "Common Windows header spellings in the retained comm closure are normalized to their lowercase MinGW filesystem names; Windows zlib-compatible calls use the source-owned miniz target; upstream namespaces, copyrights and log format remain unchanged. tencent-xlog is only the TiRTC owner and CMake target identity."
+  ]
+}

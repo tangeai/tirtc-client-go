@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "name": "opus",
+  "version": "1.5.2",
+  "kind": "source",
+  "upstream": {
+    "url": "https://github.com/xiph/opus",
+    "tag": "v1.5.2",
+    "revision": "65c1d2f78b9f2fb20082c38cbe47c951ad5839345876e46941612ee87f9a7ce1"
+  },
+  "source": {
+    "root": "src",
+    "archive_sha256": "65c1d2f78b9f2fb20082c38cbe47c951ad5839345876e46941612ee87f9a7ce1",
+    "tree_sha256": "452fcb673e943b0a9e04b63197af8775ea5fc5e9cb679a2f5521134a037e9e38"
+  },
+  "licenses": [
+    {
+      "spdx": "BSD-3-Clause",
+      "path": "LICENSES/COPYING",
+      "sha256": "01e1167d54a096d123cf6dfbbeb19587278845c6481d2d66d545669846079551"
+    }
+  ],
+  "local_changes": [
+    "The upstream release archive is pruned for Runtime's CMake build. Program and test targets are disabled; retained demo, unit-test, documentation, Meson and Autotools files are not compiled; unused DNN assets are excluded.",
+    "The wrapper declares NEON as required on Runtime's supported ARM64 targets because Opus 1.5.2 does not recognize Apple's arm64 processor spelling.",
+    "The MinGW CMake path consumes the compiler-owned absolute libssp.a selected by the Runtime wrapper so the Windows aggregate does not retain an undeclared dynamic libssp dependency."
+  ]
+}

@@ -1,0 +1,9 @@
+TiRTC FFmpeg corresponding source and static relink materials
+
+The complete version-bound compliance sidecar for this SDK contains:
+  source/ffmpeg-source.tar.gz
+  source/rebuild_ffmpeg.py
+  relink/<platform>/<runtime-output>/
+
+Source archive SHA-256: 603e00642cf3fa298a4be11ab4eb3f49e17eab7ef9466e7588c9d4b1fd92d6cc
+Obtain the sidecar with the same SDK version and compliance-manifest hash from the TiRTC SDK delivery channel used for this binary.

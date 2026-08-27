@@ -1,0 +1,278 @@
+{
+  "baseline_sha256": "0ce4e61fcd6d33dd1432d3a1083292e5ec5d85cfc15853df1d1717ee4771777b",
+  "build_identity": {
+    "fingerprint": "5b606f8036344b58e9f3f8a721841ded4e2959df39fef66e1e0362c0a6c55b8c",
+    "platform": "macos-arm64",
+    "profile_sha256": "bf5a4308b0e8fd168a760da022e949bda0c3654fe03c2efcdf864fb5347b4108",
+    "source_tree_sha256": "5ba0a8cd7eb681f81b46166bed91507b100e46de3fa473b8c7ed80fc921c8829"
+  },
+  "commands": [
+    {
+      "arguments": [
+        "-O3",
+        "-DNDEBUG",
+        "-arch",
+        "arm64",
+        "-isysroot",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-mmacosx-version-min=11.5",
+        "-dynamiclib",
+        "-Wl,-headerpad_max_install_names",
+        "-Xlinker",
+        "-exported_symbols_list",
+        "-Xlinker",
+        "{INPUT_ROOT}/files/299c73dd42c0a4cd-tirtc_media_exports_macos.txt",
+        "-o",
+        "{OUTPUT_DIR}/libtirtc_media.dylib",
+        "-install_name",
+        "@rpath/libtirtc_media.dylib",
+        "{INPUT_ROOT}/files/efc094789da20871-tirtc_media_aggregate_anchor.c.o",
+        "-Wl,-rpath,@loader_path",
+        "-Xlinker",
+        "-force_load",
+        "-Xlinker",
+        "{INPUT_ROOT}/files/c6ca6d814312fc61-libtirtc_runtime_facade.a",
+        "-Xlinker",
+        "-force_load",
+        "-Xlinker",
+        "{INPUT_ROOT}/files/60dab30f5b42a178-libtirtc_runtime_storage.a",
+        "-Xlinker",
+        "-force_load",
+        "-Xlinker",
+        "{INPUT_ROOT}/files/6253c2137f6dfc83-libtirtc_runtime_transport.a",
+        "-Xlinker",
+        "-force_load",
+        "-Xlinker",
+        "{INPUT_ROOT}/files/ac2f525f20483425-libtirtc_runtime_media.a",
+        "-Xlinker",
+        "-force_load",
+        "-Xlinker",
+        "{INPUT_ROOT}/files/44bbb8b2e4352b83-libtirtc_runtime_audio.a",
+        "-Xlinker",
+        "-force_load",
+        "-Xlinker",
+        "{INPUT_ROOT}/files/cc5d6e85a9a5dd09-libtirtc_runtime_video.a",
+        "-Xlinker",
+        "-force_load",
+        "-Xlinker",
+        "{INPUT_ROOT}/files/cf28b758b9788716-libtirtc_runtime_foundation_logging.a",
+        "-Xlinker",
+        "-force_load",
+        "-Xlinker",
+        "{INPUT_ROOT}/files/7dc7baa924e5530f-libtirtc_runtime_foundation_http.a",
+        "-Xlinker",
+        "-force_load",
+        "-Xlinker",
+        "{INPUT_ROOT}/files/8eace7202e6bde6a-libtirtc_runtime_media_contract.a",
+        "{INPUT_ROOT}/files/6f5b73c4f66a0f3c-libopus.a",
+        "{INPUT_ROOT}/files/3a93f1dfb5781822-libopencore-amrnb.a",
+        "{INPUT_ROOT}/files/3bf1b1dafab5e90a-libwebrtc-audio-processing-2.a",
+        "{INPUT_ROOT}/files/94b5272109ec9841-libtirtc_third_webrtc_neteq.a",
+        "{INPUT_ROOT}/files/6415f9125e441b27-libtirtc_third_tencent_xlog.a",
+        "{INPUT_ROOT}/files/b63432c81a522693-libTiRTC.dylib",
+        "{INPUT_ROOT}/files/948996b5778d8aca-libtgrtc.dylib",
+        "{INPUT_ROOT}/files/2b68006a63750d5f-libTiRTC.a",
+        "-lm",
+        "{INPUT_ROOT}/files/3bf1b1dafab5e90a-libwebrtc-audio-processing-2.a",
+        "-framework",
+        "AudioToolbox",
+        "-framework",
+        "AVFoundation",
+        "-framework",
+        "CoreFoundation",
+        "-framework",
+        "CoreMedia",
+        "-framework",
+        "CoreVideo",
+        "-framework",
+        "VideoToolbox",
+        "-framework",
+        "CoreGraphics",
+        "-framework",
+        "QuartzCore",
+        "-framework",
+        "AppKit",
+        "{FFMPEG_LIB_DIR}/libavformat.a",
+        "{FFMPEG_LIB_DIR}/libavcodec.a",
+        "{FFMPEG_LIB_DIR}/libswresample.a",
+        "{FFMPEG_LIB_DIR}/libswscale.a",
+        "{FFMPEG_LIB_DIR}/libavutil.a",
+        "{INPUT_ROOT}/files/5bfa526c70ca9c27-libtirtc_third_tencent_xlog_comm.a",
+        "{INPUT_ROOT}/files/a7bb5bc7725e8286-libtirtc_third_tencent_xlog_boost.a",
+        "{INPUT_ROOT}/files/b2f18ecf31ee8c8a-libtirtc_third_tencent_xlog_zstd.a",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/lib/libz.tbd",
+        "{INPUT_ROOT}/files/c4a0bcedc78051f7-libssl.a",
+        "{INPUT_ROOT}/files/5db9836d7eab734a-libcrypto.a",
+        "{INPUT_ROOT}/files/77c095f0f5355282-libtirtc_third_miniz.a",
+        "-framework",
+        "Foundation",
+        "-lobjc",
+        "-lz",
+        "-framework",
+        "Security"
+      ],
+      "tool": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++",
+      "tool_basename": "clang++"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "files/299c73dd42c0a4cd-tirtc_media_exports_macos.txt",
+      "sha256": "299c73dd42c0a4cd729588326abe2be62cc706311ad7f513c4e46e88d1d9b374",
+      "size": 5595
+    },
+    {
+      "path": "files/2b68006a63750d5f-libTiRTC.a",
+      "sha256": "2b68006a63750d5f250139eeeadcf0bc956238aaefbcf94e993585952e265af6",
+      "size": 1442400
+    },
+    {
+      "path": "files/3a93f1dfb5781822-libopencore-amrnb.a",
+      "sha256": "3a93f1dfb57818224c63aae957678d297828dbe737430d1d7a6d2ba362c7fd3d",
+      "size": 257744
+    },
+    {
+      "path": "files/3bf1b1dafab5e90a-libwebrtc-audio-processing-2.a",
+      "sha256": "3bf1b1dafab5e90a629f37c955e87f871277ba80aa49f71693261528bc75e755",
+      "size": 3473424
+    },
+    {
+      "path": "files/44bbb8b2e4352b83-libtirtc_runtime_audio.a",
+      "sha256": "44bbb8b2e4352b830dce2ab9a76b9230c9107b0d726d0011679d02268dc52b0a",
+      "size": 185864
+    },
+    {
+      "path": "files/5bfa526c70ca9c27-libtirtc_third_tencent_xlog_comm.a",
+      "sha256": "5bfa526c70ca9c27d6ee984738ed1536802e19ee8aaf76d0c7bf76e5d7921ecd",
+      "size": 97632
+    },
+    {
+      "path": "files/5db9836d7eab734a-libcrypto.a",
+      "sha256": "5db9836d7eab734aad7c86c335cc077cae7174f5f2ec50baa763aab15b418e26",
+      "size": 6819312
+    },
+    {
+      "path": "files/60dab30f5b42a178-libtirtc_runtime_storage.a",
+      "sha256": "60dab30f5b42a178caf0e48a6cdbda683ac0ec8f2110d54f5719b60e6387e1c3",
+      "size": 405464
+    },
+    {
+      "path": "files/6253c2137f6dfc83-libtirtc_runtime_transport.a",
+      "sha256": "6253c2137f6dfc8366eff06aae59e8415708bf5a2d869da7e4aaa721bec21c4b",
+      "size": 197512
+    },
+    {
+      "path": "files/6415f9125e441b27-libtirtc_third_tencent_xlog.a",
+      "sha256": "6415f9125e441b27652d1f146e6b1bfee96c3c3e78ab6820ec197386c1849a9f",
+      "size": 225816
+    },
+    {
+      "path": "files/6f5b73c4f66a0f3c-libopus.a",
+      "sha256": "6f5b73c4f66a0f3c1966c517f8a075182a81136de893cc0a8950a54a9417db70",
+      "size": 649080
+    },
+    {
+      "path": "files/77c095f0f5355282-libtirtc_third_miniz.a",
+      "sha256": "77c095f0f5355282ce0c6a5014d54f4ae6b22697da9f49f77cb66660d8eee15d",
+      "size": 98944
+    },
+    {
+      "path": "files/7dc7baa924e5530f-libtirtc_runtime_foundation_http.a",
+      "sha256": "7dc7baa924e5530f42f4cc544b4c77b5271d16bd18878fbec1f5db6c3061ad4e",
+      "size": 755752
+    },
+    {
+      "path": "files/8eace7202e6bde6a-libtirtc_runtime_media_contract.a",
+      "sha256": "8eace7202e6bde6a6a58a231b03808c4aed6bc0b35e0a7a88316ca877c52ae09",
+      "size": 27224
+    },
+    {
+      "path": "files/948996b5778d8aca-libtgrtc.dylib",
+      "sha256": "948996b5778d8aca63ca0bf306def344372a8f85a4fc46aa41e5bb0cae601dd3",
+      "size": 2952240
+    },
+    {
+      "path": "files/94b5272109ec9841-libtirtc_third_webrtc_neteq.a",
+      "sha256": "94b5272109ec9841e29350484f17617ec15020192cb79c77d19b9c986e7905a2",
+      "size": 252016
+    },
+    {
+      "path": "files/a7bb5bc7725e8286-libtirtc_third_tencent_xlog_boost.a",
+      "sha256": "a7bb5bc7725e82868b6b197c2443c9dfd53a2ce9606b13d91fc73f1f7df987c4",
+      "size": 163136
+    },
+    {
+      "path": "files/ac2f525f20483425-libtirtc_runtime_media.a",
+      "sha256": "ac2f525f2048342525f463ae92eb124f84fa401745c516b311a2721241b0024f",
+      "size": 553768
+    },
+    {
+      "path": "files/b2f18ecf31ee8c8a-libtirtc_third_tencent_xlog_zstd.a",
+      "sha256": "b2f18ecf31ee8c8a450ae6f5fca2049ab934844341c15721bc69b33299932bf1",
+      "size": 430816
+    },
+    {
+      "path": "files/b63432c81a522693-libTiRTC.dylib",
+      "sha256": "b63432c81a5226936b174e48dcc6ea01b6ee9732d10f016c7236bce0387feeb1",
+      "size": 813808
+    },
+    {
+      "path": "files/c4a0bcedc78051f7-libssl.a",
+      "sha256": "c4a0bcedc78051f7d1699a3d5c4c28a0527235569d4c69abbb8a952a7265397e",
+      "size": 1344288
+    },
+    {
+      "path": "files/c6ca6d814312fc61-libtirtc_runtime_facade.a",
+      "sha256": "c6ca6d814312fc61461709cc39fc587d0056dd3851a23861269a081709ae78f2",
+      "size": 1365336
+    },
+    {
+      "path": "files/cc5d6e85a9a5dd09-libtirtc_runtime_video.a",
+      "sha256": "cc5d6e85a9a5dd098044ce762e62bc947ba493fd4d99968a1b1577ca3a977e5a",
+      "size": 245568
+    },
+    {
+      "path": "files/cf28b758b9788716-libtirtc_runtime_foundation_logging.a",
+      "sha256": "cf28b758b9788716c3266db1c286bd1ec73cefa5b2650c2a3f8d1cce6072ed59",
+      "size": 484640
+    },
+    {
+      "path": "files/efc094789da20871-tirtc_media_aggregate_anchor.c.o",
+      "sha256": "efc094789da20871c79c1f4bf51a509969ca7613862cf6bf979fdcc5e26d0580",
+      "size": 528
+    }
+  ],
+  "library_directories": [],
+  "output_name": "libtirtc_media.dylib",
+  "platform": "macos-arm64",
+  "required_ffmpeg_archives": [
+    "libavcodec.a",
+    "libavformat.a",
+    "libavutil.a",
+    "libswresample.a",
+    "libswscale.a"
+  ],
+  "schema_version": 2,
+  "toolchain": {
+    "ar": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar",
+    "build_type": "Release",
+    "c_flags": "-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections -arch arm64 -Werror=unguarded-availability-new -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -mmacosx-version-min=11.5",
+    "cc": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
+    "cmake_generator": "Ninja",
+    "cmake_version": "4.2.3",
+    "compiler_id": "AppleClang",
+    "compiler_target": "",
+    "compiler_version": "21.0.0.21000101",
+    "cxx": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++",
+    "cxx_flags": "-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections -arch arm64 -Werror=unguarded-availability-new -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -mmacosx-version-min=11.5",
+    "deployment_target": "11.5",
+    "ld_flags": "-fPIC -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -mmacosx-version-min=11.5",
+    "make": "/usr/bin/make",
+    "nm": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/nm",
+    "ranlib": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib",
+    "sdk_sysroot": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+    "strip": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip",
+    "toolchain_file": "",
+    "toolchain_file_sha256": ""
+  }
+}
