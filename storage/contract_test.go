@@ -16,6 +16,8 @@ func TestStableErrorMapping(t *testing.T) {
 		6122: ErrRecordingUnreadable,
 		6123: ErrUnavailable,
 		6124: ErrStopped,
+		6134: ErrRecordingNotFound,
+		6135: ErrRecordingDownloadFailed,
 	} {
 		if !errors.Is(nativeError(code), sentinel) {
 			t.Fatalf("code %d did not map to %v", code, sentinel)

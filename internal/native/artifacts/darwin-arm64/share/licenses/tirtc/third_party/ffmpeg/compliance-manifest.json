@@ -5,7 +5,7 @@
     "profile_sha256": "bf5a4308b0e8fd168a760da022e949bda0c3654fe03c2efcdf864fb5347b4108",
     "source_tree_sha256": "5ba0a8cd7eb681f81b46166bed91507b100e46de3fa473b8c7ed80fc921c8829"
   },
-  "build_manifest_sha256": "b59567b5de538d529fbfb6bb772a40636cbb352489be91682cdeb3d6cbd0474a",
+  "build_manifest_sha256": "f7b8ed84ea6f9f24fc4b3dfae2d414831bfeee2729dd92ccb8d2f140aebf142c",
   "delivery_relink_coverage": {
     "darwin_framework": {
       "covered": false,
@@ -47,7 +47,7 @@
     },
     {
       "path": "build-manifest.json",
-      "sha256": "b59567b5de538d529fbfb6bb772a40636cbb352489be91682cdeb3d6cbd0474a",
+      "sha256": "f7b8ed84ea6f9f24fc4b3dfae2d414831bfeee2729dd92ccb8d2f140aebf142c",
       "size": 6152
     },
     {
@@ -56,9 +56,24 @@
       "size": 903
     },
     {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/1f22b643a24b04ec-libtirtc_third_webrtc_neteq.a",
-      "sha256": "1f22b643a24b04ec42fc255c2c863d4b38d1a7aa45ec8788f39bf5e0a145f563",
-      "size": 252016
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/05477580b2f1bfa6-libtirtc_third_tencent_xlog_boost.a",
+      "sha256": "05477580b2f1bfa6ece5d0897af5ac2e9bf4f1dbdf151fe2eecbca1feb8b0dff",
+      "size": 163136
+    },
+    {
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/0db623561b1e9947-libtirtc_runtime_audio.a",
+      "sha256": "0db623561b1e99475a5577ff948771a51ea1fe344e8aa34220cf27dcc2669914",
+      "size": 185864
+    },
+    {
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/120ab529a967e0c8-libwebrtc-audio-processing-2.a",
+      "sha256": "120ab529a967e0c8934088a157e64cfeb65fc95f422c82799c831763e46c222d",
+      "size": 3473424
+    },
+    {
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/221663e9c7409a80-libopencore-amrnb.a",
+      "sha256": "221663e9c7409a807e8b457fc35b56e82f2203c4c220a13d4aae20b6d72f90e3",
+      "size": 257744
     },
     {
       "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/299c73dd42c0a4cd-tirtc_media_exports_macos.txt",
@@ -71,64 +86,39 @@
       "size": 1442400
     },
     {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/310ad638741a8ff8-libtirtc_third_tencent_xlog_boost.a",
-      "sha256": "310ad638741a8ff81f3436fb194d85e581e67645b36ab364e78c53f96966769b",
-      "size": 163136
-    },
-    {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/3ad70e331128ff63-libcrypto.a",
-      "sha256": "3ad70e331128ff63d8eed4470468060d6e1b3a7c8b09e391550923fe3e0b980e",
-      "size": 6819328
-    },
-    {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/3dea98c0a4a02642-libtirtc_runtime_media_contract.a",
-      "sha256": "3dea98c0a4a02642bd0e1ee91b2c51afd738352ee377913cad9faec9d20da038",
-      "size": 27224
-    },
-    {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/58f5a4b679b13d47-libtirtc_runtime_foundation_logging.a",
-      "sha256": "58f5a4b679b13d47ec4e9035a36c3c9946f08abd13b7d618abff9c8f7d13549c",
-      "size": 484664
-    },
-    {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/5fe5dc8899a9404d-libtirtc_runtime_facade.a",
-      "sha256": "5fe5dc8899a9404de932c3695833550a64bb9ef2080318597df67e9af1b3d415",
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/369ec427e8b61a56-libtirtc_runtime_facade.a",
+      "sha256": "369ec427e8b61a56707914f7d9428d20b0f27e2e6a82b65d062961cfeca4d900",
       "size": 1368336
     },
     {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/613dc7ea2799b3b4-libwebrtc-audio-processing-2.a",
-      "sha256": "613dc7ea2799b3b47230fbb1c82e86bb40a2991c13100ad16c4bc50a5c941511",
-      "size": 3473424
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/3946f4a07fbb7f33-libtirtc_runtime_media.a",
+      "sha256": "3946f4a07fbb7f3348c427f427418806f3d5b51aa16728225c2a1cc260369bdb",
+      "size": 553768
     },
     {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/614dcd46240b6763-libtirtc_runtime_transport.a",
-      "sha256": "614dcd46240b6763ccf87b8aaf8309ac7b11f97cdd17735e4252f7efea95efe5",
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/4af0cd6504061ce1-libtirtc_runtime_storage.a",
+      "sha256": "4af0cd6504061ce1e0feb7abf5da394ccab68c9bbbf95a168a3de6f893ebb83f",
+      "size": 441384
+    },
+    {
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/4c62d58c3a08f480-libtirtc_runtime_media_contract.a",
+      "sha256": "4c62d58c3a08f48067b6d033bf7ac4a61ab07c38c209758a7c53b4ade0e96243",
+      "size": 27224
+    },
+    {
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/4fa43e84ead4d4f2-libtirtc_runtime_transport.a",
+      "sha256": "4fa43e84ead4d4f282634d7a469a6c39c5cfb1aa66dd3213d30b1ea94b75a519",
       "size": 197512
     },
     {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/726ea2764e9b9d2e-libopencore-amrnb.a",
-      "sha256": "726ea2764e9b9d2e4bca143bf5050abd69ea0cacde53c2a242f8f0accacfc443",
-      "size": 257744
-    },
-    {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/7afe829c2762a970-libtirtc_third_tencent_xlog.a",
-      "sha256": "7afe829c2762a97034420df060a1c1f31fee5bd9aa48525773732208de0e52ae",
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/7ba7df5c750e61ce-libtirtc_third_tencent_xlog.a",
+      "sha256": "7ba7df5c750e61ce5d131e267944d013ddfd32f0454e831c4ae7241586749730",
       "size": 225816
     },
     {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/7d786263a9e2c0ef-libtirtc_runtime_foundation_http.a",
-      "sha256": "7d786263a9e2c0ef63d08bc5b73d1a72eadad9fe3e2d54afb5e61f58687b75c0",
-      "size": 755752
-    },
-    {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/84223884f70fd60d-libtirtc_third_tencent_xlog_comm.a",
-      "sha256": "84223884f70fd60dcb5dcf5a23399b4d5971624ff338925c7a7ab738f53dd6b7",
-      "size": 97632
-    },
-    {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/945728c67f3ab9d4-libtirtc_runtime_storage.a",
-      "sha256": "945728c67f3ab9d40f39ee299bbcd12b76e4b355f560c42069d04d29c3e63817",
-      "size": 405464
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/7ea3dc75d26a1493-libtirtc_third_tencent_xlog_zstd.a",
+      "sha256": "7ea3dc75d26a1493fef60c498e55e6ba42287de3041c6176c63e42e028265099",
+      "size": 430816
     },
     {
       "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/948996b5778d8aca-libtgrtc.dylib",
@@ -136,14 +126,14 @@
       "size": 2952240
     },
     {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/9aef66cccdad724b-libtirtc_runtime_media.a",
-      "sha256": "9aef66cccdad724b6c0e04278f9262270debfb3d774abc6e82d3b61f42b5a159",
-      "size": 553768
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/aebfae034513b9ad-libtirtc_third_webrtc_neteq.a",
+      "sha256": "aebfae034513b9adfefb8cb6edf48cc2214bd7681b97b7fc3e439e53e86623f3",
+      "size": 252016
     },
     {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/a3e853a0e6d669f6-libssl.a",
-      "sha256": "a3e853a0e6d669f6861b742d3d6b9242deac5eb1c586a09c034c0ab0772f1ecc",
-      "size": 1344288
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/b2cee89f9518f8f1-libtirtc_runtime_video.a",
+      "sha256": "b2cee89f9518f8f18e093f5a0becc68d20450c4ae351c99135339e7874232694",
+      "size": 245568
     },
     {
       "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/b63432c81a522693-libTiRTC.dylib",
@@ -151,29 +141,29 @@
       "size": 813808
     },
     {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/bfe7e48979105bc1-libtirtc_runtime_video.a",
-      "sha256": "bfe7e48979105bc14a26cc28a5234ea4691a4d2e1977ab6d2fc5e4b807420c53",
-      "size": 245568
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/b9bc3a7636028ea5-libopus.a",
+      "sha256": "b9bc3a7636028ea5860f3bf3c8320b2d5b868f65811b22cbc1a073e7745b774f",
+      "size": 649080
     },
     {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/c34bc71c5ac57270-libtirtc_runtime_audio.a",
-      "sha256": "c34bc71c5ac5727045ec976d0caa388c870328813c855b82826ad54330060bb7",
-      "size": 185864
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/bac88679741394ea-libtirtc_runtime_foundation_logging.a",
+      "sha256": "bac88679741394eaa2ae61663e74db2fc7a3f54c452f272ec314de602b6c19e7",
+      "size": 484896
     },
     {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/e98e886de5a08a5d-libtirtc_third_tencent_xlog_zstd.a",
-      "sha256": "e98e886de5a08a5d71f1f991f7b6d31f8fb130427becd19e0d5385fe073ffd82",
-      "size": 430816
-    },
-    {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/e9b074ef1b1e7691-libtirtc_third_miniz.a",
-      "sha256": "e9b074ef1b1e7691385738b8d7809d5eff17bf3f0385b165e6e43b802f68b504",
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/e8e54808667e51aa-libtirtc_third_miniz.a",
+      "sha256": "e8e54808667e51aad8ce8eb527e920f96b7058331a0f3e142611c8eba7eb7948",
       "size": 98944
     },
     {
-      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/ecb42a695bc336fe-libopus.a",
-      "sha256": "ecb42a695bc336fed8e3a550c3f5d902fa0cb33c9c2158abb90be51b6912a912",
-      "size": 649080
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/ea65a365dc51491c-libssl.a",
+      "sha256": "ea65a365dc51491c5b0c40b6034cec3bee7062d553ca8524ad2d352c55b56ed3",
+      "size": 1344288
+    },
+    {
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/eddfd074cc417568-libtirtc_third_tencent_xlog_comm.a",
+      "sha256": "eddfd074cc4175681303a88b5118d8bd1ff66ca2a4b0834908fa78a04a18eb63",
+      "size": 97632
     },
     {
       "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/efc094789da20871-tirtc_media_aggregate_anchor.c.o",
@@ -181,8 +171,18 @@
       "size": 528
     },
     {
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/f4743d4abab037db-libtirtc_runtime_foundation_http.a",
+      "sha256": "f4743d4abab037db7d7cb89e552f3884e8ee8492d916d58514bf853760e84ec5",
+      "size": 755752
+    },
+    {
+      "path": "relink/macos-arm64/libtirtc_media.dylib/inputs/files/f7367e9a0b7df27a-libcrypto.a",
+      "sha256": "f7367e9a0b7df27a77c200b1f570fdb9acdb95fd29213b6636abe0c54631b01d",
+      "size": 6819328
+    },
+    {
       "path": "relink/macos-arm64/libtirtc_media.dylib/recipe.json",
-      "sha256": "e7b7e6c72b18f8691a0e9d3d8dad520919ba3f4a3933c17adafb449f59ab5fd2",
+      "sha256": "d42888da087e0b6494248cc6f994d3c9ec49fe888010f384462cfe406783ee7a",
       "size": 11181
     },
     {
@@ -206,11 +206,11 @@
   "platform": "macos-arm64",
   "relink_outputs": [
     {
-      "baseline_sha256": "461ec09380d1d89868aef85d72fd8000097e796ef0d67acdea197444e5aca2c8",
+      "baseline_sha256": "3b66a4401b4239bc6b044b7a72f706220e65b044459cb0d29e08c4bb60cde617",
       "input_count": 25,
       "output_name": "libtirtc_media.dylib",
       "recipe": "relink/macos-arm64/libtirtc_media.dylib/recipe.json",
-      "recipe_sha256": "e7b7e6c72b18f8691a0e9d3d8dad520919ba3f4a3933c17adafb449f59ab5fd2"
+      "recipe_sha256": "d42888da087e0b6494248cc6f994d3c9ec49fe888010f384462cfe406783ee7a"
     }
   ],
   "schema_version": 2,

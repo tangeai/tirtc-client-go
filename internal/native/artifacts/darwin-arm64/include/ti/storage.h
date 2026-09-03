@@ -133,6 +133,8 @@ typedef struct TiCloudStorageExportCallbacks {
 #define TI_CLOUD_STORAGE_ERROR_RECORDING_UNREADABLE ((TiError)6122)
 #define TI_CLOUD_STORAGE_ERROR_UNAVAILABLE ((TiError)6123)
 #define TI_CLOUD_STORAGE_ERROR_STOPPED ((TiError)6124)
+#define TI_CLOUD_STORAGE_ERROR_RECORDING_NOT_FOUND ((TiError)6134)
+#define TI_CLOUD_STORAGE_ERROR_RECORDING_DOWNLOAD_FAILED ((TiError)6135)
 
 TI_API TiError TI_CALL ti_cloud_storage_init(const TiCloudStorageInitOptions* options);
 TI_API TiError TI_CALL ti_cloud_storage_uninit(void);
