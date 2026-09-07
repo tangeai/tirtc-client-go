@@ -29,10 +29,10 @@ typedef struct TiVideoSnapshotFile {
 #define TI_VIDEO_SNAPSHOT_FILE_INITIALIZER {NULL}
 
 /*
- * Deletes a TiRTC- or Ti Cloud Storage-generated temporary MP4 or JPEG under the active Runtime
- * cache root. Either the RTC or Ti Cloud Storage product lease must be initialized. The operation
- * is idempotent. Paths outside the TiRTC media cache, directories, and symbolic links are rejected;
- * this function is not a general-purpose filesystem delete primitive.
+ * Deletes a TiRTC- or Ti Cloud Storage-generated temporary MP4 or JPEG under the active Runtime cache
+ * root. Either the RTC or Ti Cloud Storage product lease must be initialized.
+ * The operation is idempotent. Paths outside the TiRTC media cache, directories, and symbolic
+ * links are rejected; this function is not a general-purpose filesystem delete primitive.
  */
 TI_API TiError TI_CALL ti_local_media_file_delete(const char* file_path);
 
@@ -352,13 +352,6 @@ typedef struct TiEncodedVideoInputCallbacks {
 #define TI_ENCODED_VIDEO_INPUT_CALLBACKS_INITIALIZER \
   {NULL, NULL, NULL, NULL, TI_CALLBACK_DISPATCHER_INITIALIZER}
 
-/**
- * Receives decoded PCM owned by the callback invocation.
- *
- * Live RTC audio using adaptive playout is delivered as one 10 ms PCM block per callback.
- * Direct, timeline-preserving, and Ti Cloud Storage Replay outputs retain their route-specific
- * frame shape. Consumers must use `TiAudioFrameInfo.samples_per_channel` for every invocation.
- */
 typedef void(TI_CALL* TiAudioOutputOnFrameFn)(TiAudioOutput* output, const TiAudioFrame* frame,
                                               void* user_data);
 typedef void(TI_CALL* TiAudioOutputOnStateChangedFn)(TiAudioOutput* output, TiOutputState state,
@@ -522,12 +515,12 @@ TI_API TiError TI_CALL ti_audio_output_set_callbacks(TiAudioOutput* output,
                                                      void* user_data);
 TI_API TiError TI_CALL ti_audio_output_set_volume(TiAudioOutput* output, uint32_t volume_percent);
 /**
- * Selects whether RTC live audio uses adaptive encoded-packet NetEQ playout.
+ * Selects whether RTC live audio uses adaptive decoded-PCM playout.
  *
  * Adaptive playout is enabled by default. `enabled` accepts only 0 or 1 and
  * must be configured before the output is attached. Disabling selects the
- * bounded direct decoded-PCM path; it does not change Ti Cloud Storage timeline playback.
- * Calling while attached returns `TI_ERROR_IN_USE`.
+ * bounded direct decoded-PCM path; it does not change the Ti Cloud Storage timeline
+ * playback. Calling while attached returns `TI_ERROR_IN_USE`.
  */
 TI_API TiError TI_CALL ti_audio_output_set_adaptive_playout_enabled(TiAudioOutput* output,
                                                                     uint8_t enabled);

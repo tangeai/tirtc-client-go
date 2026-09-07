@@ -6,21 +6,7 @@ import (
 	"path/filepath"
 	"sync"
 	"testing"
-
-	"github.com/tangeai/tirtc-client-go/v2/internal/buildidentity"
 )
-
-func TestPublicInitConsumesRTCBuildIdentity(t *testing.T) {
-	buildidentity.Release("rtc")
-	options := InitOptions{AppID: "app", CacheDir: t.TempDir()}
-	if err := Init(options); err != nil {
-		t.Fatal(err)
-	}
-	defer Shutdown()
-	if _, available := buildidentity.Line("rtc"); available {
-		t.Fatal("RTC public Init did not consume the build identity")
-	}
-}
 
 func TestRepeatedInitChecksConfigurationBeforeFilesystemWrites(t *testing.T) {
 	root := t.TempDir()

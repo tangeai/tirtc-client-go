@@ -1,5 +1,5 @@
 {
-  "baseline_sha256": "63b778c7a6baaa4a20d1386a7c906c11864bf219d58983eb87584f89b3517a22",
+  "baseline_sha256": "b466a503700f397d250f3650133d7f32908ceb2ed5bc902029fd510892cab6c8",
   "build_identity": {
     "fingerprint": "cd9ef871bc81f9ff49d3eab97ef62336190b0e4cf337f6e9d07934cc88220675",
     "platform": "linux-x64",
@@ -29,22 +29,22 @@
         "--push-state",
         "-Xlinker",
         "--whole-archive",
-        "{INPUT_ROOT}/files/f8c655fd17629ead-libtirtc_runtime_facade.a",
-        "{INPUT_ROOT}/files/db4a0b634d0ab7d9-libtirtc_runtime_storage.a",
-        "{INPUT_ROOT}/files/3c05259e65055856-libtirtc_runtime_transport.a",
-        "{INPUT_ROOT}/files/83ea375d39f4cc44-libtirtc_runtime_media.a",
-        "{INPUT_ROOT}/files/cb0f3b549d013837-libtirtc_runtime_audio.a",
-        "{INPUT_ROOT}/files/97d0cd45a66e0513-libtirtc_runtime_video.a",
-        "{INPUT_ROOT}/files/fb6e8f51ace20ea5-libtirtc_runtime_foundation_logging.a",
-        "{INPUT_ROOT}/files/33e4897c98f32b70-libtirtc_runtime_foundation_http.a",
+        "{INPUT_ROOT}/files/5128833b39e42f82-libtirtc_runtime_facade.a",
+        "{INPUT_ROOT}/files/2aa49e7d03667874-libtirtc_runtime_storage.a",
+        "{INPUT_ROOT}/files/36943377158c55fe-libtirtc_runtime_transport.a",
+        "{INPUT_ROOT}/files/4da76ddaa7791e1b-libtirtc_runtime_media.a",
+        "{INPUT_ROOT}/files/6307426e40c37468-libtirtc_runtime_audio.a",
+        "{INPUT_ROOT}/files/183de0ec339961ef-libtirtc_runtime_video.a",
+        "{INPUT_ROOT}/files/b031e4dccbdb2675-libtirtc_runtime_foundation_logging.a",
+        "{INPUT_ROOT}/files/f7b5744d40bb12ee-libtirtc_runtime_foundation_http.a",
         "{INPUT_ROOT}/files/5ebd16daa9cc6c60-libtirtc_runtime_media_contract.a",
         "-Xlinker",
         "--pop-state",
         "{INPUT_ROOT}/files/4aed97ecfc78622f-libopus.a",
         "{INPUT_ROOT}/files/2a4b0dcb0e43c2d5-libopencore-amrnb.a",
         "{INPUT_ROOT}/files/95aef8518ae56d2c-libwebrtc-audio-processing-2.a",
-        "{INPUT_ROOT}/files/41566d4e62cf957d-libtirtc_third_webrtc_neteq.a",
-        "{INPUT_ROOT}/files/b73c21d393b51c1b-libtirtc_third_tencent_xlog.a",
+        "{INPUT_ROOT}/files/7abbb610dee05a25-libtirtc_third_webrtc_neteq.a",
+        "{INPUT_ROOT}/files/4dbb4e7f9e7d5fc8-libtirtc_third_tencent_xlog.a",
         "-ldl",
         "-lm",
         "-Wl,--no-as-needed",
@@ -72,7 +72,7 @@
         "{INPUT_ROOT}/files/a513710288fb98d0-libtirtc_third_tencent_xlog_zstd.a",
         "/usr/lib/x86_64-linux-gnu/libz.so",
         "{INPUT_ROOT}/files/5f4e67320cd38078-libssl.a",
-        "{INPUT_ROOT}/files/47751f14cbb52079-libcrypto.a",
+        "{INPUT_ROOT}/files/ceae37e26d8f5670-libcrypto.a",
         "{INPUT_ROOT}/files/5732ef4ed7605117-libtirtc_third_miniz.a"
       ],
       "tool": "/usr/bin/clang++-21",
@@ -80,6 +80,11 @@
     }
   ],
   "inputs": [
+    {
+      "path": "files/183de0ec339961ef-libtirtc_runtime_video.a",
+      "sha256": "183de0ec339961ef05fe6d66706ec43874207ecd050caba0c90f65a45f75d9de",
+      "size": 135114
+    },
     {
       "path": "files/229b9b574bd1bf7e-libtirtc_third_tencent_xlog_boost.a",
       "sha256": "229b9b574bd1bf7e146b6b3e00ea25022d8fd10aedd05fa87d54c3c5653a9b48",
@@ -91,29 +96,34 @@
       "size": 364726
     },
     {
-      "path": "files/33e4897c98f32b70-libtirtc_runtime_foundation_http.a",
-      "sha256": "33e4897c98f32b704d922ddf2d3cb727f882c4041938c9c314806067df4b0fc3",
-      "size": 1052218
+      "path": "files/2aa49e7d03667874-libtirtc_runtime_storage.a",
+      "sha256": "2aa49e7d036678741356704e5cd8d3b5fc197fb7e6357d9a26f2aaeda2d68f07",
+      "size": 616912
     },
     {
-      "path": "files/3c05259e65055856-libtirtc_runtime_transport.a",
-      "sha256": "3c05259e65055856b3ba4e6dfc336cb17b229e5ee066af99f07504d9bb2a31d4",
-      "size": 248746
-    },
-    {
-      "path": "files/41566d4e62cf957d-libtirtc_third_webrtc_neteq.a",
-      "sha256": "41566d4e62cf957d66cdfea39a822148498f36c122145b200357d034a57217db",
-      "size": 669310
-    },
-    {
-      "path": "files/47751f14cbb52079-libcrypto.a",
-      "sha256": "47751f14cbb5207974eea96e2a2a4b3e81eaff27e63862f52cd51d039ee94a33",
-      "size": 11030450
+      "path": "files/36943377158c55fe-libtirtc_runtime_transport.a",
+      "sha256": "36943377158c55fe2aaa1732410768bb57f9c00ae3c0e0a8a7d436cdf5b418c1",
+      "size": 244278
     },
     {
       "path": "files/4aed97ecfc78622f-libopus.a",
       "sha256": "4aed97ecfc78622fc7675e2aad6278e0ae042e724667f6ec31bb44e68b4e88c3",
       "size": 910822
+    },
+    {
+      "path": "files/4da76ddaa7791e1b-libtirtc_runtime_media.a",
+      "sha256": "4da76ddaa7791e1bc5f9fcb942a14f0c7bcec56fe2005fd500a8d1fd3f3d722c",
+      "size": 753944
+    },
+    {
+      "path": "files/4dbb4e7f9e7d5fc8-libtirtc_third_tencent_xlog.a",
+      "sha256": "4dbb4e7f9e7d5fc80a6f6166d012ccfb54868fdb3b9f353e5fd4d6c55a48b749",
+      "size": 322714
+    },
+    {
+      "path": "files/5128833b39e42f82-libtirtc_runtime_facade.a",
+      "sha256": "5128833b39e42f8210f84a4fd30fc53b601c0ce69fadde70dafd170338b64e52",
+      "size": 1502952
     },
     {
       "path": "files/5732ef4ed7605117-libtirtc_third_miniz.a",
@@ -131,19 +141,19 @@
       "size": 2057536
     },
     {
-      "path": "files/83ea375d39f4cc44-libtirtc_runtime_media.a",
-      "sha256": "83ea375d39f4cc44152721a7c157b59c0b540ca53841b805b9d894105671cb81",
-      "size": 783320
+      "path": "files/6307426e40c37468-libtirtc_runtime_audio.a",
+      "sha256": "6307426e40c37468da1d3edc8e769ace3960a078a041a524e024930c52397093",
+      "size": 179186
+    },
+    {
+      "path": "files/7abbb610dee05a25-libtirtc_third_webrtc_neteq.a",
+      "sha256": "7abbb610dee05a25845bacc237aae6dc81f2ff04889282425ad0ab38dfdbf792",
+      "size": 292214
     },
     {
       "path": "files/95aef8518ae56d2c-libwebrtc-audio-processing-2.a",
       "sha256": "95aef8518ae56d2c0efe934d4a5a26ef2fe3ed4f516daf2847e1ba708f5f70bf",
       "size": 5121936
-    },
-    {
-      "path": "files/97d0cd45a66e0513-libtirtc_runtime_video.a",
-      "sha256": "97d0cd45a66e0513c7da52aa709d649a2db40fbb01bd90cecfc3a7f72b973fb3",
-      "size": 135106
     },
     {
       "path": "files/9fbb1250b45d6b03-tirtc_media_aggregate_anchor.c.o",
@@ -156,9 +166,9 @@
       "size": 541660
     },
     {
-      "path": "files/b73c21d393b51c1b-libtirtc_third_tencent_xlog.a",
-      "sha256": "b73c21d393b51c1b8dd84b1ce179d1fcb105754229ffc5cc4c571d3c8ba8c24a",
-      "size": 322714
+      "path": "files/b031e4dccbdb2675-libtirtc_runtime_foundation_logging.a",
+      "sha256": "b031e4dccbdb2675d09a4ecd04fb79d21116e4b035d54a8666bc9877aacd7935",
+      "size": 745754
     },
     {
       "path": "files/c50fcfb78b4f19de-libtirtc_third_tencent_xlog_comm.a",
@@ -166,24 +176,14 @@
       "size": 132972
     },
     {
-      "path": "files/cb0f3b549d013837-libtirtc_runtime_audio.a",
-      "sha256": "cb0f3b549d01383734d3974d62709320a36710fd4a368636d0355bd7d50f4aad",
-      "size": 220766
+      "path": "files/ceae37e26d8f5670-libcrypto.a",
+      "sha256": "ceae37e26d8f5670d68c46f8d91b24a0005b2cbed1a58df771586b51b7ca14b4",
+      "size": 11030450
     },
     {
-      "path": "files/db4a0b634d0ab7d9-libtirtc_runtime_storage.a",
-      "sha256": "db4a0b634d0ab7d9130f44a809a0650dbc670e697f4031acdd28075a03e3e072",
-      "size": 614212
-    },
-    {
-      "path": "files/f8c655fd17629ead-libtirtc_runtime_facade.a",
-      "sha256": "f8c655fd17629eada57823ad842d4346fd35cedc5148c7ae254a54833a39cf13",
-      "size": 1518896
-    },
-    {
-      "path": "files/fb6e8f51ace20ea5-libtirtc_runtime_foundation_logging.a",
-      "sha256": "fb6e8f51ace20ea58f6237f3eaeb747d0ed689ab03198cf6cc71a9acd89d9c25",
-      "size": 755640
+      "path": "files/f7b5744d40bb12ee-libtirtc_runtime_foundation_http.a",
+      "sha256": "f7b5744d40bb12ee0e4b0773ec25a8b09c86a4ff7e22554040e7afbcc0bdfe36",
+      "size": 1027596
     },
     {
       "path": "library-dirs/229d6fba2e110afd/libTiRTC.a",
@@ -220,7 +220,7 @@
     "c_flags": "-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections",
     "cc": "/usr/bin/clang-21",
     "cmake_generator": "Ninja",
-    "cmake_version": "4.4.2",
+    "cmake_version": "4.4.0",
     "compiler_id": "Clang",
     "compiler_target": "",
     "compiler_version": "21.1.8",

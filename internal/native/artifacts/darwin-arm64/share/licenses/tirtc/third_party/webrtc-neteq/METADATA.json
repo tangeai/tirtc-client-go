@@ -10,7 +10,7 @@
   },
   "source": {
     "root": "src",
-    "tree_sha256": "1d653610a4d0864a964568e09e8d02ca634bc309e3c39a4ba8caa8cc3c5da2a1",
+    "tree_sha256": "f90d5b9c0cb9b60da0e3991edef1f73a40a1731ee34824f90a81e21aa9d99bc9",
     "components": []
   },
   "licenses": [
@@ -26,12 +26,7 @@
     }
   ],
   "local_changes": [
-    "The source closure contains the M131 NetEqImpl decision path and its direct production dependencies. TiRTC supplies a private encoded-audio decoder factory and does not import AudioCodingModule, RTP receiver, transport, or the rest of libwebrtc.",
-    "TiRTC does not enable NACK, RTX, RED, or transport-owned recovery. Dense private sequence numbers are used only for packet identity; timing decisions consume the source RTP timestamp and the original monotonic receive time carried at the encoded ingress boundary.",
-    "PacketArrivedInfo carries an optional original-arrival sample timestamp into PacketArrivalHistory. TiRTC maps encoded-ingress monotonic receive time into NetEQ's TickTimer sample domain so insert-worker delay is not misclassified as network jitter. Remove this adaptation only when upstream NetEQ accepts original receive time in its packet-arrival estimator.",
-    "Environment::CreateForNetEq constructs the clock and field-trial subset used by this standalone source closure without importing libwebrtc task-queue or event-log owners. Access to either omitted service remains fail-closed. Remove this factory if the closure later owns those full upstream services.",
-    "NetEq::LastOperationForTiRtc exposes the already-selected operation for internal output classification and deterministic validation; it does not override decisions or form a public product contract. Remove it if upstream lifetime statistics provide per-pull operation classification.",
-    "reorder_optimizer.cc directly includes <cstdint> so int64_t is declared by its owning header set on MinGW instead of relying on a transitive include.",
+    "The decoded-PCM playout closure is limited to PacketBuffer, Expand/Merge, Accelerate and its time-stretch dependency, the L16 raw-PCM decoder, and their direct dependencies. DelayManager, DecisionLogic, PacketArrivalHistory, PreemptiveExpand, NetEqImpl, AudioCodingModule, RTP receiver, NACK, and the rest of libwebrtc are excluded because this boundary does not receive the original transport sequence and loss contract required to make their decisions correctly. The media latency owner supplies explicit whole-pipeline catch-up control instead.",
     "Shared api, common_audio, rtc_base, and Abseil headers and symbols are reused from the existing webrtc-apm 2.1 source closure at the same WebRTC M131 revision 79aff54b0fa9238ce3518dd9eaf9610cd6f22e82, avoiding duplicate strong symbols."
   ]
 }

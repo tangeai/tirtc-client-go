@@ -4,17 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/tangeai/tirtc-client-go/v2/internal/buildidentity"
 	"github.com/tangeai/tirtc-client-go/v2/internal/native"
 )
-
-func logCloudStorageBuildIdentity() {
-	if line, ok := buildidentity.Line("cloud_storage"); ok {
-		if code := native.Log(cloudStorageLogInfo, cloudStorageLogTag, line); code != 0 {
-			buildidentity.Release("cloud_storage")
-		}
-	}
-}
 
 const (
 	cloudStorageLogTag     = "Ti Cloud Storage"

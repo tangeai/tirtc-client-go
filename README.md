@@ -55,7 +55,7 @@ Recording、Export 和 Snapshot 返回 Runtime cache 中的临时文件。应用
 go test -race ./...
 ```
 
-`script/build_candidate.sh` 从同一次 Runtime candidate 生成双平台本地 module proxy，默认重建 `.build/go/candidate/current`。`script/go_verify.sh` 验证 Darwin/Linux contract 和两条真实 RTC smoke；默认写入 `.build/go/verify`，每次开始自动清理同平台、同 mode 的上一轮 run，其他平台/mode 与 candidate 输入不受影响。上层聚合编排才需要传 `--output-root`，并在自己的 current run 内承担 retention。`tool/ti_cloud_storage.py` 在两个平台运行公开 Ti Cloud Storage Example。具体输入和完成信号由仓库 `go-test` Skill 定义。
+`script/build_candidate.sh` 从同一次 Runtime candidate 生成双平台本地 module proxy。`script/go_verify.sh` 验证 Darwin/Linux contract 和两条真实 RTC smoke；`tool/ti_cloud_storage.py` 在两个平台运行公开 Ti Cloud Storage Example。具体输入和完成信号由仓库 `go-test` Skill 定义。
 
 公开源码由 `tool/project_release.py` 从 allowlist 投影。投影会拒绝 symlink、Git LFS pointer、超限文件、仓库私有工具，以及源码或 metadata 中会形成本机依赖的绝对路径；Native 可搬移性由 RPATH、install name 和动态依赖检查负责。编译器写入动态库的源码字符串不参与加载，因此不作为 candidate 或发布门禁。发布 module、tag、外部 Samples 或上传日志都需要用户明确授权。
 

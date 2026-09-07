@@ -5,5 +5,5 @@ The complete version-bound compliance sidecar for this SDK contains:
   source/rebuild_ffmpeg.py
   relink/<platform>/<runtime-output>/
 
-Source archive SHA-256: 9006e67d9fb80ab3ee7c2c4e3122b7c9f3df21a6592ed969edc1a91fa4bfd08d
+Source archive SHA-256: 603e00642cf3fa298a4be11ab4eb3f49e17eab7ef9466e7588c9d4b1fd92d6cc
 Obtain the sidecar with the same SDK version and compliance-manifest hash from the TiRTC SDK delivery channel used for this binary.

@@ -6,20 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
-
-	"github.com/tangeai/tirtc-client-go/v2/internal/buildidentity"
 )
-
-func TestPublicInitConsumesCloudStorageBuildIdentity(t *testing.T) {
-	buildidentity.Release("cloud_storage")
-	if err := Init(InitOptions{AppID: "app", CacheDir: t.TempDir()}); err != nil {
-		t.Fatal(err)
-	}
-	defer Shutdown()
-	if _, available := buildidentity.Line("cloud_storage"); available {
-		t.Fatal("Cloud Storage public Init did not consume the build identity")
-	}
-}
 
 func TestStableErrorMapping(t *testing.T) {
 	for code, sentinel := range map[int32]error{
