@@ -2,19 +2,19 @@
   "artifacts": [
     {
       "path": "lib/libavcodec.a",
-      "sha256": "e64b64310e9e6d9f2bcb8e83c80148b3ceea7293593274db685354a226a104aa"
+      "sha256": "ab21f17864f5d577b841335d3fe10e1a9ce58770b5da850c33374e16b5513066"
     },
     {
       "path": "lib/libavformat.a",
-      "sha256": "70ca73d005d809e7a23b8145afeaf5e4f312f09418abae2371d687e19da77e9b"
+      "sha256": "e990e9f436399130d870fec7c4fa24bfa6adf07e336e272174a4a0b1df56b251"
     },
     {
       "path": "lib/libavutil.a",
-      "sha256": "435d2ffc7bc963e8d7926725abe4e8cd76b6340dda9ddfce0d362bbe36bf76b7"
+      "sha256": "f351068cb9ae2c902eb2eab1717ee6a4088edcb31e5cffb776abb612415e2750"
     },
     {
       "path": "lib/libswresample.a",
-      "sha256": "574ba604aaab98935b95bd5cadaa2e0c9aff44dfb5fa8e9f763f6e70d2ecaa30"
+      "sha256": "b4ab823baf0c293af12b54a2025ff1a91066224e4fba8cb2e5970e4df0162850"
     },
     {
       "path": "lib/libswscale.a",
@@ -73,7 +73,7 @@
     "c_flags": "-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections -arch arm64 -Werror=unguarded-availability-new -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -mmacosx-version-min=11.5",
     "cc": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
     "cmake_generator": "Ninja",
-    "cmake_version": "4.2.3",
+    "cmake_version": "3.31.1-g0a10cd6",
     "compiler_id": "AppleClang",
     "compiler_target": "",
     "compiler_version": "21.0.0.21000101",

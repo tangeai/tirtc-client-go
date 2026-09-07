@@ -59,8 +59,12 @@ typedef struct TiLogSinkOptions {
 // the process unloads the Runtime aggregate.
 TI_API const TiBuildInfo* TI_CALL ti_build_info_get(void);
 TI_API const char* TI_CALL ti_build_version_string(void);
-// A successful clear or replacement is a barrier for the previous callback
-// generation and its user_data.
+// An installed sink receives DEBUG, INFO, WARNING, and ERROR and is the sole
+// non-file output owner. A successful clear or replacement is a barrier for
+// the previous callback generation and its user_data. Without a sink, Runtime
+// writes the same four levels to its platform console only when the shared
+// console option is enabled. Persistent logs and ordinary upload contain INFO
+// and above; DEBUG is never persisted by this API.
 TI_API TiError TI_CALL ti_logging_set_sink(const TiLogSinkOptions* options);
 TI_API TiError TI_CALL ti_logging_write(TiLogLevel level, const char* tag, const char* message);
 TI_API TiError TI_CALL ti_logging_upload(char* out_log_id, uint32_t out_log_id_capacity);

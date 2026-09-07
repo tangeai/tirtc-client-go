@@ -4,8 +4,17 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/tangeai/tirtc-client-go/v2/internal/buildidentity"
 	"github.com/tangeai/tirtc-client-go/v2/internal/native"
 )
+
+func logSDKBuildIdentity() {
+	if line, ok := buildidentity.Line("rtc"); ok {
+		if code := native.Log(sdkLogInfo, sdkLogTag, line); code != 0 {
+			buildidentity.Release("rtc")
+		}
+	}
+}
 
 const (
 	sdkLogTag     = "TiRTC"

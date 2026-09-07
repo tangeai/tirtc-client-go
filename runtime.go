@@ -41,6 +41,9 @@ func Init(options InitOptions) error {
 	if errors.Is(err, runtimelease.ErrConflict) {
 		err = ErrAlreadyInitialized
 	}
+	if err == nil {
+		logSDKBuildIdentity()
+	}
 	logSDKResult("runtime_init", err)
 	return err
 }

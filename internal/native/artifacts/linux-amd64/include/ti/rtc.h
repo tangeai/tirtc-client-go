@@ -104,6 +104,7 @@ typedef struct TiRtcOutputStartupMetrics {
 } TiRtcOutputStartupMetrics;
 
 typedef struct TiRtcOutputStutterMetrics {
+  /* Only degraded intervals strictly longer than this value count as stutter. */
   uint32_t stutter_threshold_ms;
   uint32_t stutter_count;
   uint64_t output_duration_ms;
@@ -113,6 +114,12 @@ typedef struct TiRtcOutputStutterMetrics {
   double stutter_rate;
 } TiRtcOutputStutterMetrics;
 
+/**
+ * RTC audio-output metrics for the current metrics session.
+ *
+ * The audio stutter threshold is 100 ms. A degraded interval of exactly 100 ms does not count;
+ * an interval longer than 100 ms contributes its complete duration.
+ */
 typedef struct TiRtcAudioOutputMetricsSnapshot {
   TiRtcOutputStartupMetrics startup;
   TiRtcOutputStutterMetrics stutter;
@@ -126,6 +133,23 @@ typedef struct TiRtcAudioOutputMetricsSnapshot {
   uint32_t stats_refresh_interval_ms;
   uint64_t stats_updated_at_ms;
 } TiRtcAudioOutputMetricsSnapshot;
+
+/**
+ * Source-frame continuity facts for the current RTC audio-output attachment.
+ *
+ * `observed_source_frame_count` counts valid RTC source frames before the bounded media queue.
+ * `accepted_source_frame_count` counts frames admitted to that queue and never exceeds observed.
+ * `missing_source_duration_ms` accumulates positive source-PTS gaps using codec sample duration;
+ * receiver arrival stalls with continuous PTS and local queue rejection do not create source gaps.
+ * A transport generation or codec tuple change resets the PTS anchor without resetting counters.
+ * Attach starts all fields at zero, detach freezes the final value until the next attach, and
+ * Ti Cloud Storage Replay does not contribute to this RTC-scoped snapshot.
+ */
+typedef struct TiRtcAudioOutputContinuityMetricsSnapshot {
+  uint64_t observed_source_frame_count;
+  uint64_t accepted_source_frame_count;
+  uint64_t missing_source_duration_ms;
+} TiRtcAudioOutputContinuityMetricsSnapshot;
 
 typedef struct TiRtcVideoOutputMetricsSnapshot {
   TiRtcOutputStartupMetrics startup;
@@ -264,6 +288,9 @@ TI_API TiError TI_CALL tirtc_conn_get_metrics_snapshot(TiRtcConn* connection,
                                                        TiRtcConnMetricsSnapshot* out_snapshot);
 TI_API TiError TI_CALL tirtc_audio_output_get_metrics_snapshot(
     TiAudioOutput* output, TiRtcAudioOutputMetricsSnapshot* out_snapshot);
+/** Copies the current attachment-scoped RTC source-continuity facts into `out_snapshot`. */
+TI_API TiError TI_CALL tirtc_audio_output_get_continuity_metrics_snapshot(
+    TiAudioOutput* output, TiRtcAudioOutputContinuityMetricsSnapshot* out_snapshot);
 TI_API TiError TI_CALL tirtc_audio_output_reset_metrics_session(TiAudioOutput* output);
 TI_API TiError TI_CALL tirtc_video_output_get_metrics_snapshot(
     TiVideoOutput* output, TiRtcVideoOutputMetricsSnapshot* out_snapshot);

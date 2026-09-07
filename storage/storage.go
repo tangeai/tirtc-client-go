@@ -40,6 +40,9 @@ func Init(options InitOptions) error {
 	if errors.Is(err, runtimelease.ErrConflict) {
 		err = ErrAlreadyInitialized
 	}
+	if err == nil {
+		logCloudStorageBuildIdentity()
+	}
 	logCloudStorageResult("cloud_storage_init", err)
 	return err
 }
