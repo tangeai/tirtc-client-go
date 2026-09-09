@@ -16,6 +16,8 @@ typedef struct TiRtcConnService TiRtcConnService;
 typedef struct TiRtcConn TiRtcConn;
 typedef struct TiRtcConnCallbacks TiRtcConnCallbacks;
 typedef struct TiRtcRecordingTask TiRtcRecordingTask;
+typedef struct TiRtcClient TiRtcClient;
+typedef struct TiRtcConnectAttempt TiRtcConnectAttempt;
 
 #define TI_RTC_STREAM_ID_NONE ((int32_t)-1)
 
@@ -49,6 +51,33 @@ typedef struct TiRtcInitOptions {
   uint8_t console_log_enabled;
 } TiRtcInitOptions;
 #define TI_RTC_INIT_OPTIONS_INITIALIZER {NULL, NULL, NULL, 0u}
+
+typedef struct TiRtcClientOptions {
+  const char* app_id;
+  const char* access_key_id;
+  const char* access_key_secret;
+  const char* endpoint;
+  const char* cache_root_dir;
+  uint8_t console_log_enabled;
+} TiRtcClientOptions;
+#define TI_RTC_CLIENT_OPTIONS_INITIALIZER {NULL, NULL, NULL, NULL, NULL, 0u}
+
+typedef struct TiRtcManagedConnectOptions {
+  const char* device_id;
+  const char* subject;
+  int64_t ttl_seconds;
+  int64_t timeout_ms;
+} TiRtcManagedConnectOptions;
+#define TI_RTC_MANAGED_CONNECT_OPTIONS_INITIALIZER {NULL, NULL, 0, 0}
+
+typedef void(TI_CALL* TiRtcConnectAttemptOnCompleteFn)(TiRtcConnectAttempt* attempt,
+                                                       TiError error, void* user_data);
+typedef struct TiRtcConnectAttemptCallbacks {
+  TiRtcConnectAttemptOnCompleteFn on_complete;
+  TiCallbackDispatcher dispatcher;
+} TiRtcConnectAttemptCallbacks;
+#define TI_RTC_CONNECT_ATTEMPT_CALLBACKS_INITIALIZER \
+  {NULL, TI_CALLBACK_DISPATCHER_INITIALIZER}
 
 typedef struct TiRtcConnServiceStartOptions {
   const char* device_id;
@@ -104,6 +133,7 @@ typedef struct TiRtcOutputStartupMetrics {
 } TiRtcOutputStartupMetrics;
 
 typedef struct TiRtcOutputStutterMetrics {
+  /* Only degraded intervals strictly longer than this value count as stutter. */
   uint32_t stutter_threshold_ms;
   uint32_t stutter_count;
   uint64_t output_duration_ms;
@@ -113,6 +143,12 @@ typedef struct TiRtcOutputStutterMetrics {
   double stutter_rate;
 } TiRtcOutputStutterMetrics;
 
+/**
+ * RTC audio-output metrics for the current metrics session.
+ *
+ * The audio stutter threshold is 100 ms. A degraded interval of exactly 100 ms does not count;
+ * an interval longer than 100 ms contributes its complete duration.
+ */
 typedef struct TiRtcAudioOutputMetricsSnapshot {
   TiRtcOutputStartupMetrics startup;
   TiRtcOutputStutterMetrics stutter;
@@ -126,6 +162,23 @@ typedef struct TiRtcAudioOutputMetricsSnapshot {
   uint32_t stats_refresh_interval_ms;
   uint64_t stats_updated_at_ms;
 } TiRtcAudioOutputMetricsSnapshot;
+
+/**
+ * Source-frame continuity facts for the current RTC audio-output attachment.
+ *
+ * `observed_source_frame_count` counts valid RTC source frames before the bounded media queue.
+ * `accepted_source_frame_count` counts frames admitted to that queue and never exceeds observed.
+ * `missing_source_duration_ms` accumulates positive source-PTS gaps using codec sample duration;
+ * receiver arrival stalls with continuous PTS and local queue rejection do not create source gaps.
+ * A transport generation or codec tuple change resets the PTS anchor without resetting counters.
+ * Attach starts all fields at zero, detach freezes the final value until the next attach, and
+ * Ti Cloud Storage Replay does not contribute to this RTC-scoped snapshot.
+ */
+typedef struct TiRtcAudioOutputContinuityMetricsSnapshot {
+  uint64_t observed_source_frame_count;
+  uint64_t accepted_source_frame_count;
+  uint64_t missing_source_duration_ms;
+} TiRtcAudioOutputContinuityMetricsSnapshot;
 
 typedef struct TiRtcVideoOutputMetricsSnapshot {
   TiRtcOutputStartupMetrics startup;
@@ -194,6 +247,17 @@ TI_API TiError TI_CALL tirtc_init(const TiRtcInitOptions* options);
 TI_API TiError TI_CALL tirtc_uninit(void);
 TI_API TiError TI_CALL tirtc_set_connect_link_mode(TiRtcConnectLinkMode mode);
 
+/*
+ * Creates the process's single managed RTC client. Credentials are copied by Runtime and are used
+ * only to issue a fresh token for each accepted connection attempt. No token crosses this API.
+ */
+TI_API TiError TI_CALL tirtc_client_create(const TiRtcClientOptions* options,
+                                           TiRtcClient** out_client);
+TI_API TiError TI_CALL tirtc_client_create_connection(TiRtcClient* client,
+                                                      const TiRtcConnCreateOptions* options,
+                                                      TiRtcConn** out_connection);
+TI_API TiError TI_CALL tirtc_client_destroy(TiRtcClient* client);
+
 TI_API TiError TI_CALL tirtc_conn_service_start(const TiRtcConnServiceStartOptions* options,
                                                 const TiRtcConnServiceCallbacks* callbacks,
                                                 void* user_data, TiRtcConnService** out_service);
@@ -207,6 +271,15 @@ TI_API TiError TI_CALL tirtc_conn_set_callbacks(TiRtcConn* connection,
                                                 void* user_data);
 TI_API TiError TI_CALL tirtc_conn_connect(TiRtcConn* connection,
                                           const TiRtcConnConnectOptions* options);
+/* Acceptance is synchronous; token issuance and Nano connect run on a bounded Native attempt. */
+TI_API TiError TI_CALL tirtc_conn_connect_managed(
+    TiRtcConn* connection, const TiRtcManagedConnectOptions* options,
+    const TiRtcConnectAttemptCallbacks* callbacks, void* user_data,
+    TiRtcConnectAttempt** out_attempt);
+TI_API TiError TI_CALL tirtc_connect_attempt_cancel(TiRtcConnectAttempt* attempt);
+/* destroy returns TI_ERROR_IN_USE until the cancelled Native connect call has left its cleanup
+ * barrier; the terminal callback may already have been delivered. */
+TI_API TiError TI_CALL tirtc_connect_attempt_destroy(TiRtcConnectAttempt* attempt);
 TI_API TiError TI_CALL tirtc_conn_disconnect(TiRtcConn* connection);
 TI_API TiError TI_CALL tirtc_conn_send_command(TiRtcConn* connection,
                                                const TiRtcConnCommand* command);
@@ -264,6 +337,9 @@ TI_API TiError TI_CALL tirtc_conn_get_metrics_snapshot(TiRtcConn* connection,
                                                        TiRtcConnMetricsSnapshot* out_snapshot);
 TI_API TiError TI_CALL tirtc_audio_output_get_metrics_snapshot(
     TiAudioOutput* output, TiRtcAudioOutputMetricsSnapshot* out_snapshot);
+/** Copies the current attachment-scoped RTC source-continuity facts into `out_snapshot`. */
+TI_API TiError TI_CALL tirtc_audio_output_get_continuity_metrics_snapshot(
+    TiAudioOutput* output, TiRtcAudioOutputContinuityMetricsSnapshot* out_snapshot);
 TI_API TiError TI_CALL tirtc_audio_output_reset_metrics_session(TiAudioOutput* output);
 TI_API TiError TI_CALL tirtc_video_output_get_metrics_snapshot(
     TiVideoOutput* output, TiRtcVideoOutputMetricsSnapshot* out_snapshot);

@@ -8,29 +8,31 @@ import (
 )
 
 var (
-	ErrInvalidArgument      = errors.New("tirtc: invalid argument")
-	ErrNotInitialized       = errors.New("tirtc: not initialized")
-	ErrAuthenticationFailed = errors.New("tirtc: authentication failed")
-	ErrTimeout              = errors.New("tirtc: timeout")
-	ErrRemoteClosed         = errors.New("tirtc: remote closed")
-	ErrTokenExpired         = errors.New("tirtc: token expired")
-	ErrAlreadyInitialized   = errors.New("tirtc: already initialized")
-	ErrPermissionDenied     = errors.New("tirtc: permission denied")
-	ErrInUse                = errors.New("tirtc: resource in use")
-	ErrNotStarted           = errors.New("tirtc: not started")
-	ErrNotConnected         = errors.New("tirtc: not connected")
-	ErrNotBound             = errors.New("tirtc: not bound")
-	ErrNotConfigured        = errors.New("tirtc: not configured")
-	ErrResourceExhausted    = errors.New("tirtc: resource exhausted")
-	ErrLogExport            = errors.New("tirtc: log export failed")
-	ErrLogUpload            = errors.New("tirtc: log upload failed")
-	ErrUnsupported          = errors.New("tirtc: unsupported")
-	ErrUnsupportedFormat    = errors.New("tirtc: unsupported format")
-	ErrIO                   = errors.New("tirtc: I/O failed")
-	ErrNoFrame              = errors.New("tirtc: no frame")
-	ErrNoRecordableMedia    = errors.New("tirtc: no recordable media")
-	ErrRecordingOverrun     = errors.New("tirtc: recording overrun")
-	ErrClosed               = errors.New("tirtc: closed")
+	ErrInvalidArgument             = errors.New("tirtc: invalid argument")
+	ErrNotInitialized              = errors.New("tirtc: not initialized")
+	ErrAuthenticationFailed        = errors.New("tirtc: authentication failed")
+	ErrTimeout                     = errors.New("tirtc: timeout")
+	ErrRemoteClosed                = errors.New("tirtc: remote closed")
+	ErrTokenExpired                = errors.New("tirtc: token expired")
+	ErrAlreadyInitialized          = errors.New("tirtc: already initialized")
+	ErrPermissionDenied            = errors.New("tirtc: permission denied")
+	ErrInUse                       = errors.New("tirtc: resource in use")
+	ErrNotStarted                  = errors.New("tirtc: not started")
+	ErrNotConnected                = errors.New("tirtc: not connected")
+	ErrNotBound                    = errors.New("tirtc: not bound")
+	ErrNotConfigured               = errors.New("tirtc: not configured")
+	ErrResourceExhausted           = errors.New("tirtc: resource exhausted")
+	ErrLogExport                   = errors.New("tirtc: log export failed")
+	ErrLogUpload                   = errors.New("tirtc: log upload failed")
+	ErrUnsupported                 = errors.New("tirtc: unsupported")
+	ErrUnsupportedFormat           = errors.New("tirtc: unsupported format")
+	ErrIO                          = errors.New("tirtc: I/O failed")
+	ErrNoFrame                     = errors.New("tirtc: no frame")
+	ErrNoRecordableMedia           = errors.New("tirtc: no recordable media")
+	ErrRecordingOverrun            = errors.New("tirtc: recording overrun")
+	ErrNetworkUnavailable          = errors.New("tirtc: network unavailable")
+	ErrEndpointDNSResolutionFailed = errors.New("tirtc: endpoint DNS resolution failed")
+	ErrClosed                      = errors.New("tirtc: closed")
 )
 
 type Error struct{ Code int32 }
@@ -96,5 +98,16 @@ func errorSentinel(code int32) error {
 		6131: ErrLogUpload,
 		6132: ErrLogUpload,
 		6133: ErrLogUpload,
+		6136: ErrNetworkUnavailable,
+		6137: ErrEndpointDNSResolutionFailed,
 	}[code]
+}
+
+// Only the native cancellation terminal may carry the caller's context error.
+func withCancellationContext(err, contextErr error) error {
+	var terminal *Error
+	if contextErr != nil && errors.As(err, &terminal) && terminal.Code == 6115 {
+		return fmt.Errorf("%w: %w", err, contextErr)
+	}
+	return err
 }

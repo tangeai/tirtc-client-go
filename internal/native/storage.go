@@ -9,6 +9,7 @@ import "C"
 import (
 	"runtime/cgo"
 	"time"
+	"unsafe"
 )
 
 const errorInUse int32 = 6026
@@ -49,6 +50,47 @@ func destroyAfterTerminalWithClock(
 
 type CloudStorage struct {
 	ptr *C.TiCloudStorage
+}
+
+type CloudStorageClient struct{ ptr *C.TiCloudStorageClient }
+
+func NewCloudStorageClient(options ClientOptions) (*CloudStorageClient, int32) {
+	app, freeApp := cString(options.AppID)
+	defer freeApp()
+	accessKeyID, freeAccessKeyID := cString(options.AccessKeyID)
+	defer freeAccessKeyID()
+	accessKeySecret, freeAccessKeySecret := cString(options.AccessKeySecret)
+	defer freeAccessKeySecret()
+	endpoint, freeEndpoint := cString(options.Endpoint)
+	defer freeEndpoint()
+	cacheDir, freeCacheDir := cString(options.CacheDir)
+	defer freeCacheDir()
+	var pointer *C.TiCloudStorageClient
+	code := int32(C.ti_go_cloud_storage_client_create(app, accessKeyID, accessKeySecret, endpoint,
+		cacheDir, boolByte(options.ConsoleLogEnabled), &pointer))
+	if code != 0 {
+		return nil, code
+	}
+	return &CloudStorageClient{ptr: pointer}, 0
+}
+
+func (c *CloudStorageClient) OpenDevice(deviceID string) (*CloudStorage, int32) {
+	device, freeDevice := cString(deviceID)
+	defer freeDevice()
+	var pointer *C.TiCloudStorage
+	code := int32(C.ti_cloud_storage_client_open_device(c.ptr, device, &pointer))
+	if code != 0 {
+		return nil, code
+	}
+	return &CloudStorage{ptr: pointer}, 0
+}
+
+func (c *CloudStorageClient) Close() int32 {
+	code := int32(C.ti_cloud_storage_client_destroy(c.ptr))
+	if code == 0 {
+		c.ptr = nil
+	}
+	return code
 }
 
 func CloudStorageInit(options InitOptions) int32 {
@@ -213,9 +255,11 @@ func (r *CloudStorageRecordingDaysRequest) Close() int32 {
 }
 
 type CloudStorageReplayCallbacks struct {
+	Dispatch    func(func())
 	OnTime      func(int64)
 	OnCompleted func()
 	OnError     func(int32)
+	OnGap       func(CloudStorageRecordingGap)
 }
 type replayContext struct{ callbacks CloudStorageReplayCallbacks }
 type CloudStorageReplay struct {
@@ -334,13 +378,48 @@ func (t *CloudStorageRecordingTask) Stop() (string, int64, int32, bool) {
 }
 
 type CloudStorageExportCallbacks struct {
-	OnProgress  func(float64)
+	OnProgress  func(CloudStorageExportProgress)
+	OnGap       func(CloudStorageRecordingGap)
 	OnCompleted func(int32, string, int64)
 }
-type exportContext struct{ callbacks CloudStorageExportCallbacks }
+type exportContext struct {
+	callbacks CloudStorageExportCallbacks
+}
 type CloudStorageExportTask struct {
 	ptr    *C.TiCloudStorageExportTask
 	handle cgo.Handle
+}
+
+type CloudStorageExportProgress struct {
+	Fraction          float64
+	CoveredDurationMS int64
+}
+
+type CloudStorageRecordingTrack struct {
+	Kind      uint32
+	ChannelID uint8
+}
+
+type CloudStorageRecordingGap struct {
+	Range   CloudStorageRange
+	Tracks  []CloudStorageRecordingTrack
+	Reasons []uint32
+}
+
+type CloudStorageExportSegment struct {
+	SourceRange                CloudStorageRange
+	OutputStartMS, OutputEndMS int64
+}
+
+type CloudStorageExportReport struct {
+	RequestedRange    CloudStorageRange
+	CoveredDurationMS int64
+	Segments          []CloudStorageExportSegment
+	Gaps              []CloudStorageRecordingGap
+	Unprocessed       []CloudStorageRange
+	Complete          bool
+	Termination       uint32
+	Cause             int32
 }
 
 func (s *CloudStorage) Export(start, end int64, video, audio int32, callbacks CloudStorageExportCallbacks) (*CloudStorageExportTask, int32) {
@@ -354,9 +433,19 @@ func (s *CloudStorage) Export(start, end int64, video, audio int32, callbacks Cl
 	}
 	return &CloudStorageExportTask{task, handle}, 0
 }
-func (t *CloudStorageExportTask) Stop() (string, int64, int32) {
+func (t *CloudStorageExportTask) Progress() (CloudStorageExportProgress, int32) {
+	var value C.TiCloudStorageExportProgress
+	code := int32(C.ti_cloud_storage_export_task_get_progress_detail(t.ptr, &value))
+	return CloudStorageExportProgress{Fraction: float64(value.fraction), CoveredDurationMS: int64(value.covered_duration_ms)}, code
+}
+
+func (t *CloudStorageExportTask) Cancel() int32 {
+	return int32(C.ti_cloud_storage_export_task_cancel(t.ptr))
+}
+
+func (t *CloudStorageExportTask) Wait() (string, int64, int32) {
 	var file C.TiCloudStorageMp4File
-	code := int32(C.ti_cloud_storage_export_task_stop(t.ptr, &file))
+	code := int32(C.ti_cloud_storage_export_task_wait(t.ptr, &file))
 	path := ""
 	duration := int64(0)
 	if code == 0 {
@@ -364,6 +453,88 @@ func (t *CloudStorageExportTask) Stop() (string, int64, int32) {
 		duration = int64(file.duration_ms)
 	}
 	return path, duration, code
+}
+
+func exportGap(task *C.TiCloudStorageExportTask, index C.size_t) (CloudStorageRecordingGap, int32) {
+	var value C.TiCloudStorageRecordingGap
+	code := int32(C.ti_cloud_storage_export_task_get_gap(task, index, &value))
+	result := CloudStorageRecordingGap{
+		Range:   CloudStorageRange{StartMS: int64(value._range.start_time_ms), EndMS: int64(value._range.end_time_ms)},
+		Tracks:  make([]CloudStorageRecordingTrack, 0, int(value.track_count)),
+		Reasons: make([]uint32, 0, int(value.reason_count)),
+	}
+	for trackIndex := C.size_t(0); code == 0 && trackIndex < value.track_count; trackIndex++ {
+		var track C.TiCloudStorageRecordingTrack
+		code = int32(C.ti_cloud_storage_export_task_get_gap_track(task, index, trackIndex, &track))
+		if code == 0 {
+			result.Tracks = append(result.Tracks, CloudStorageRecordingTrack{Kind: uint32(track.kind), ChannelID: uint8(track.channel_id)})
+		}
+	}
+	for reasonIndex := C.size_t(0); code == 0 && reasonIndex < value.reason_count; reasonIndex++ {
+		var reason C.TiCloudStorageRecordingGapReason
+		code = int32(C.ti_cloud_storage_export_task_get_gap_reason(task, index, reasonIndex, &reason))
+		if code == 0 {
+			result.Reasons = append(result.Reasons, uint32(reason))
+		}
+	}
+	return result, code
+}
+
+func recordingGapFromC(value *C.TiCloudStorageRecordingGap) CloudStorageRecordingGap {
+	result := CloudStorageRecordingGap{
+		Range:   CloudStorageRange{StartMS: int64(value._range.start_time_ms), EndMS: int64(value._range.end_time_ms)},
+		Tracks:  make([]CloudStorageRecordingTrack, 0, int(value.track_count)),
+		Reasons: make([]uint32, 0, int(value.reason_count)),
+	}
+	if value.tracks != nil {
+		for _, track := range unsafe.Slice(value.tracks, int(value.track_count)) {
+			result.Tracks = append(result.Tracks, CloudStorageRecordingTrack{Kind: uint32(track.kind), ChannelID: uint8(track.channel_id)})
+		}
+	}
+	if value.reasons != nil {
+		for _, reason := range unsafe.Slice(value.reasons, int(value.reason_count)) {
+			result.Reasons = append(result.Reasons, uint32(reason))
+		}
+	}
+	return result
+}
+
+func (t *CloudStorageExportTask) Report() (CloudStorageExportReport, int32) {
+	var value C.TiCloudStorageExportReport
+	code := int32(C.ti_cloud_storage_export_task_get_report(t.ptr, &value))
+	result := CloudStorageExportReport{
+		RequestedRange:    CloudStorageRange{StartMS: int64(value.requested_range.start_time_ms), EndMS: int64(value.requested_range.end_time_ms)},
+		CoveredDurationMS: int64(value.covered_duration_ms), Complete: value.complete != 0,
+		Termination: uint32(value.termination), Cause: int32(value.cause),
+		Segments:    make([]CloudStorageExportSegment, 0, int(value.segment_count)),
+		Gaps:        make([]CloudStorageRecordingGap, 0, int(value.gap_count)),
+		Unprocessed: make([]CloudStorageRange, 0, int(value.unprocessed_range_count)),
+	}
+	for index := C.size_t(0); code == 0 && index < value.segment_count; index++ {
+		var segment C.TiCloudStorageExportSegment
+		code = int32(C.ti_cloud_storage_export_task_get_segment(t.ptr, index, &segment))
+		if code == 0 {
+			result.Segments = append(result.Segments, CloudStorageExportSegment{
+				SourceRange:   CloudStorageRange{StartMS: int64(segment.source_range.start_time_ms), EndMS: int64(segment.source_range.end_time_ms)},
+				OutputStartMS: int64(segment.output_start_ms), OutputEndMS: int64(segment.output_end_ms),
+			})
+		}
+	}
+	for index := C.size_t(0); code == 0 && index < value.gap_count; index++ {
+		var gap CloudStorageRecordingGap
+		gap, code = exportGap(t.ptr, index)
+		if code == 0 {
+			result.Gaps = append(result.Gaps, gap)
+		}
+	}
+	for index := C.size_t(0); code == 0 && index < value.unprocessed_range_count; index++ {
+		var item C.TiCloudStorageRecordingRange
+		code = int32(C.ti_cloud_storage_export_task_get_unprocessed_range(t.ptr, index, &item))
+		if code == 0 {
+			result.Unprocessed = append(result.Unprocessed, CloudStorageRange{StartMS: int64(item.start_time_ms), EndMS: int64(item.end_time_ms)})
+		}
+	}
+	return result, code
 }
 func (t *CloudStorageExportTask) Close() int32 {
 	code := destroyAfterTerminal(func() int32 {
@@ -416,8 +587,21 @@ func goTiCloudStorageRecordingDaysCompleted(handle C.uintptr_t, request *C.TiClo
 	}
 }
 
+//export goTiCloudStorageReplayDispatch
+func goTiCloudStorageReplayDispatch(handle C.uintptr_t, task C.TiCallbackTaskFn, data unsafe.Pointer) {
+	context := cgo.Handle(handle).Value().(*replayContext)
+	invoke := func() { C.ti_go_callback_task_run(task, data) }
+	if context.callbacks.Dispatch != nil {
+		context.callbacks.Dispatch(invoke)
+	} else {
+		invoke()
+	}
+}
+
 //export goTiCloudStorageReplayTime
 func goTiCloudStorageReplayTime(handle C.uintptr_t, value C.int64_t) {
+	// Return through C so its callback gate always completes, even if a user handler panics.
+	defer func() { _ = recover() }()
 	callback := cgo.Handle(handle).Value().(*replayContext).callbacks.OnTime
 	if callback != nil {
 		callback(int64(value))
@@ -426,6 +610,8 @@ func goTiCloudStorageReplayTime(handle C.uintptr_t, value C.int64_t) {
 
 //export goTiCloudStorageReplayCompleted
 func goTiCloudStorageReplayCompleted(handle C.uintptr_t) {
+	// Return through C so its callback gate always completes, even if a user handler panics.
+	defer func() { _ = recover() }()
 	callback := cgo.Handle(handle).Value().(*replayContext).callbacks.OnCompleted
 	if callback != nil {
 		callback()
@@ -434,17 +620,38 @@ func goTiCloudStorageReplayCompleted(handle C.uintptr_t) {
 
 //export goTiCloudStorageReplayError
 func goTiCloudStorageReplayError(handle C.uintptr_t, code C.int32_t) {
+	// Return through C so its callback gate always completes, even if a user handler panics.
+	defer func() { _ = recover() }()
 	callback := cgo.Handle(handle).Value().(*replayContext).callbacks.OnError
 	if callback != nil {
 		callback(int32(code))
 	}
 }
 
-//export goTiCloudStorageExportProgress
-func goTiCloudStorageExportProgress(handle C.uintptr_t, value C.double) {
+//export goTiCloudStorageReplayGap
+func goTiCloudStorageReplayGap(handle C.uintptr_t, value *C.TiCloudStorageRecordingGap) {
+	// Return through C so its callback gate always completes, even if a user handler panics.
+	defer func() { _ = recover() }()
+	callback := cgo.Handle(handle).Value().(*replayContext).callbacks.OnGap
+	if callback != nil {
+		callback(recordingGapFromC(value))
+	}
+}
+
+//export goTiCloudStorageExportProgressDetail
+func goTiCloudStorageExportProgressDetail(handle C.uintptr_t, value C.double, covered C.int64_t) {
 	callback := cgo.Handle(handle).Value().(*exportContext).callbacks.OnProgress
 	if callback != nil {
-		callback(float64(value))
+		callback(CloudStorageExportProgress{Fraction: float64(value), CoveredDurationMS: int64(covered)})
+	}
+}
+
+//export goTiCloudStorageExportGap
+func goTiCloudStorageExportGap(handle C.uintptr_t, value *C.TiCloudStorageRecordingGap) {
+	context := cgo.Handle(handle).Value().(*exportContext)
+	gap := recordingGapFromC(value)
+	if context.callbacks.OnGap != nil {
+		context.callbacks.OnGap(gap)
 	}
 }
 

@@ -2,6 +2,7 @@ package tirtc_test
 
 import (
 	"bytes"
+	"context"
 	"os"
 	"os/exec"
 	"regexp"
@@ -35,16 +36,16 @@ func TestPublicAPIDump(t *testing.T) {
 }
 
 func TestPublicAPISignatures(t *testing.T) {
-	var _ func(tirtc.InitOptions) error = tirtc.Init
-	var _ func() error = tirtc.Shutdown
+	var _ func(tirtc.ClientOptions) (*tirtc.Client, error) = tirtc.NewClient
 	var _ func() (string, error) = tirtc.UploadLogs
-	var _ func(tirtc.ConnOptions) (*tirtc.Conn, error) = tirtc.NewConn
+	var _ func(*tirtc.Client, tirtc.ConnOptions) (*tirtc.Conn, error) = (*tirtc.Client).NewConnection
+	var _ func(*tirtc.Client) error = (*tirtc.Client).Close
 	var _ func(tirtc.AudioOutputOptions) (*tirtc.AudioOutput, error) = tirtc.NewAudioOutput
 	var _ func(tirtc.VideoOutputOptions) (*tirtc.VideoOutput, error) = tirtc.NewVideoOutput
 	var _ func(tirtc.EncodedAudioOutputOptions) (*tirtc.EncodedAudioOutput, error) = tirtc.NewEncodedAudioOutput
 	var _ func(tirtc.EncodedVideoOutputOptions) (*tirtc.EncodedVideoOutput, error) = tirtc.NewEncodedVideoOutput
 
-	var _ func(*tirtc.Conn, string, string) error = (*tirtc.Conn).Connect
+	var _ func(*tirtc.Conn, context.Context, string) error = (*tirtc.Conn).Connect
 	var _ func(*tirtc.Conn) error = (*tirtc.Conn).Disconnect
 	var _ func(*tirtc.Conn) tirtc.ConnState = (*tirtc.Conn).State
 	var _ func(*tirtc.Conn, uint8) error = (*tirtc.Conn).SubscribeAudio
@@ -57,7 +58,7 @@ func TestPublicAPISignatures(t *testing.T) {
 	var _ func(*tirtc.Conn, tirtc.StartRecordingOptions) (*tirtc.RecordingTask, error) = (*tirtc.Conn).StartRecording
 	var _ func(*tirtc.Conn) error = (*tirtc.Conn).Close
 
-	_ = tirtc.InitOptions{AppID: "", CacheDir: "", Endpoint: "", ConsoleLogEnabled: false}
+	_ = tirtc.ClientOptions{AppID: "", AccessKeyID: "", AccessKeySecret: "", CacheDir: "", Endpoint: "", ConsoleLogEnabled: false}
 	_ = tirtc.ConnOptions{
 		OnStateChanged:  func(tirtc.ConnState, error) {},
 		OnCommand:       func(uint32, []byte) {},

@@ -31,7 +31,6 @@ func (c *Conn) StartRecording(options StartRecordingOptions) (*RecordingTask, er
 		return nil, ErrClosed
 	}
 	handle := c.native
-	c.tasks++
 	c.mu.Unlock()
 	audio := int32(-1)
 	if options.AudioStreamID != nil {
@@ -39,15 +38,16 @@ func (c *Conn) StartRecording(options StartRecordingOptions) (*RecordingTask, er
 	}
 	nativeTask, code := handle.StartRecording(int32(options.VideoStreamID), audio)
 	if code != 0 {
-		c.mu.Lock()
-		c.tasks--
-		c.mu.Unlock()
 		err := nativeError(code)
 		logSDKResult("recording_start", err)
 		return nil, err
 	}
 	logSDKResult("recording_start", nil)
-	return &RecordingTask{native: nativeTask, connection: c}, nil
+	task := &RecordingTask{native: nativeTask, connection: c}
+	c.mu.Lock()
+	c.tasks[task] = struct{}{}
+	c.mu.Unlock()
+	return task, nil
 }
 
 func (t *RecordingTask) Stop() (file RecordingFile, resultErr error) {
@@ -85,9 +85,7 @@ func (t *RecordingTask) Stop() (file RecordingFile, resultErr error) {
 			t.file = file
 			t.err = err
 			t.connection.mu.Lock()
-			if t.connection.tasks > 0 {
-				t.connection.tasks--
-			}
+			delete(t.connection.tasks, t)
 			t.connection.mu.Unlock()
 		}
 		t.stopping = false

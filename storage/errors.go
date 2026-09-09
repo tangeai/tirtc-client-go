@@ -8,29 +8,31 @@ import (
 )
 
 var (
-	ErrInvalidArgument         = errors.New("storage: invalid argument")
-	ErrNotInitialized          = errors.New("storage: not initialized")
-	ErrTokenExpired            = errors.New("storage: token expired")
-	ErrAlreadyInitialized      = errors.New("storage: already initialized")
-	ErrPermissionDenied        = errors.New("storage: permission denied")
-	ErrInUse                   = errors.New("storage: resource in use")
-	ErrNotStarted              = errors.New("storage: not started")
-	ErrNotBound                = errors.New("storage: not bound")
-	ErrNotConfigured           = errors.New("storage: not configured")
-	ErrResourceExhausted       = errors.New("storage: resource exhausted")
-	ErrUnsupportedFormat       = errors.New("storage: unsupported format")
-	ErrIO                      = errors.New("storage: I/O failed")
-	ErrCancelled               = errors.New("storage: cancelled")
-	ErrRangeTooLarge           = errors.New("storage: range too large")
-	ErrNoFrame                 = errors.New("storage: no frame")
-	ErrNoRecordableMedia       = errors.New("storage: no recordable media")
-	ErrRecordingOverrun        = errors.New("storage: recording overrun")
-	ErrRecordingUnreadable     = errors.New("storage: recording unreadable")
-	ErrRecordingNotFound       = errors.New("storage: recording not found")
-	ErrRecordingDownloadFailed = errors.New("storage: recording download failed")
-	ErrUnavailable             = errors.New("storage: unavailable")
-	ErrStopped                 = errors.New("storage: stopped")
-	ErrClosed                  = errors.New("storage: closed")
+	ErrInvalidArgument             = errors.New("storage: invalid argument")
+	ErrNotInitialized              = errors.New("storage: not initialized")
+	ErrTokenExpired                = errors.New("storage: token expired")
+	ErrAlreadyInitialized          = errors.New("storage: already initialized")
+	ErrPermissionDenied            = errors.New("storage: permission denied")
+	ErrInUse                       = errors.New("storage: resource in use")
+	ErrNotStarted                  = errors.New("storage: not started")
+	ErrNotBound                    = errors.New("storage: not bound")
+	ErrNotConfigured               = errors.New("storage: not configured")
+	ErrResourceExhausted           = errors.New("storage: resource exhausted")
+	ErrUnsupportedFormat           = errors.New("storage: unsupported format")
+	ErrIO                          = errors.New("storage: I/O failed")
+	ErrCancelled                   = errors.New("storage: cancelled")
+	ErrRangeTooLarge               = errors.New("storage: range too large")
+	ErrNoFrame                     = errors.New("storage: no frame")
+	ErrNoRecordableMedia           = errors.New("storage: no recordable media")
+	ErrRecordingOverrun            = errors.New("storage: recording overrun")
+	ErrRecordingUnreadable         = errors.New("storage: recording unreadable")
+	ErrRecordingNotFound           = errors.New("storage: recording not found")
+	ErrRecordingDownloadFailed     = errors.New("storage: recording download failed")
+	ErrUnavailable                 = errors.New("storage: unavailable")
+	ErrStopped                     = errors.New("storage: stopped")
+	ErrNetworkUnavailable          = errors.New("storage: network unavailable")
+	ErrEndpointDNSResolutionFailed = errors.New("storage: endpoint DNS resolution failed")
+	ErrClosed                      = errors.New("storage: closed")
 )
 
 type Error struct{ Code int32 }
@@ -83,5 +85,15 @@ func errorSentinel(code int32) error {
 		6124: ErrStopped,
 		6134: ErrRecordingNotFound,
 		6135: ErrRecordingDownloadFailed,
+		6136: ErrNetworkUnavailable,
+		6137: ErrEndpointDNSResolutionFailed,
 	}[code]
+}
+
+// A context can explain a native cancellation, but cannot replace another terminal.
+func withCancellationContext(err, contextErr error) error {
+	if contextErr != nil && (errors.Is(err, ErrCancelled) || errors.Is(err, ErrStopped)) {
+		return fmt.Errorf("%w: %w", err, contextErr)
+	}
+	return err
 }

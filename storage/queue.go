@@ -1,6 +1,13 @@
 package storage
 
-import "sync"
+import (
+	"sync"
+	"sync/atomic"
+
+	"github.com/tangeai/tirtc-client-go/v2/internal/native"
+)
+
+var callbackQueueSequence atomic.Uint64
 
 const (
 	callbackQueueCapacity   = 256
@@ -12,20 +19,20 @@ const (
 )
 
 type callbackQueue struct {
-	mu               sync.Mutex
-	cond             *sync.Cond
-	events           []func()
-	controls         []func()
-	critical         [callbackCriticalSlots]func()
-	terminal         func()
-	terminalReserved bool
-	active           int
-	closed           bool
-	stopped          bool
+	owner    uint64
+	mu       sync.Mutex
+	cond     *sync.Cond
+	events   []func()
+	controls []func()
+	critical [callbackCriticalSlots]func()
+	active   int
+	closed   bool
+	stopped  bool
 }
 
 func newCallbackQueue() *callbackQueue {
 	q := &callbackQueue{
+		owner:    callbackQueueSequence.Add(1),
 		events:   make([]func(), 0, callbackQueueCapacity),
 		controls: make([]func(), 0, callbackControlCapacity),
 	}
@@ -41,7 +48,26 @@ func (q *callbackQueue) post(event func()) bool {
 	}
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	if q.closed || q.terminal != nil || len(q.events) == cap(q.events) {
+	if q.closed || len(q.events) == cap(q.events) {
+		return false
+	}
+	q.events = append(q.events, event)
+	q.cond.Signal()
+	return true
+}
+
+// postReliable applies bounded backpressure to source facts that cannot be dropped.
+// Export cancellation and progress remain callable while the producer waits here.
+func (q *callbackQueue) postReliable(event func()) bool {
+	if event == nil {
+		return true
+	}
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	for !q.closed && len(q.events) == cap(q.events) {
+		q.cond.Wait()
+	}
+	if q.closed {
 		return false
 	}
 	q.events = append(q.events, event)
@@ -57,7 +83,7 @@ func (q *callbackQueue) postControl(event func()) bool {
 	}
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	if q.closed || q.terminal != nil || len(q.controls) == cap(q.controls) {
+	if q.closed || len(q.controls) == cap(q.controls) {
 		return false
 	}
 	q.controls = append(q.controls, event)
@@ -74,7 +100,7 @@ func (q *callbackQueue) postCritical(slot int, event func(), replace bool) bool 
 	}
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	if q.closed || q.terminal != nil || slot < 0 || slot >= len(q.critical) {
+	if q.closed || slot < 0 || slot >= len(q.critical) {
 		return false
 	}
 	if q.critical[slot] != nil && !replace {
@@ -85,73 +111,15 @@ func (q *callbackQueue) postCritical(slot int, event func(), replace bool) bool 
 	return true
 }
 
-// reserveTerminal is called before a replay operation is accepted. The one-slot
-// reservation makes the later native terminal independent of ordinary/control
-// queue pressure without turning the mailbox into an unbounded queue.
-func (q *callbackQueue) reserveTerminal() bool {
-	q.mu.Lock()
-	defer q.mu.Unlock()
-	if q.closed || q.terminalReserved {
-		return false
-	}
-	q.terminalReserved = true
-	return true
-}
-
-// ensureTerminalReservation reuses the still-empty reservation of an active
-// replay generation. A replacement Play therefore remains legal, while a
-// terminal that has already been admitted must drain before another generation
-// can start.
-func (q *callbackQueue) ensureTerminalReservation() (created bool, ok bool) {
-	q.mu.Lock()
-	defer q.mu.Unlock()
-	if q.closed || q.terminal != nil {
-		return false, false
-	}
-	if q.terminalReserved {
-		return false, true
-	}
-	q.terminalReserved = true
-	return true, true
-}
-
-func (q *callbackQueue) releaseTerminal() {
-	q.mu.Lock()
-	if q.terminal == nil {
-		q.terminalReserved = false
-	}
-	q.mu.Unlock()
-}
-
-func (q *callbackQueue) terminalPending() bool {
-	q.mu.Lock()
-	defer q.mu.Unlock()
-	return q.terminalReserved && q.terminal == nil
-}
-
-func (q *callbackQueue) postReservedTerminal(event func()) bool {
-	if event == nil {
-		return true
-	}
-	q.mu.Lock()
-	defer q.mu.Unlock()
-	if q.closed || !q.terminalReserved || q.terminal != nil {
-		return false
-	}
-	q.terminal = event
-	q.cond.Signal()
-	return true
-}
-
 func (q *callbackQueue) run() {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	for {
-		for q.terminal == nil && !q.hasCriticalLocked() &&
+		for !q.hasCriticalLocked() &&
 			len(q.controls) == 0 && len(q.events) == 0 && !q.closed {
 			q.cond.Wait()
 		}
-		if q.terminal == nil && !q.hasCriticalLocked() &&
+		if !q.hasCriticalLocked() &&
 			len(q.controls) == 0 && len(q.events) == 0 && q.closed {
 			q.stopped = true
 			q.cond.Broadcast()
@@ -171,17 +139,13 @@ func (q *callbackQueue) run() {
 			copy(q.events, q.events[1:])
 			q.events[len(q.events)-1] = nil
 			q.events = q.events[:len(q.events)-1]
-		} else {
-			event = q.terminal
-			q.terminal = nil
-			q.terminalReserved = false
 		}
 		q.active++
 		q.cond.Broadcast()
 		q.mu.Unlock()
 		func() {
 			defer func() { _ = recover() }()
-			event()
+			native.RunCallback(q.owner, event)
 		}()
 		q.mu.Lock()
 		q.active--
@@ -205,14 +169,26 @@ func (q *callbackQueue) firstCriticalLocked() int {
 func (q *callbackQueue) idle() bool {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	return q.active == 0 && len(q.events) == 0 && len(q.controls) == 0 && q.terminal == nil &&
-		!q.terminalReserved && !q.hasCriticalLocked()
+	return q.active == 0 && len(q.events) == 0 && len(q.controls) == 0 && !q.hasCriticalLocked()
+}
+
+func (q *callbackQueue) inHandler() bool {
+	return native.InCallback(q.owner)
+}
+
+func (q *callbackQueue) waitIdle() {
+	q.mu.Lock()
+	for q.active != 0 || len(q.events) != 0 || len(q.controls) != 0 ||
+		q.hasCriticalLocked() {
+		q.cond.Wait()
+	}
+	q.mu.Unlock()
 }
 
 func (q *callbackQueue) replayCloseReady() bool {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	return q.active == 0 && len(q.events) == 0 && len(q.controls) == 0 && q.terminal == nil &&
+	return q.active == 0 && len(q.events) == 0 && len(q.controls) == 0 &&
 		!q.hasCriticalLocked()
 }
 

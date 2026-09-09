@@ -2,11 +2,26 @@
 
 #include <stddef.h>
 
+// User handlers run on Go-owned threads, beyond the Runtime callback barrier.
+static _Thread_local uintptr_t callback_scope_owner;
+uintptr_t ti_go_callback_scope_swap(uintptr_t owner) {
+  const uintptr_t previous = callback_scope_owner;
+  callback_scope_owner = owner;
+  return previous;
+}
+uintptr_t ti_go_callback_scope_current(void) { return callback_scope_owner; }
+void ti_go_callback_task_run(TiCallbackTaskFn task, void* task_data) { task(task_data); }
+extern void goTiCloudStorageReplayDispatch(uintptr_t context, TiCallbackTaskFn task, void* task_data);
+static void cloud_storage_replay_dispatch(TiCallbackTaskFn task, void* task_data, void* user_data) {
+  goTiCloudStorageReplayDispatch((uintptr_t)user_data, task, task_data);
+}
+
 extern void goTiConnState(uintptr_t context, uint32_t state, int32_t error);
 extern void goTiConnCommand(uintptr_t context, uint32_t command, const uint8_t* data,
                             uint64_t size);
 extern void goTiConnMessage(uintptr_t context, uint8_t stream_id, uint32_t timestamp_ms,
                             const uint8_t* data, uint64_t size);
+extern void goTiConnectComplete(uintptr_t context, int32_t error);
 extern void goTiOutputState(uintptr_t context, uint32_t state);
 extern void goTiOutputError(uintptr_t context, int32_t error, const char* message);
 extern void goTiAudioFrame(uintptr_t context, const TiAudioFrame* frame);
@@ -19,7 +34,10 @@ extern void goTiCloudStorageRecordingDaysCompleted(uintptr_t context,
 extern void goTiCloudStorageReplayTime(uintptr_t context, int64_t time_ms);
 extern void goTiCloudStorageReplayCompleted(uintptr_t context);
 extern void goTiCloudStorageReplayError(uintptr_t context, int32_t error);
-extern void goTiCloudStorageExportProgress(uintptr_t context, double progress);
+extern void goTiCloudStorageReplayGap(uintptr_t context, const TiCloudStorageRecordingGap* gap);
+extern void goTiCloudStorageExportProgressDetail(uintptr_t context, double progress,
+                                                 int64_t covered_duration_ms);
+extern void goTiCloudStorageExportGap(uintptr_t context, const TiCloudStorageRecordingGap* gap);
 extern void goTiCloudStorageExportCompleted(uintptr_t context, int32_t error, const char* path,
                                      int64_t duration_ms);
 
@@ -56,6 +74,20 @@ TiError ti_go_init(const char* app_id, const char* endpoint, const char* cache_d
   return tirtc_init(&options);
 }
 
+TiError ti_go_rtc_client_create(const char* app_id, const char* access_key_id,
+                                const char* access_key_secret, const char* endpoint,
+                                const char* cache_dir, uint8_t console_log_enabled,
+                                TiRtcClient** out_client) {
+  TiRtcClientOptions options = TI_RTC_CLIENT_OPTIONS_INITIALIZER;
+  options.app_id = app_id;
+  options.access_key_id = access_key_id;
+  options.access_key_secret = access_key_secret;
+  options.endpoint = endpoint;
+  options.cache_root_dir = cache_dir;
+  options.console_log_enabled = console_log_enabled;
+  return tirtc_client_create(&options, out_client);
+}
+
 TiError ti_go_logging_upload(char* out_log_id, uint32_t capacity) {
   return ti_logging_upload(out_log_id, capacity);
 }
@@ -68,6 +100,20 @@ TiError ti_go_cloud_storage_init(const char* app_id, const char* endpoint, const
   options.cache_root_dir = cache_dir;
   options.console_log_enabled = console_log_enabled;
   return ti_cloud_storage_init(&options);
+}
+
+TiError ti_go_cloud_storage_client_create(const char* app_id, const char* access_key_id,
+                                          const char* access_key_secret, const char* endpoint,
+                                          const char* cache_dir, uint8_t console_log_enabled,
+                                          TiCloudStorageClient** out_client) {
+  TiCloudStorageClientOptions options = TI_CLOUD_STORAGE_CLIENT_OPTIONS_INITIALIZER;
+  options.app_id = app_id;
+  options.access_key_id = access_key_id;
+  options.access_key_secret = access_key_secret;
+  options.endpoint = endpoint;
+  options.cache_root_dir = cache_dir;
+  options.console_log_enabled = console_log_enabled;
+  return ti_cloud_storage_client_create(&options, out_client);
 }
 
 static void cloud_storage_list_completed(TiCloudStorageRecordingRequest* request, void* user_data) {
@@ -109,6 +155,11 @@ static void cloud_storage_replay_error(TiCloudStorageReplay* replay, TiError err
   (void)replay;
   goTiCloudStorageReplayError((uintptr_t)user_data, error);
 }
+static void cloud_storage_replay_gap(TiCloudStorageReplay* replay,
+                                     const TiCloudStorageRecordingGap* gap, void* user_data) {
+  (void)replay;
+  if (gap != NULL) goTiCloudStorageReplayGap((uintptr_t)user_data, gap);
+}
 
 TiError ti_go_cloud_storage_replay_create(TiCloudStorage* cloud_storage, uintptr_t context, TiCloudStorageReplay** out_replay) {
   TiError error = ti_cloud_storage_replay_create(cloud_storage, out_replay);
@@ -117,6 +168,9 @@ TiError ti_go_cloud_storage_replay_create(TiCloudStorage* cloud_storage, uintptr
   callbacks.on_time_changed = cloud_storage_replay_time;
   callbacks.on_completed = cloud_storage_replay_completed;
   callbacks.on_error = cloud_storage_replay_error;
+  callbacks.on_recording_gap = cloud_storage_replay_gap;
+  callbacks.dispatcher.dispatch = cloud_storage_replay_dispatch;
+  callbacks.dispatcher.user_data = (void*)context;
   error = ti_cloud_storage_replay_set_callbacks(*out_replay, &callbacks, (void*)context);
   if (error != TI_ERROR_OK) {
     (void)ti_cloud_storage_replay_destroy(*out_replay);
@@ -125,9 +179,19 @@ TiError ti_go_cloud_storage_replay_create(TiCloudStorage* cloud_storage, uintptr
   return error;
 }
 
-static void cloud_storage_export_progress(TiCloudStorageExportTask* task, double progress, void* user_data) {
+static void cloud_storage_export_progress_detail(TiCloudStorageExportTask* task,
+                                                 const TiCloudStorageExportProgress* progress,
+                                                 void* user_data) {
   (void)task;
-  goTiCloudStorageExportProgress((uintptr_t)user_data, progress);
+  if (progress == NULL) return;
+  goTiCloudStorageExportProgressDetail((uintptr_t)user_data, progress->fraction,
+                                       progress->covered_duration_ms);
+}
+static void cloud_storage_export_gap(TiCloudStorageExportTask* task,
+                                     const TiCloudStorageRecordingGap* gap, void* user_data) {
+  (void)task;
+  if (gap == NULL) return;
+  goTiCloudStorageExportGap((uintptr_t)user_data, gap);
 }
 static void cloud_storage_export_completed(TiCloudStorageExportTask* task, TiError error,
                                    const TiCloudStorageMp4File* file, void* user_data) {
@@ -140,7 +204,8 @@ static void cloud_storage_export_completed(TiCloudStorageExportTask* task, TiErr
 TiError ti_go_cloud_storage_export(TiCloudStorage* cloud_storage, const TiCloudStorageExportOptions* options, uintptr_t context,
                            TiCloudStorageExportTask** out_task) {
   TiCloudStorageExportCallbacks callbacks = TI_CLOUD_STORAGE_EXPORT_CALLBACKS_INITIALIZER;
-  callbacks.on_progress = cloud_storage_export_progress;
+  callbacks.on_progress_detail = cloud_storage_export_progress_detail;
+  callbacks.on_recording_gap = cloud_storage_export_gap;
   callbacks.on_completed = cloud_storage_export_completed;
   return ti_cloud_storage_export_recording(cloud_storage, options, &callbacks, (void*)context, out_task);
 }
@@ -151,6 +216,31 @@ TiError ti_go_conn_create(uintptr_t context, TiRtcConn** out_connection) {
   options.callbacks = &callbacks;
   options.user_data = (void*)context;
   return tirtc_conn_create(&options, out_connection);
+}
+
+TiError ti_go_rtc_client_conn_create(TiRtcClient* client, uintptr_t context,
+                                     TiRtcConn** out_connection) {
+  TiRtcConnCallbacks callbacks = conn_callbacks();
+  TiRtcConnCreateOptions options = TI_RTC_CONN_CREATE_OPTIONS_INITIALIZER;
+  options.callbacks = &callbacks;
+  options.user_data = (void*)context;
+  return tirtc_client_create_connection(client, &options, out_connection);
+}
+
+static void connect_complete(TiRtcConnectAttempt* attempt, TiError error, void* user_data) {
+  (void)attempt;
+  goTiConnectComplete((uintptr_t)user_data, error);
+}
+
+TiError ti_go_conn_connect_managed(TiRtcConn* connection, const char* device_id,
+                                   int64_t timeout_ms, uintptr_t context,
+                                   TiRtcConnectAttempt** out_attempt) {
+  TiRtcManagedConnectOptions options = TI_RTC_MANAGED_CONNECT_OPTIONS_INITIALIZER;
+  options.device_id = device_id;
+  options.timeout_ms = timeout_ms;
+  TiRtcConnectAttemptCallbacks callbacks = TI_RTC_CONNECT_ATTEMPT_CALLBACKS_INITIALIZER;
+  callbacks.on_complete = connect_complete;
+  return tirtc_conn_connect_managed(connection, &options, &callbacks, (void*)context, out_attempt);
 }
 
 TiError ti_go_conn_send_command(TiRtcConn* connection, uint32_t command_id,

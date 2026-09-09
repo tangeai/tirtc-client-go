@@ -36,6 +36,17 @@ func TestLogUploadStageErrorsPreserveCodeAndStableSentinel(t *testing.T) {
 	}
 }
 
+func TestConnectivityErrorsPreserveStableSentinel(t *testing.T) {
+	for code, sentinel := range map[int32]error{
+		6136: ErrNetworkUnavailable,
+		6137: ErrEndpointDNSResolutionFailed,
+	} {
+		if err := nativeError(code); !errors.Is(err, sentinel) {
+			t.Fatalf("errors.Is(%d, %v) = false: %v", code, sentinel, err)
+		}
+	}
+}
+
 func TestMediaFileDeleteRejectsZeroValueBeforeNativeCall(t *testing.T) {
 	for name, remove := range map[string]func() error{
 		"recording": RecordingFile{}.Delete,

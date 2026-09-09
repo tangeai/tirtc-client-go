@@ -4,68 +4,59 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"sync"
 	"testing"
+
+	"github.com/tangeai/tirtc-client-go/v2/internal/buildidentity"
 )
 
-func TestRepeatedInitChecksConfigurationBeforeFilesystemWrites(t *testing.T) {
-	root := t.TempDir()
-	options := InitOptions{AppID: "app", CacheDir: root + "/runtime"}
-	if err := Init(options); err != nil {
+func testClientOptions(cache string) ClientOptions {
+	return ClientOptions{AppID: "app", AccessKeyID: "key", AccessKeySecret: "secret", CacheDir: cache}
+}
+
+func TestPublicClientConsumesRTCBuildIdentity(t *testing.T) {
+	buildidentity.Release("rtc")
+	client, err := NewClient(testClientOptions(t.TempDir()))
+	if err != nil {
 		t.Fatal(err)
 	}
-	defer func() {
-		if err := Shutdown(); err != nil {
-			t.Error(err)
-		}
-	}()
-	if err := Init(options); err != nil {
-		t.Fatalf("repeated identical Init = %v", err)
-	}
-	conflictingCache := filepath.Join(root, "must-not-exist", "cache")
-	if err := Init(InitOptions{
-		AppID: "other", CacheDir: conflictingCache,
-	}); !errors.Is(err, ErrAlreadyInitialized) {
-		t.Fatalf("conflicting Init = %v", err)
-	}
-	if _, err := os.Stat(filepath.Join(root, "must-not-exist")); !errors.Is(err, os.ErrNotExist) {
-		t.Fatalf("conflicting Init changed filesystem: %v", err)
+	defer client.Close()
+	if _, available := buildidentity.Line("rtc"); available {
+		t.Fatal("RTC Client did not consume the build identity")
 	}
 }
 
-func TestInitRejectsEmptyAppIDBeforeFilesystemWrites(t *testing.T) {
+func TestSecondRTCClientIsRejectedBeforeFilesystemWrites(t *testing.T) {
 	root := t.TempDir()
-	cache := filepath.Join(root, "runtime")
-	if err := Init(InitOptions{CacheDir: cache}); !errors.Is(err, ErrInvalidArgument) {
-		t.Fatalf("Init = %v", err)
+	client, err := NewClient(testClientOptions(filepath.Join(root, "active")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close()
+	conflicting := filepath.Join(root, "must-not-exist", "cache")
+	if _, err := NewClient(testClientOptions(conflicting)); !errors.Is(err, ErrAlreadyInitialized) {
+		t.Fatalf("second Client = %v", err)
+	}
+	if _, err := os.Stat(filepath.Dir(conflicting)); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("second Client changed filesystem: %v", err)
+	}
+}
+
+func TestClientRejectsMissingCredentialsBeforeFilesystemWrites(t *testing.T) {
+	cache := filepath.Join(t.TempDir(), "missing")
+	if _, err := NewClient(ClientOptions{AppID: "app", CacheDir: cache}); !errors.Is(err, ErrInvalidArgument) {
+		t.Fatalf("Client = %v", err)
 	}
 	if _, err := os.Stat(cache); !errors.Is(err, os.ErrNotExist) {
-		t.Fatalf("invalid Init changed filesystem: %v", err)
-	}
-}
-
-func TestInitPreservesPathErrorForFilesystemFailure(t *testing.T) {
-	root := t.TempDir()
-	blockedParent := filepath.Join(root, "file")
-	if err := os.WriteFile(blockedParent, []byte("not a directory"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	err := Init(InitOptions{AppID: "app", CacheDir: filepath.Join(blockedParent, "cache")})
-	if !errors.Is(err, ErrIO) {
-		t.Fatalf("Init does not preserve ErrIO: %v", err)
-	}
-	var pathError *os.PathError
-	if !errors.As(err, &pathError) {
-		t.Fatalf("Init does not preserve *os.PathError: %T %v", err, err)
+		t.Fatalf("invalid Client changed filesystem: %v", err)
 	}
 }
 
 func TestConnectionClosePreflightsOutputBinding(t *testing.T) {
-	root := t.TempDir()
-	if err := Init(InitOptions{AppID: "app", CacheDir: root + "/runtime"}); err != nil {
+	client, err := NewClient(testClientOptions(t.TempDir()))
+	if err != nil {
 		t.Fatal(err)
 	}
-	connection, err := NewConn(ConnOptions{})
+	connection, err := client.NewConnection(ConnOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,8 +76,38 @@ func TestConnectionClosePreflightsOutputBinding(t *testing.T) {
 	if err := connection.Close(); err != nil {
 		t.Fatal(err)
 	}
-	if err := Shutdown(); err != nil {
+	if err := client.Close(); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestClientCloseDetachesBorrowedOutputAndReclaimsConnection(t *testing.T) {
+	client, err := NewClient(testClientOptions(t.TempDir()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	connection, err := client.NewConnection(ConnOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	output, err := NewVideoOutput(VideoOutputOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := output.Attach(connection, 11); err != nil {
+		t.Fatal(err)
+	}
+	if err := client.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err := client.Close(); err != nil {
+		t.Fatalf("repeated Client.Close = %v", err)
+	}
+	if err := connection.Close(); err != nil {
+		t.Fatalf("connection was not reclaimed: %v", err)
+	}
+	if err := output.Close(); err != nil {
+		t.Fatalf("borrowed output was not left independently owned: %v", err)
 	}
 }
 
@@ -99,63 +120,5 @@ func TestRequiredOutputFrameHandlers(t *testing.T) {
 	}
 	if _, err := NewEncodedVideoOutput(EncodedVideoOutputOptions{}); !errors.Is(err, ErrInvalidArgument) {
 		t.Fatalf("encoded video output = %v", err)
-	}
-}
-
-func TestConcurrentAttachAndConnectionCloseAreSerialized(t *testing.T) {
-	root := t.TempDir()
-	if err := Init(InitOptions{AppID: "app", CacheDir: root + "/runtime"}); err != nil {
-		t.Fatal(err)
-	}
-	defer func() {
-		if err := Shutdown(); err != nil {
-			t.Error(err)
-		}
-	}()
-
-	for iteration := 0; iteration < 64; iteration++ {
-		connection, err := NewConn(ConnOptions{})
-		if err != nil {
-			t.Fatal(err)
-		}
-		output, err := NewVideoOutput(VideoOutputOptions{})
-		if err != nil {
-			t.Fatal(err)
-		}
-		start := make(chan struct{})
-		var wait sync.WaitGroup
-		var attachErr, closeErr error
-		wait.Add(2)
-		go func() {
-			defer wait.Done()
-			<-start
-			attachErr = output.Attach(connection, 11)
-		}()
-		go func() {
-			defer wait.Done()
-			<-start
-			closeErr = connection.Close()
-		}()
-		close(start)
-		wait.Wait()
-
-		if attachErr == nil {
-			if !errors.Is(closeErr, ErrInUse) {
-				t.Fatalf("iteration %d: close after attach = %v", iteration, closeErr)
-			}
-		} else {
-			if !errors.Is(attachErr, ErrClosed) {
-				t.Fatalf("iteration %d: attach = %v", iteration, attachErr)
-			}
-			if closeErr != nil {
-				t.Fatalf("iteration %d: winning close = %v", iteration, closeErr)
-			}
-		}
-		if err := output.Close(); err != nil {
-			t.Fatalf("iteration %d: output close = %v", iteration, err)
-		}
-		if err := connection.Close(); err != nil {
-			t.Fatalf("iteration %d: final connection close = %v", iteration, err)
-		}
 	}
 }

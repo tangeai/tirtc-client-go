@@ -1,54 +1,101 @@
 package tirtc
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/tangeai/tirtc-client-go/v2/internal/native"
-	"github.com/tangeai/tirtc-client-go/v2/internal/runtimelease"
 )
 
-type InitOptions struct {
+type ClientOptions struct {
 	AppID             string
+	AccessKeyID       string
+	AccessKeySecret   string
 	CacheDir          string
 	Endpoint          string
 	ConsoleLogEnabled bool
 }
 
-func Init(options InitOptions) error {
-	if options.AppID == "" || options.CacheDir == "" || !filepath.IsAbs(options.CacheDir) {
-		return ErrInvalidArgument
+type Client struct {
+	mu          sync.Mutex
+	native      *native.Client
+	connections map[*Conn]struct{}
+	closing     bool
+	closed      bool
+}
+
+func NewClient(options ClientOptions) (*Client, error) {
+	if options.AppID == "" || options.AccessKeyID == "" || options.AccessKeySecret == "" ||
+		options.CacheDir == "" || !filepath.IsAbs(options.CacheDir) {
+		return nil, ErrInvalidArgument
 	}
 	cache, err := normalizeDir(options.CacheDir)
 	if err != nil {
-		return fmt.Errorf("%w: %w", ErrIO, err)
+		return nil, fmt.Errorf("%w: %w", ErrIO, err)
 	}
-	options.CacheDir = cache
-	err = runtimelease.Init(runtimelease.RTC, runtimelease.Configuration{
-		AppID: options.AppID, Endpoint: options.Endpoint, CacheDir: cache,
+	handle, code := native.NewClient(native.ClientOptions{
+		AppID: options.AppID, AccessKeyID: options.AccessKeyID,
+		AccessKeySecret: options.AccessKeySecret, Endpoint: options.Endpoint, CacheDir: cache,
 		ConsoleLogEnabled: options.ConsoleLogEnabled,
-	}, func() error {
-		if err := ensureWritableDir(cache); err != nil {
-			return fmt.Errorf("%w: %w", ErrIO, err)
-		}
-		return nativeError(native.Init(native.InitOptions{
-			AppID: options.AppID, Endpoint: options.Endpoint, CacheDir: cache,
-			ConsoleLogEnabled: options.ConsoleLogEnabled,
-		}))
 	})
-	if errors.Is(err, runtimelease.ErrConflict) {
-		err = ErrAlreadyInitialized
+	err = nativeError(code)
+	if err == nil {
+		logSDKBuildIdentity()
 	}
-	logSDKResult("runtime_init", err)
-	return err
+	logSDKResult("client_create", err)
+	if err != nil {
+		return nil, err
+	}
+	return &Client{native: handle, connections: make(map[*Conn]struct{})}, nil
 }
 
-func Shutdown() error {
-	logSDKEvent("runtime_shutdown_started")
-	err := runtimelease.Shutdown(runtimelease.RTC, func() error { return nativeError(native.Shutdown()) })
-	logSDKResult("runtime_shutdown", err)
+func (c *Client) Close() error {
+	if c == nil {
+		return ErrClosed
+	}
+	c.mu.Lock()
+	if c.closed {
+		c.mu.Unlock()
+		return nil
+	}
+	if c.closing {
+		c.mu.Unlock()
+		return ErrInUse
+	}
+	c.closing = true
+	connections := make([]*Conn, 0, len(c.connections))
+	for connection := range c.connections {
+		connections = append(connections, connection)
+	}
+	handle := c.native
+	c.mu.Unlock()
+	for _, connection := range connections {
+		if err := connection.preflightClientClose(); err != nil {
+			c.mu.Lock()
+			c.closing = false
+			c.mu.Unlock()
+			return err
+		}
+	}
+	for _, connection := range connections {
+		if err := connection.closeFromClient(); err != nil {
+			c.mu.Lock()
+			c.closing = false
+			c.mu.Unlock()
+			return err
+		}
+	}
+	err := nativeError(handle.Close())
+	c.mu.Lock()
+	if err == nil {
+		c.native = nil
+		c.closed = true
+	}
+	c.closing = false
+	c.mu.Unlock()
+	logSDKResult("client_close", err)
 	return err
 }
 

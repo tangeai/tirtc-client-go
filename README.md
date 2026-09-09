@@ -1,12 +1,12 @@
-# TiRTC Go SDK
+# TiRTC Server SDK for Go
 
-`go/` 是 `github.com/tangeai/tirtc-client-go/v2` 的开发工程。根 package `tirtc` 提供 headless RTC client，`storage` 子 package 提供云录像查询、回放和导出。两者都只消费 Runtime public C surface，不重新实现连接、媒体处理、录像或云端访问。
+`go/` 是 `github.com/tangeai/tirtc-client-go/v2` 的开发工程。根 package `tirtc` 提供 headless RTC client，`storage` 子 package 提供云录像查询、回放和导出。Go 只投影 Runtime public C surface；Token 签发、刷新、连接状态和媒体处理都由 Runtime 完成。
 
-当前支持 Go 1.25、`CGO_ENABLED=1` 下的 `darwin/arm64` 与 `linux/amd64`。每个 module 版本同时携带两个平台的 public header、动态库和第三方许可证。应用使用同版本 `tirtc-build` 生成可搬移的 `dist/bin` 与 `dist/lib/tirtc`，不需要在目标机器全局安装 Runtime。
+当前支持 Go 1.25、`CGO_ENABLED=1` 下的 `darwin/arm64` 与 `linux/amd64`。每个 module 版本同时携带两个平台的 public header、动态库和许可证。
 
 ## 安装与构建
 
-在应用 module 中选择同一个 SDK 版本作为 library 和 build tool：
+应用把 SDK 与构建工具固定到同一版本：
 
 ```bash
 go get github.com/tangeai/tirtc-client-go/v2@<version>
@@ -14,49 +14,53 @@ go get -tool github.com/tangeai/tirtc-client-go/v2/cmd/tirtc-build@<version>
 go tool tirtc-build build --output dist/bin/app ./cmd/app
 ```
 
-成功后，`dist/bin/app` 只从相邻的 `dist/lib/tirtc/` 加载 Native library。分发应用时必须保留整个 `dist/`，包括 `dist/share/licenses/tirtc/`。
+生成的程序只从相邻的 `dist/lib/tirtc/` 加载 Native library。分发时保留整个 `dist/`，包括 `dist/share/licenses/tirtc/`。
 
-`InitOptions.CacheDir` 是必填的可写绝对路径。RTC 与 Ti Cloud Storage 可以使用不同的 App ID 和 Endpoint，但同一进程中的两者必须使用相同的 CacheDir 和 `ConsoleLogEnabled`。配置冲突在创建目录或启动 Runtime 前返回 `ErrAlreadyInitialized`。
+## Client 与凭据
+
+RTC 和云存分别创建 client，均在创建时接收 App ID、AK/SK、可写绝对 CacheDir 和可选 Endpoint：
+
+```go
+rtcClient, err := tirtc.NewClient(tirtc.ClientOptions{
+    AppID: appID, AccessKeyID: accessKeyID, AccessKeySecret: accessKeySecret,
+    CacheDir: cacheDir,
+})
+
+storageClient, err := storage.NewClient(storage.ClientOptions{
+    AppID: storageAppID, AccessKeyID: storageAccessKeyID,
+    AccessKeySecret: storageAccessKeySecret, CacheDir: cacheDir,
+})
+```
+
+同一进程只允许一个 RTC client；它可以依次或同时拥有多个 Connection。云存允许多个独立 Client，每次查询、Replay 或 Export 显式传入 device ID。各 client 的应用身份和 Endpoint 可以不同；活跃产品共享的 CacheDir 与 `ConsoleLogEnabled` 必须一致。Runtime 内部签发和刷新短期 Token，普通 Go API 不暴露 Token 或 `UpdateToken`。
 
 ## 公开能力
 
-根 package `tirtc` 提供：
+根 package `tirtc` 提供主动连接、命令、流消息、订阅、四类 decoded/encoded Output、MP4 Recording、JPEG Snapshot 和日志上传。`Conn.Connect(ctx, deviceID)` 等待本次建连的唯一初始结果；初次失败只从返回值取得，连接成功后的断线继续走状态 callback。Context 取消会结束业务 attempt；Native cleanup barrier 尚未越过时 Close 返回 `ErrInUse`，可重试。
 
-- `Init`、`Shutdown` 和 `UploadLogs`；
-- 主动连接、命令、流消息、订阅和关键帧请求；
-- decoded/encoded Audio/Video Output；
-- MP4 RecordingTask 和 JPEG Snapshot；
-- 稳定 error sentinel，以及保留 Native 错误码的 `*Error`。
+`storage` 提供录像自然日和范围查询、Replay、四类 Output、暂停/恢复/Seek/倍速、Replay Recording、Snapshot 和独立范围 Export。Export 提供覆盖进度、已确认缺口事件和最终 `ExportReport`；部分可播放 MP4 是成功结果，`Report.Complete` 用来区分完整与部分覆盖。
 
-`storage` 提供：
+Frame callback 收到的 byte slice 和 plane 已脱离 C callback 生命周期。Callback mailbox 有界；媒体帧因背压丢弃后，下一帧以 `Discontinuity=true` 标记。
 
-- 独立的 `Init`、`Shutdown` 和设备授权 `CloudStorage`；
-- 录像自然日、录像时间段查询和 `UpdateToken`；
-- Replay、decoded/encoded Output、暂停、恢复、Seek、倍速和当前时间；
-- 回放录像、范围导出和 Snapshot。
+Export 缺口通知使用有界背压，`Wait` 等待已接受的用户回调排空；部分文件不使提前中断的进度变为 100%。本对象 observer 内调用 Export `Wait` 返回 `ErrInUse`，其他协程可以等待。
 
-Frame callback 收到的字节和 plane 已脱离 C callback 生命周期；调用方可以在 callback 返回后继续读取。SDK 的 callback mailbox 有界，媒体帧因背压丢弃后，下一帧以 `Discontinuity=true` 标记不连续。
+Replay 用户回调直接由排入 Go 队列的 Runtime callback task 调用，Seek/新 Play 的 generation 检查保留到交付时；同一 Replay handler 内的 Play/Seek/Stop 返回 `ErrInUse`；其他操作遇正在执行的 Replay 操作时也返回 `ErrInUse`，避免与回调排空互等。
 
-Recording、Export 和 Snapshot 返回 Runtime cache 中的临时文件。应用先用标准 `os`/`io` API 把文件复制或移动到自己的目录，再调用结果对象的 `Delete()` 删除临时源文件。Go SDK 不接管相册或系统媒体目录。
+Recording、Export 和 Snapshot 返回 Runtime cache 中的临时文件。应用用标准 `os`/`io` 保存到业务目录，随后调用结果对象的 `Delete()` 清理临时源文件。已成功发布的 Export 文件保留独立删除归属，可在 client 关闭后保存和删除；同一结果的副本共享成功删除状态。
 
 ## Examples
 
-[`example/client`](example/client/README.md) 展示 RTC 主动连接、四种 Output、控制消息、关键帧请求、录像、截图和逆序关闭。
+- [`example/client`](example/client/README.md) 展示单设备 RTC 签发、建连、四类 Output、控制消息、录像、截图和清理。
+- [`example/storage`](example/storage/README.md) 展示云录像查询、四类 Output、回放控制、缺口事件、覆盖报告、录像、导出和截图。
 
-[`example/storage`](example/storage/README.md) 展示云录像日期与范围查询、显式 Token 更新和重试、四种 Output、回放控制、录像、范围导出、截图和逆序关闭。
+两份 Example 都只 import 公开 module，凭据只从环境变量读取；它们也是候选包真实验收使用的 canonical clients。
 
-两个 Example 都只 import 公开 module，Secret 只从环境变量读取，普通配置通过 flag 传入。它们也是候选包真实运行验收的标准 client，不存在另一套私有 acceptance 程序。
-
-## 验证与发布边界
-
-仓内开发测试：
+## 验证与发布
 
 ```bash
 go test -race ./...
 ```
 
-`script/build_candidate.sh` 从同一次 Runtime candidate 生成双平台本地 module proxy。`script/go_verify.sh` 验证 Darwin/Linux contract 和两条真实 RTC smoke；`tool/ti_cloud_storage.py` 在两个平台运行公开 Ti Cloud Storage Example。具体输入和完成信号由仓库 `go-test` Skill 定义。
+`script/build_candidate.sh` 从同一批 Runtime 生成双 tuple candidate。`script/go_verify.sh` 运行两平台 contract 和单设备 RTC smoke；`tool/ti_cloud_storage.py` 运行两平台云存 Example；`tool/upload_logs.py` 从同一 candidate 执行一次真实日志上传并产生身份绑定 summary。`tool/release_gate.py` 要求完整六条产品 lane 与 UploadLogs 证据后才允许公开发布。
 
-公开源码由 `tool/project_release.py` 从 allowlist 投影。投影会拒绝 symlink、Git LFS pointer、超限文件、仓库私有工具，以及源码或 metadata 中会形成本机依赖的绝对路径；Native 可搬移性由 RPATH、install name 和动态依赖检查负责。编译器写入动态库的源码字符串不参与加载，因此不作为 candidate 或发布门禁。发布 module、tag、外部 Samples 或上传日志都需要用户明确授权。
-
-完整声明见 [Go RTC API Reference](../docs/rtc/api-reference/go.md) 和 [Go Ti Cloud Storage API Reference](../docs/cloud-storage/public/api-reference/go.md)，实现边界见 [Go SDK 交付设计](../docs/cloud-storage/internal/go-sdk-design.md)。
+完整声明见 [Go RTC API Reference](../docs/rtc/api-reference/go.md) 和 [Go Ti Cloud Storage API Reference](../docs/cloud-storage/public/api-reference/go.md)。

@@ -82,9 +82,10 @@ const (
 )
 
 type ReplayOptions struct {
-	OnTimeChanged func(time.Time)
-	OnCompleted   func()
-	OnError       func(error)
+	OnTimeChanged  func(time.Time)
+	OnCompleted    func()
+	OnError        func(error)
+	OnRecordingGap func(RecordingGap)
 }
 
 type AudioOutputOptions struct {
@@ -112,6 +113,7 @@ type EncodedVideoOutputOptions struct {
 }
 
 type RecordingFile struct {
+	owner    *mediaFileOwner
 	Path     string
 	Duration time.Duration
 }
@@ -130,6 +132,77 @@ type ExportOptions struct {
 	EndTime        time.Time
 	VideoChannelID uint8
 	AudioChannelID *uint8
+	OnProgress     func(ExportProgress)
+	OnRecordingGap func(RecordingGap)
+}
+
+type ExportProgress struct {
+	Fraction        float64
+	CoveredDuration time.Duration
+}
+
+type RecordingTrackKind uint32
+
+const (
+	RecordingTrackVideo RecordingTrackKind = 1
+	RecordingTrackAudio RecordingTrackKind = 2
+)
+
+type RecordingTrack struct {
+	Kind      RecordingTrackKind
+	ChannelID uint8
+}
+
+type RecordingGapReason uint32
+
+const (
+	RecordingGapUnknown          RecordingGapReason = 0
+	RecordingGapNotFound         RecordingGapReason = 1
+	RecordingGapDownloadFailed   RecordingGapReason = 2
+	RecordingGapIntegrityFailed  RecordingGapReason = 3
+	RecordingGapMediaUnreadable  RecordingGapReason = 4
+	RecordingGapNoKeyFrame       RecordingGapReason = 5
+	RecordingGapNoRecording      RecordingGapReason = 6
+	RecordingGapDecryptionFailed RecordingGapReason = 7
+	RecordingGapUnsupportedMedia RecordingGapReason = 8
+	RecordingGapTrackUnavailable RecordingGapReason = 9
+)
+
+type RecordingGap struct {
+	Range   RecordingRange
+	Tracks  []RecordingTrack
+	Reasons []RecordingGapReason
+}
+
+type ExportSegment struct {
+	SourceRange RecordingRange
+	OutputStart time.Duration
+	OutputEnd   time.Duration
+}
+
+type ExportTermination uint32
+
+const (
+	ExportExhausted   ExportTermination = 0
+	ExportInterrupted ExportTermination = 1
+	ExportCancelled   ExportTermination = 2
+	ExportFailed      ExportTermination = 3
+)
+
+type ExportReport struct {
+	RequestedRange    RecordingRange
+	CoveredDuration   time.Duration
+	Segments          []ExportSegment
+	Gaps              []RecordingGap
+	UnprocessedRanges []RecordingRange
+	Complete          bool
+	Termination       ExportTermination
+	Cause             error
+}
+
+type ExportResult struct {
+	File   *RecordingFile
+	Report ExportReport
 }
 
 func unixMilliseconds(value time.Time) int64 { return value.UTC().UnixMilli() }

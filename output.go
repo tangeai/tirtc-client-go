@@ -1,6 +1,7 @@
 package tirtc
 
 import (
+	"errors"
 	"sync"
 	"time"
 
@@ -142,7 +143,7 @@ func (o *AudioOutput) Attach(connection *Conn, streamID uint8) (resultErr error)
 	}
 	handle := o.native
 	o.mu.Unlock()
-	if err := connection.attachDependency(func(connHandle *native.Conn) error {
+	if err := connection.attachDependency(o, func(connHandle *native.Conn) error {
 		return nativeError(handle.Attach(connHandle, streamID))
 	}); err != nil {
 		return err
@@ -172,7 +173,7 @@ func (o *AudioOutput) detachLocked() error {
 	}
 	handle := o.native
 	o.mu.Unlock()
-	if err := connection.detachDependency(func(*native.Conn) error {
+	if err := connection.detachDependency(o, func(*native.Conn) error {
 		return nativeError(handle.Detach())
 	}); err != nil {
 		return err
@@ -189,6 +190,17 @@ func (o *AudioOutput) detachLocked() error {
 		}
 	}
 	return nil
+}
+func (o *AudioOutput) preflightClientClose() error { return o.mailbox.preflightClose() }
+func (o *AudioOutput) detachFromClient() error {
+	err := o.Detach()
+	if errors.Is(err, ErrNotBound) || errors.Is(err, ErrClosed) {
+		return nil
+	}
+	if err == nil {
+		o.mailbox.waitIdle()
+	}
+	return err
 }
 func (o *AudioOutput) Close() (resultErr error) {
 	defer func() { logSDKResult("audio_output_dispose", resultErr) }()
@@ -306,7 +318,7 @@ func (o *VideoOutput) Attach(connection *Conn, streamID uint8) (resultErr error)
 	}
 	handle := o.native
 	o.mu.Unlock()
-	if err := connection.attachDependency(func(connHandle *native.Conn) error {
+	if err := connection.attachDependency(o, func(connHandle *native.Conn) error {
 		return nativeError(handle.Attach(connHandle, streamID))
 	}); err != nil {
 		return err
@@ -340,7 +352,7 @@ func (o *VideoOutput) detachLocked() error {
 	}
 	handle := o.native
 	o.mu.Unlock()
-	if err := connection.detachDependency(func(*native.Conn) error {
+	if err := connection.detachDependency(o, func(*native.Conn) error {
 		return nativeError(handle.Detach())
 	}); err != nil {
 		return err
@@ -357,6 +369,17 @@ func (o *VideoOutput) detachLocked() error {
 		}
 	}
 	return nil
+}
+func (o *VideoOutput) preflightClientClose() error { return o.mailbox.preflightClose() }
+func (o *VideoOutput) detachFromClient() error {
+	err := o.Detach()
+	if errors.Is(err, ErrNotBound) || errors.Is(err, ErrClosed) {
+		return nil
+	}
+	if err == nil {
+		o.mailbox.waitIdle()
+	}
+	return err
 }
 func (o *VideoOutput) TakeSnapshot() (file SnapshotFile, resultErr error) {
 	defer func() { logSDKResult("video_output_snapshot", resultErr) }()
@@ -502,7 +525,7 @@ func (o *EncodedAudioOutput) Attach(connection *Conn, streamID uint8) (resultErr
 	}
 	handle := o.native
 	o.mu.Unlock()
-	if err := connection.attachDependency(func(connHandle *native.Conn) error {
+	if err := connection.attachDependency(o, func(connHandle *native.Conn) error {
 		return nativeError(handle.Attach(connHandle, streamID))
 	}); err != nil {
 		return err
@@ -532,7 +555,7 @@ func (o *EncodedAudioOutput) detachLocked() error {
 	}
 	handle := o.native
 	o.mu.Unlock()
-	if err := connection.detachDependency(func(*native.Conn) error {
+	if err := connection.detachDependency(o, func(*native.Conn) error {
 		return nativeError(handle.Detach())
 	}); err != nil {
 		return err
@@ -549,6 +572,17 @@ func (o *EncodedAudioOutput) detachLocked() error {
 		}
 	}
 	return nil
+}
+func (o *EncodedAudioOutput) preflightClientClose() error { return o.mailbox.preflightClose() }
+func (o *EncodedAudioOutput) detachFromClient() error {
+	err := o.Detach()
+	if errors.Is(err, ErrNotBound) || errors.Is(err, ErrClosed) {
+		return nil
+	}
+	if err == nil {
+		o.mailbox.waitIdle()
+	}
+	return err
 }
 func (o *EncodedAudioOutput) Close() (resultErr error) {
 	defer func() { logSDKResult("encoded_audio_output_dispose", resultErr) }()
@@ -657,7 +691,7 @@ func (o *EncodedVideoOutput) Attach(connection *Conn, streamID uint8) (resultErr
 	}
 	handle := o.native
 	o.mu.Unlock()
-	if err := connection.attachDependency(func(connHandle *native.Conn) error {
+	if err := connection.attachDependency(o, func(connHandle *native.Conn) error {
 		return nativeError(handle.Attach(connHandle, streamID))
 	}); err != nil {
 		return err
@@ -687,7 +721,7 @@ func (o *EncodedVideoOutput) detachLocked() error {
 	}
 	handle := o.native
 	o.mu.Unlock()
-	if err := connection.detachDependency(func(*native.Conn) error {
+	if err := connection.detachDependency(o, func(*native.Conn) error {
 		return nativeError(handle.Detach())
 	}); err != nil {
 		return err
@@ -704,6 +738,17 @@ func (o *EncodedVideoOutput) detachLocked() error {
 		}
 	}
 	return nil
+}
+func (o *EncodedVideoOutput) preflightClientClose() error { return o.mailbox.preflightClose() }
+func (o *EncodedVideoOutput) detachFromClient() error {
+	err := o.Detach()
+	if errors.Is(err, ErrNotBound) || errors.Is(err, ErrClosed) {
+		return nil
+	}
+	if err == nil {
+		o.mailbox.waitIdle()
+	}
+	return err
 }
 func (o *EncodedVideoOutput) Close() (resultErr error) {
 	defer func() { logSDKResult("encoded_video_output_dispose", resultErr) }()

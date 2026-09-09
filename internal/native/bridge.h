@@ -12,11 +12,24 @@
 extern "C" {
 #endif
 
+uintptr_t ti_go_callback_scope_swap(uintptr_t owner);
+uintptr_t ti_go_callback_scope_current(void);
+void ti_go_callback_task_run(TiCallbackTaskFn task, void* task_data);
+
 TiError ti_go_init(const char* app_id, const char* endpoint, const char* cache_dir,
                    uint8_t console_log_enabled);
+TiError ti_go_rtc_client_create(const char* app_id, const char* access_key_id,
+                                const char* access_key_secret, const char* endpoint,
+                                const char* cache_dir, uint8_t console_log_enabled,
+                                TiRtcClient** out_client);
 TiError ti_go_logging_upload(char* out_log_id, uint32_t capacity);
 
 TiError ti_go_conn_create(uintptr_t context, TiRtcConn** out_connection);
+TiError ti_go_rtc_client_conn_create(TiRtcClient* client, uintptr_t context,
+                                     TiRtcConn** out_connection);
+TiError ti_go_conn_connect_managed(TiRtcConn* connection, const char* device_id,
+                                   int64_t timeout_ms, uintptr_t context,
+                                   TiRtcConnectAttempt** out_attempt);
 TiError ti_go_conn_send_command(TiRtcConn* connection, uint32_t command,
                                 const uint8_t* data, uint64_t size);
 TiError ti_go_conn_send_message(TiRtcConn* connection, uint8_t stream_id,
@@ -35,6 +48,10 @@ TiError ti_go_encoded_video_output_create(uintptr_t context,
                                           TiEncodedVideoOutput** out_output);
 TiError ti_go_cloud_storage_init(const char* app_id, const char* endpoint, const char* cache_dir,
                          uint8_t console_log_enabled);
+TiError ti_go_cloud_storage_client_create(const char* app_id, const char* access_key_id,
+                                          const char* access_key_secret, const char* endpoint,
+                                          const char* cache_dir, uint8_t console_log_enabled,
+                                          TiCloudStorageClient** out_client);
 TiError ti_go_cloud_storage_list(TiCloudStorage* cloud_storage, int64_t start_ms, int64_t end_ms, uintptr_t context,
                          TiCloudStorageRecordingRequest** out_request);
 TiError ti_go_cloud_storage_recording_days(TiCloudStorage* cloud_storage, const char* start_date,

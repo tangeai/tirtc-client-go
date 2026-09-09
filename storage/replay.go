@@ -14,64 +14,83 @@ type Replay struct {
 	queue   *callbackQueue
 	options ReplayOptions
 	speed   ReplaySpeed
-	deps    int
-	tasks   int
-	active  bool
+	deps    map[replayDependency]struct{}
+	tasks   map[*RecordingTask]struct{}
 	closed  bool
+	client  *Client
+	device  *native.CloudStorage
 }
 
-func (s *CloudStorage) NewReplay(options ReplayOptions) (*Replay, error) {
-	s.op.enter()
-	s.mu.Lock()
-	if s.closed {
-		s.mu.Unlock()
-		s.op.leave()
+type replayDependency interface {
+	preflightClientClose() error
+	detachFromClient() error
+}
+
+func (c *Client) NewReplay(deviceID string, options ReplayOptions) (*Replay, error) {
+	if c == nil {
 		return nil, ErrClosed
 	}
-	handle := s.native
-	s.mu.Unlock()
-	replay := &Replay{queue: newCallbackQueue(), options: options}
-	nativeReplay, code := handle.NewReplay(native.CloudStorageReplayCallbacks{
+	c.op.enter()
+	device, err := c.openDeviceLocked(deviceID)
+	if err != nil {
+		c.op.leave()
+		return nil, err
+	}
+	replay := &Replay{queue: newCallbackQueue(), options: options, client: c, device: device,
+		deps: make(map[replayDependency]struct{}), tasks: make(map[*RecordingTask]struct{})}
+	nativeReplay, code := device.NewReplay(native.CloudStorageReplayCallbacks{
+		Dispatch: func(task func()) {
+			// Keep generation checks in the Runtime task until the user handler runs.
+			// Every accepted opaque task must execute, including suppressed teardown work.
+			if !replay.queue.postReliable(task) {
+				task()
+			}
+		},
 		OnTime: func(value int64) {
-			_ = replay.queue.post(func() {
-				if replay.options.OnTimeChanged != nil {
-					replay.options.OnTimeChanged(time.UnixMilli(value).UTC())
-				}
-			})
+			if replay.options.OnTimeChanged != nil {
+				replay.options.OnTimeChanged(time.UnixMilli(value).UTC())
+			}
 		},
 		OnCompleted: func() {
-			replay.mu.Lock()
-			replay.active = false
 			logCloudStorageEvent("cloud_storage_replay_completed")
-			_ = replay.queue.postReservedTerminal(func() {
-				if replay.options.OnCompleted != nil {
-					replay.options.OnCompleted()
-				}
-			})
-			replay.mu.Unlock()
+			if replay.options.OnCompleted != nil {
+				replay.options.OnCompleted()
+			}
 		},
 		OnError: func(code int32) {
-			replay.mu.Lock()
-			replay.active = false
 			logCloudStorageResult("cloud_storage_replay", nativeError(code))
-			_ = replay.queue.postReservedTerminal(func() {
-				if replay.options.OnError != nil {
-					replay.options.OnError(nativeError(code))
-				}
-			})
-			replay.mu.Unlock()
+			if replay.options.OnError != nil {
+				replay.options.OnError(nativeError(code))
+			}
+		},
+		OnGap: func(value native.CloudStorageRecordingGap) {
+			if replay.options.OnRecordingGap != nil {
+				replay.options.OnRecordingGap(recordingGapFromNative(value))
+			}
 		},
 	})
-	s.op.leave()
 	if code != 0 {
 		replay.queue.close()
+		_ = c.closeDevice(device)
+		c.op.leave()
 		err := nativeError(code)
 		logCloudStorageResult("cloud_storage_replay_create", err)
 		return nil, err
 	}
 	replay.native = nativeReplay
+	c.registerChildLocked(replay)
+	c.op.leave()
 	logCloudStorageResult("cloud_storage_replay_create", nil)
 	return replay, nil
+}
+
+// enterNative never waits behind an operation that may be draining this callback.
+func (r *Replay) enterNative() bool {
+	if r.queue.inHandler() {
+		return r.op.mu.TryLock()
+	}
+	r.op.enter()
+	return true
 }
 
 func (r *Replay) withNative(operationName string, operation func(*native.CloudStorageReplay) int32) error {
@@ -80,7 +99,9 @@ func (r *Replay) withNative(operationName string, operation func(*native.CloudSt
 
 func (r *Replay) withNativeThen(operationName string, operation func(*native.CloudStorageReplay) int32,
 	afterSuccess func()) error {
-	r.op.enter()
+	if !r.enterNative() {
+		return ErrInUse
+	}
 	defer r.op.leave()
 	r.mu.Lock()
 	if r.closed {
@@ -97,44 +118,18 @@ func (r *Replay) withNativeThen(operationName string, operation func(*native.Clo
 	return err
 }
 
-func (r *Replay) withReservedTerminalNative(operationName string,
-	operation func(*native.CloudStorageReplay) int32) error {
-	r.op.enter()
-	defer r.op.leave()
-	r.mu.Lock()
-	if r.closed {
-		r.mu.Unlock()
-		return ErrClosed
-	}
-	handle := r.native
-	r.mu.Unlock()
-	createdReservation, reserved := r.queue.ensureTerminalReservation()
-	if !reserved {
-		return ErrInUse
-	}
-	err := nativeError(operation(handle))
-	if err != nil && createdReservation {
-		r.queue.releaseTerminal()
-	}
-	logCloudStorageResult(operationName, err)
-	return err
-}
-
 func (r *Replay) Play(startTime, endTime time.Time) error {
 	return r.PlayAt(startTime, endTime, startTime)
 }
 
 func (r *Replay) PlayAt(startTime, endTime, initialTime time.Time) error {
+	if r.queue.inHandler() {
+		return ErrInUse
+	}
 	start, end, initial := unixMilliseconds(startTime), unixMilliseconds(endTime), unixMilliseconds(initialTime)
-	err := r.withReservedTerminalNative("cloud_storage_replay_play", func(handle *native.CloudStorageReplay) int32 {
+	return r.withNative("cloud_storage_replay_play", func(handle *native.CloudStorageReplay) int32 {
 		return handle.Play(start, end, initial)
 	})
-	if err == nil {
-		r.mu.Lock()
-		r.active = r.queue.terminalPending()
-		r.mu.Unlock()
-	}
-	return err
 }
 
 func (r *Replay) Pause() error {
@@ -146,6 +141,9 @@ func (r *Replay) Resume() error {
 }
 
 func (r *Replay) Seek(target time.Time) error {
+	if r.queue.inHandler() {
+		return ErrInUse
+	}
 	value := unixMilliseconds(target)
 	return r.withNative("cloud_storage_replay_seek", func(handle *native.CloudStorageReplay) int32 { return handle.SeekTo(value) })
 }
@@ -172,7 +170,9 @@ func (r *Replay) Speed() ReplaySpeed {
 }
 
 func (r *Replay) CurrentTime() (time.Time, bool, error) {
-	r.op.enter()
+	if !r.enterNative() {
+		return time.Time{}, false, ErrInUse
+	}
 	defer r.op.leave()
 	r.mu.Lock()
 	if r.closed {
@@ -192,13 +192,11 @@ func (r *Replay) CurrentTime() (time.Time, bool, error) {
 }
 
 func (r *Replay) Stop() error {
-	return r.withNativeThen("cloud_storage_replay_stop", func(handle *native.CloudStorageReplay) int32 {
+	if r.queue.inHandler() {
+		return ErrInUse
+	}
+	return r.withNative("cloud_storage_replay_stop", func(handle *native.CloudStorageReplay) int32 {
 		return handle.Stop()
-	}, func() {
-		r.mu.Lock()
-		r.active = false
-		r.mu.Unlock()
-		r.queue.releaseTerminal()
 	})
 }
 
@@ -207,7 +205,9 @@ func (r *Replay) StartRecording(options StartRecordingOptions) (*RecordingTask, 
 	if options.AudioChannelID != nil {
 		audio = int32(*options.AudioChannelID)
 	}
-	r.op.enter()
+	if !r.enterNative() {
+		return nil, ErrInUse
+	}
 	defer r.op.leave()
 	r.mu.Lock()
 	if r.closed {
@@ -223,15 +223,18 @@ func (r *Replay) StartRecording(options StartRecordingOptions) (*RecordingTask, 
 		return nil, err
 	}
 	r.mu.Lock()
-	r.tasks++
+	taskValue := &RecordingTask{native: task, replay: r}
+	r.tasks[taskValue] = struct{}{}
 	r.mu.Unlock()
 	logCloudStorageResult("cloud_storage_recording_start", nil)
-	return &RecordingTask{native: task, replay: r}, nil
+	return taskValue, nil
 }
 
 func (r *Replay) Close() (resultErr error) {
 	defer func() { logCloudStorageResult("cloud_storage_replay_dispose", resultErr) }()
-	r.op.enter()
+	if !r.enterNative() {
+		return ErrInUse
+	}
 	if !r.queue.replayCloseReady() {
 		r.op.leave()
 		return ErrInUse
@@ -242,23 +245,16 @@ func (r *Replay) Close() (resultErr error) {
 		r.op.leave()
 		return nil
 	}
-	if r.deps != 0 || r.tasks != 0 {
+	if len(r.deps) != 0 || len(r.tasks) != 0 {
 		r.mu.Unlock()
 		r.op.leave()
 		return ErrInUse
 	}
 	handle := r.native
-	active := r.active
 	r.mu.Unlock()
-	if active {
-		if err := nativeError(handle.Stop()); err != nil {
-			r.op.leave()
-			return err
-		}
-		r.mu.Lock()
-		r.active = false
-		r.mu.Unlock()
-		r.queue.releaseTerminal()
+	if err := nativeError(handle.Stop()); err != nil {
+		r.op.leave()
+		return err
 	}
 	if err := nativeError(handle.Close()); err != nil {
 		r.op.leave()
@@ -267,7 +263,62 @@ func (r *Replay) Close() (resultErr error) {
 	r.mu.Lock()
 	r.closed = true
 	r.native = nil
+	device := r.device
+	client := r.client
+	r.device = nil
+	r.client = nil
 	r.mu.Unlock()
 	finishNativeClose(&r.op, r.queue)
+	if client != nil {
+		client.unregisterChild(r)
+		return client.closeDevice(device)
+	}
 	return nil
+}
+
+func (r *Replay) preflightClientClose() error {
+	if !r.queue.replayCloseReady() {
+		return ErrInUse
+	}
+	r.mu.Lock()
+	dependencies := make([]replayDependency, 0, len(r.deps))
+	for dependency := range r.deps {
+		dependencies = append(dependencies, dependency)
+	}
+	r.mu.Unlock()
+	for _, dependency := range dependencies {
+		if err := dependency.preflightClientClose(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (r *Replay) closeFromClient() error {
+	r.mu.Lock()
+	dependencies := make([]replayDependency, 0, len(r.deps))
+	for dependency := range r.deps {
+		dependencies = append(dependencies, dependency)
+	}
+	tasks := make([]*RecordingTask, 0, len(r.tasks))
+	for task := range r.tasks {
+		tasks = append(tasks, task)
+	}
+	r.mu.Unlock()
+	for _, task := range tasks {
+		if _, err := task.Stop(); err != nil {
+			task.mu.Lock()
+			done := task.done
+			task.mu.Unlock()
+			if !done {
+				return err
+			}
+		}
+	}
+	for _, dependency := range dependencies {
+		if err := dependency.detachFromClient(); err != nil {
+			return err
+		}
+	}
+	return r.Close()
 }

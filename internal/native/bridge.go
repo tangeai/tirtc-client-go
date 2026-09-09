@@ -7,15 +7,67 @@ package native
 import "C"
 
 import (
+	"runtime"
 	"runtime/cgo"
 	"sync"
 	"time"
 	"unsafe"
 )
 
+// RunCallback pins the handler to its thread while the private owner marker is set.
+// Other goroutines may wait for this handler; only self-waits must be rejected.
+func RunCallback(owner uint64, callback func()) {
+	runtime.LockOSThread()
+	previous := C.ti_go_callback_scope_swap(C.uintptr_t(owner))
+	defer func() {
+		C.ti_go_callback_scope_swap(previous)
+		runtime.UnlockOSThread()
+	}()
+	callback()
+}
+
+func InCallback(owner uint64) bool {
+	return owner != 0 && uint64(C.ti_go_callback_scope_current()) == owner
+}
+
 type InitOptions struct {
 	AppID, Endpoint, CacheDir string
 	ConsoleLogEnabled         bool
+}
+
+type ClientOptions struct {
+	AppID, AccessKeyID, AccessKeySecret, Endpoint, CacheDir string
+	ConsoleLogEnabled                                       bool
+}
+
+type Client struct{ ptr *C.TiRtcClient }
+
+func NewClient(options ClientOptions) (*Client, int32) {
+	appID, freeAppID := cString(options.AppID)
+	defer freeAppID()
+	accessKeyID, freeAccessKeyID := cString(options.AccessKeyID)
+	defer freeAccessKeyID()
+	accessKeySecret, freeAccessKeySecret := cString(options.AccessKeySecret)
+	defer freeAccessKeySecret()
+	endpoint, freeEndpoint := cString(options.Endpoint)
+	defer freeEndpoint()
+	cache, freeCache := cString(options.CacheDir)
+	defer freeCache()
+	var pointer *C.TiRtcClient
+	code := int32(C.ti_go_rtc_client_create(appID, accessKeyID, accessKeySecret, endpoint, cache,
+		boolByte(options.ConsoleLogEnabled), &pointer))
+	if code != 0 {
+		return nil, code
+	}
+	return &Client{ptr: pointer}, 0
+}
+
+func (c *Client) Close() int32 {
+	code := int32(C.tirtc_client_destroy(c.ptr))
+	if code == 0 {
+		c.ptr = nil
+	}
+	return code
 }
 
 func cString(value string) (*C.char, func()) {
@@ -115,6 +167,54 @@ func NewConn(callbacks ConnCallbacks) (*Conn, int32) {
 		return nil, code
 	}
 	return &Conn{ptr: pointer, handle: handle}, 0
+}
+
+func (c *Client) NewConn(callbacks ConnCallbacks) (*Conn, int32) {
+	context := &connContext{callbacks: &callbacks}
+	handle := cgo.NewHandle(context)
+	var pointer *C.TiRtcConn
+	code := int32(C.ti_go_rtc_client_conn_create(c.ptr, C.uintptr_t(handle), &pointer))
+	if code != 0 {
+		handle.Delete()
+		return nil, code
+	}
+	return &Conn{ptr: pointer, handle: handle}, 0
+}
+
+type connectAttemptContext struct{ done chan int32 }
+
+type ConnectAttempt struct {
+	ptr    *C.TiRtcConnectAttempt
+	handle cgo.Handle
+	done   <-chan int32
+}
+
+func (c *Conn) ConnectManaged(deviceID string, timeout time.Duration) (*ConnectAttempt, int32) {
+	device, freeDevice := cString(deviceID)
+	defer freeDevice()
+	context := &connectAttemptContext{done: make(chan int32, 1)}
+	handle := cgo.NewHandle(context)
+	var pointer *C.TiRtcConnectAttempt
+	code := int32(C.ti_go_conn_connect_managed(c.ptr, device, C.int64_t(timeout.Milliseconds()),
+		C.uintptr_t(handle), &pointer))
+	if code != 0 {
+		handle.Delete()
+		return nil, code
+	}
+	return &ConnectAttempt{ptr: pointer, handle: handle, done: context.done}, 0
+}
+
+func (a *ConnectAttempt) Done() <-chan int32 { return a.done }
+func (a *ConnectAttempt) Cancel() int32 {
+	return int32(C.tirtc_connect_attempt_cancel(a.ptr))
+}
+func (a *ConnectAttempt) Close() int32 {
+	code := int32(C.tirtc_connect_attempt_destroy(a.ptr))
+	if code == 0 {
+		a.ptr = nil
+		a.handle.Delete()
+	}
+	return code
 }
 
 func (c *Conn) Connect(remoteID, token string) int32 {
@@ -422,6 +522,12 @@ func goTiConnState(handle C.uintptr_t, state C.uint32_t, code C.int32_t) {
 			callbacks.OnState(uint32(state), int32(code))
 		}
 	})
+}
+
+//export goTiConnectComplete
+func goTiConnectComplete(handle C.uintptr_t, code C.int32_t) {
+	context := cgo.Handle(handle).Value().(*connectAttemptContext)
+	context.done <- int32(code)
 }
 
 //export goTiConnCommand

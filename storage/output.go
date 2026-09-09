@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"sync"
 	"time"
 
@@ -87,11 +88,14 @@ func (b *outputBase) markDropped() {
 	b.mu.Unlock()
 }
 
-func (b *outputBase) attach(replay *Replay, channelID uint8, operation func(*native.CloudStorageReplay) int32) error {
+func (b *outputBase) attach(dependency replayDependency, replay *Replay, channelID uint8,
+	operation func(*native.CloudStorageReplay) int32) error {
 	if replay == nil {
 		return ErrInvalidArgument
 	}
-	replay.op.enter()
+	if !replay.enterNative() {
+		return ErrInUse
+	}
 	defer replay.op.leave()
 	b.op.enter()
 	defer b.op.leave()
@@ -124,12 +128,12 @@ func (b *outputBase) attach(replay *Replay, channelID uint8, operation func(*nat
 	b.channel = channelID
 	b.mu.Unlock()
 	replay.mu.Lock()
-	replay.deps++
+	replay.deps[dependency] = struct{}{}
 	replay.mu.Unlock()
 	return nil
 }
 
-func (b *outputBase) detach(operation func() int32) error {
+func (b *outputBase) detach(dependency replayDependency, operation func() int32) error {
 	b.mu.Lock()
 	if b.closed {
 		b.mu.Unlock()
@@ -140,7 +144,9 @@ func (b *outputBase) detach(operation func() int32) error {
 	if replay == nil {
 		return ErrNotBound
 	}
-	replay.op.enter()
+	if !replay.enterNative() {
+		return ErrInUse
+	}
 	defer replay.op.leave()
 	b.op.enter()
 	defer b.op.leave()
@@ -162,9 +168,7 @@ func (b *outputBase) detach(operation func() int32) error {
 	b.dropped = true
 	b.mu.Unlock()
 	replay.mu.Lock()
-	if replay.deps > 0 {
-		replay.deps--
-	}
+	delete(replay.deps, dependency)
 	replay.mu.Unlock()
 	return nil
 }
@@ -234,14 +238,14 @@ func NewAudioOutput(options AudioOutputOptions) (*AudioOutput, error) {
 
 func (o *AudioOutput) State() OutputState { return o.outputBase.State() }
 func (o *AudioOutput) Attach(replay *Replay, channelID uint8) error {
-	err := o.attach(replay, channelID, func(r *native.CloudStorageReplay) int32 {
+	err := o.attach(o, replay, channelID, func(r *native.CloudStorageReplay) int32 {
 		return o.native.CloudStorageAttach(r, channelID)
 	})
 	logCloudStorageResult("cloud_storage_audio_attach", err)
 	return err
 }
 func (o *AudioOutput) Detach() error {
-	err := o.detach(func() int32 { return o.native.CloudStorageDetach() })
+	err := o.detach(o, func() int32 { return o.native.CloudStorageDetach() })
 	if err == nil && o.setState(OutputIdle) {
 		logCloudStorageState("cloud_storage_audio_output_state", OutputIdle)
 		_ = postOutputState(o.queue, OutputIdle, func() {
@@ -345,14 +349,14 @@ func NewVideoOutput(options VideoOutputOptions) (*VideoOutput, error) {
 
 func (o *VideoOutput) State() OutputState { return o.outputBase.State() }
 func (o *VideoOutput) Attach(replay *Replay, channelID uint8) error {
-	err := o.attach(replay, channelID, func(r *native.CloudStorageReplay) int32 {
+	err := o.attach(o, replay, channelID, func(r *native.CloudStorageReplay) int32 {
 		return o.native.CloudStorageAttach(r, channelID)
 	})
 	logCloudStorageResult("cloud_storage_video_attach", err)
 	return err
 }
 func (o *VideoOutput) Detach() error {
-	err := o.detach(func() int32 { return o.native.CloudStorageDetach() })
+	err := o.detach(o, func() int32 { return o.native.CloudStorageDetach() })
 	if err == nil && o.setState(OutputIdle) {
 		logCloudStorageState("cloud_storage_video_output_state", OutputIdle)
 		_ = postOutputState(o.queue, OutputIdle, func() {
@@ -474,14 +478,14 @@ func NewEncodedAudioOutput(options EncodedAudioOutputOptions) (*EncodedAudioOutp
 
 func (o *EncodedAudioOutput) State() OutputState { return o.outputBase.State() }
 func (o *EncodedAudioOutput) Attach(replay *Replay, channelID uint8) error {
-	err := o.attach(replay, channelID, func(r *native.CloudStorageReplay) int32 {
+	err := o.attach(o, replay, channelID, func(r *native.CloudStorageReplay) int32 {
 		return o.native.CloudStorageAttach(r, channelID)
 	})
 	logCloudStorageResult("cloud_storage_encoded_audio_attach", err)
 	return err
 }
 func (o *EncodedAudioOutput) Detach() error {
-	err := o.detach(func() int32 { return o.native.CloudStorageDetach() })
+	err := o.detach(o, func() int32 { return o.native.CloudStorageDetach() })
 	if err == nil && o.setState(OutputIdle) {
 		logCloudStorageState("cloud_storage_encoded_audio_output_state", OutputIdle)
 		_ = postOutputState(o.queue, OutputIdle, func() {
@@ -584,14 +588,14 @@ func NewEncodedVideoOutput(options EncodedVideoOutputOptions) (*EncodedVideoOutp
 
 func (o *EncodedVideoOutput) State() OutputState { return o.outputBase.State() }
 func (o *EncodedVideoOutput) Attach(replay *Replay, channelID uint8) error {
-	err := o.attach(replay, channelID, func(r *native.CloudStorageReplay) int32 {
+	err := o.attach(o, replay, channelID, func(r *native.CloudStorageReplay) int32 {
 		return o.native.CloudStorageAttach(r, channelID)
 	})
 	logCloudStorageResult("cloud_storage_encoded_video_attach", err)
 	return err
 }
 func (o *EncodedVideoOutput) Detach() error {
-	err := o.detach(func() int32 { return o.native.CloudStorageDetach() })
+	err := o.detach(o, func() int32 { return o.native.CloudStorageDetach() })
 	if err == nil && o.setState(OutputIdle) {
 		logCloudStorageState("cloud_storage_encoded_video_output_state", OutputIdle)
 		_ = postOutputState(o.queue, OutputIdle, func() {
@@ -640,4 +644,62 @@ func (o *EncodedVideoOutput) Close() error {
 	finishNativeClose(&o.op, o.queue)
 	logCloudStorageResult("cloud_storage_encoded_video_dispose", nil)
 	return nil
+}
+
+func preflightStorageOutputClose(base *outputBase) error {
+	if !base.queue.idle() {
+		return ErrInUse
+	}
+	return nil
+}
+
+func normalizeStorageDetach(err error) error {
+	if errors.Is(err, ErrNotBound) || errors.Is(err, ErrClosed) {
+		return nil
+	}
+	return err
+}
+
+func (o *AudioOutput) preflightClientClose() error {
+	return preflightStorageOutputClose(&o.outputBase)
+}
+func (o *AudioOutput) detachFromClient() error {
+	err := normalizeStorageDetach(o.Detach())
+	if err == nil {
+		o.queue.waitIdle()
+	}
+	return err
+}
+
+func (o *VideoOutput) preflightClientClose() error {
+	return preflightStorageOutputClose(&o.outputBase)
+}
+func (o *VideoOutput) detachFromClient() error {
+	err := normalizeStorageDetach(o.Detach())
+	if err == nil {
+		o.queue.waitIdle()
+	}
+	return err
+}
+
+func (o *EncodedAudioOutput) preflightClientClose() error {
+	return preflightStorageOutputClose(&o.outputBase)
+}
+func (o *EncodedAudioOutput) detachFromClient() error {
+	err := normalizeStorageDetach(o.Detach())
+	if err == nil {
+		o.queue.waitIdle()
+	}
+	return err
+}
+
+func (o *EncodedVideoOutput) preflightClientClose() error {
+	return preflightStorageOutputClose(&o.outputBase)
+}
+func (o *EncodedVideoOutput) detachFromClient() error {
+	err := normalizeStorageDetach(o.Detach())
+	if err == nil {
+		o.queue.waitIdle()
+	}
+	return err
 }

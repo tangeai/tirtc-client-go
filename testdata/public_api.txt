@@ -4,36 +4,36 @@ package tirtc // import "github.com/tangeai/tirtc-client-go/v2"
 VARIABLES
 
 var (
-	ErrInvalidArgument      = errors.New("tirtc: invalid argument")
-	ErrNotInitialized       = errors.New("tirtc: not initialized")
-	ErrAuthenticationFailed = errors.New("tirtc: authentication failed")
-	ErrTimeout              = errors.New("tirtc: timeout")
-	ErrRemoteClosed         = errors.New("tirtc: remote closed")
-	ErrTokenExpired         = errors.New("tirtc: token expired")
-	ErrAlreadyInitialized   = errors.New("tirtc: already initialized")
-	ErrPermissionDenied     = errors.New("tirtc: permission denied")
-	ErrInUse                = errors.New("tirtc: resource in use")
-	ErrNotStarted           = errors.New("tirtc: not started")
-	ErrNotConnected         = errors.New("tirtc: not connected")
-	ErrNotBound             = errors.New("tirtc: not bound")
-	ErrNotConfigured        = errors.New("tirtc: not configured")
-	ErrResourceExhausted    = errors.New("tirtc: resource exhausted")
-	ErrLogExport            = errors.New("tirtc: log export failed")
-	ErrLogUpload            = errors.New("tirtc: log upload failed")
-	ErrUnsupported          = errors.New("tirtc: unsupported")
-	ErrUnsupportedFormat    = errors.New("tirtc: unsupported format")
-	ErrIO                   = errors.New("tirtc: I/O failed")
-	ErrNoFrame              = errors.New("tirtc: no frame")
-	ErrNoRecordableMedia    = errors.New("tirtc: no recordable media")
-	ErrRecordingOverrun     = errors.New("tirtc: recording overrun")
-	ErrClosed               = errors.New("tirtc: closed")
+	ErrInvalidArgument             = errors.New("tirtc: invalid argument")
+	ErrNotInitialized              = errors.New("tirtc: not initialized")
+	ErrAuthenticationFailed        = errors.New("tirtc: authentication failed")
+	ErrTimeout                     = errors.New("tirtc: timeout")
+	ErrRemoteClosed                = errors.New("tirtc: remote closed")
+	ErrTokenExpired                = errors.New("tirtc: token expired")
+	ErrAlreadyInitialized          = errors.New("tirtc: already initialized")
+	ErrPermissionDenied            = errors.New("tirtc: permission denied")
+	ErrInUse                       = errors.New("tirtc: resource in use")
+	ErrNotStarted                  = errors.New("tirtc: not started")
+	ErrNotConnected                = errors.New("tirtc: not connected")
+	ErrNotBound                    = errors.New("tirtc: not bound")
+	ErrNotConfigured               = errors.New("tirtc: not configured")
+	ErrResourceExhausted           = errors.New("tirtc: resource exhausted")
+	ErrLogExport                   = errors.New("tirtc: log export failed")
+	ErrLogUpload                   = errors.New("tirtc: log upload failed")
+	ErrUnsupported                 = errors.New("tirtc: unsupported")
+	ErrUnsupportedFormat           = errors.New("tirtc: unsupported format")
+	ErrIO                          = errors.New("tirtc: I/O failed")
+	ErrNoFrame                     = errors.New("tirtc: no frame")
+	ErrNoRecordableMedia           = errors.New("tirtc: no recordable media")
+	ErrRecordingOverrun            = errors.New("tirtc: recording overrun")
+	ErrNetworkUnavailable          = errors.New("tirtc: network unavailable")
+	ErrEndpointDNSResolutionFailed = errors.New("tirtc: endpoint DNS resolution failed")
+	ErrClosed                      = errors.New("tirtc: closed")
 )
 
 FUNCTIONS
 
 func ErrorName(code int32) string
-func Init(options InitOptions) error
-func Shutdown() error
 func UploadLogs() (string, error)
 
 TYPES
@@ -107,15 +107,32 @@ const (
 	AudioSampleNone AudioSampleFormat = iota
 	AudioSampleInt16LEInterleaved
 )
+type Client struct {
+	// Has unexported fields.
+}
+
+func NewClient(options ClientOptions) (*Client, error)
+
+func (c *Client) Close() error
+
+func (c *Client) NewConnection(options ConnOptions) (*Conn, error)
+
+type ClientOptions struct {
+	AppID             string
+	AccessKeyID       string
+	AccessKeySecret   string
+	CacheDir          string
+	Endpoint          string
+	ConsoleLogEnabled bool
+}
+
 type Conn struct {
 	// Has unexported fields.
 }
 
-func NewConn(options ConnOptions) (*Conn, error)
-
 func (c *Conn) Close() (resultErr error)
 
-func (c *Conn) Connect(remoteID, token string) error
+func (c *Conn) Connect(ctx context.Context, deviceID string) error
 
 func (c *Conn) Disconnect() error
 
@@ -221,13 +238,6 @@ type Error struct{ Code int32 }
 func (e *Error) Error() string
 
 func (e *Error) Unwrap() error
-
-type InitOptions struct {
-	AppID             string
-	CacheDir          string
-	Endpoint          string
-	ConsoleLogEnabled bool
-}
 
 type OutputBufferOptions struct {
 	Strategy           OutputBufferStrategy

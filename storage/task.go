@@ -1,6 +1,9 @@
 package storage
 
 import (
+	"context"
+	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -34,18 +37,13 @@ func (t *RecordingTask) Stop() (file RecordingFile, resultErr error) {
 		return RecordingFile{}, ErrClosed
 	}
 	path, duration, code, destroyed := t.native.Stop()
-	file = RecordingFile{Path: path, Duration: time.Duration(duration) * time.Millisecond}
+	file = newRecordingFile(path, time.Duration(duration)*time.Millisecond)
 	err := nativeError(code)
 	if destroyed {
-		t.file = file
-		t.err = err
-		t.done = true
-		t.native = nil
+		t.file, t.err, t.done, t.native = file, err, true, nil
 		if t.replay != nil {
 			t.replay.mu.Lock()
-			if t.replay.tasks > 0 {
-				t.replay.tasks--
-			}
+			delete(t.replay.tasks, t)
 			t.replay.mu.Unlock()
 			t.replay = nil
 		}
@@ -53,27 +51,75 @@ func (t *RecordingTask) Stop() (file RecordingFile, resultErr error) {
 	return file, err
 }
 
-type exportResult struct {
-	file RecordingFile
-	err  error
-}
-
-type ExportTask struct {
-	op       nativeOperationGate
-	mu       sync.Mutex
-	native   exportTaskNative
-	done     chan struct{}
-	result   exportResult
-	progress float64
-	terminal bool
-}
-
 type exportTaskNative interface {
-	Stop() (string, int64, int32)
+	Progress() (native.CloudStorageExportProgress, int32)
+	Cancel() int32
+	Wait() (string, int64, int32)
+	Report() (native.CloudStorageExportReport, int32)
 	Close() int32
 }
 
-func (s *CloudStorage) ExportRecording(options ExportOptions) (*ExportTask, error) {
+type ExportTask struct {
+	op          nativeOperationGate
+	mu          sync.Mutex
+	native      exportTaskNative
+	queue       *callbackQueue
+	client      *Client
+	device      *native.CloudStorage
+	waitOnce    sync.Once
+	contextOnce sync.Once
+	contextDone chan struct{}
+	result      ExportResult
+	resultErr   error
+	progress    ExportProgress
+	terminal    bool
+	cancelled   bool
+	contextErr  error
+	stopContext func() bool
+}
+
+func recordingRangeFromNative(value native.CloudStorageRange) RecordingRange {
+	return RecordingRange{StartTime: time.UnixMilli(value.StartMS).UTC(), EndTime: time.UnixMilli(value.EndMS).UTC()}
+}
+
+func recordingGapFromNative(value native.CloudStorageRecordingGap) RecordingGap {
+	gap := RecordingGap{Range: recordingRangeFromNative(value.Range), Tracks: make([]RecordingTrack, 0, len(value.Tracks)), Reasons: make([]RecordingGapReason, 0, len(value.Reasons))}
+	for _, track := range value.Tracks {
+		gap.Tracks = append(gap.Tracks, RecordingTrack{Kind: RecordingTrackKind(track.Kind), ChannelID: track.ChannelID})
+	}
+	for _, reason := range value.Reasons {
+		gap.Reasons = append(gap.Reasons, RecordingGapReason(reason))
+	}
+	return gap
+}
+
+func exportReportFromNative(value native.CloudStorageExportReport) ExportReport {
+	report := ExportReport{
+		RequestedRange:  recordingRangeFromNative(value.RequestedRange),
+		CoveredDuration: time.Duration(value.CoveredDurationMS) * time.Millisecond,
+		Segments:        make([]ExportSegment, 0, len(value.Segments)), Gaps: make([]RecordingGap, 0, len(value.Gaps)),
+		UnprocessedRanges: make([]RecordingRange, 0, len(value.Unprocessed)), Complete: value.Complete,
+		Termination: ExportTermination(value.Termination), Cause: nativeError(value.Cause),
+	}
+	for _, segment := range value.Segments {
+		report.Segments = append(report.Segments, ExportSegment{SourceRange: recordingRangeFromNative(segment.SourceRange), OutputStart: time.Duration(segment.OutputStartMS) * time.Millisecond, OutputEnd: time.Duration(segment.OutputEndMS) * time.Millisecond})
+	}
+	for _, gap := range value.Gaps {
+		report.Gaps = append(report.Gaps, recordingGapFromNative(gap))
+	}
+	for _, item := range value.Unprocessed {
+		report.UnprocessedRanges = append(report.UnprocessedRanges, recordingRangeFromNative(item))
+	}
+	return report
+}
+
+func (c *Client) ExportRecording(ctx context.Context, deviceID string, options ExportOptions) (*ExportTask, error) {
+	if ctx == nil || deviceID == "" {
+		return nil, ErrInvalidArgument
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	start, end := unixMilliseconds(options.StartTime), unixMilliseconds(options.EndTime)
 	if start < 0 || start >= end {
 		return nil, ErrInvalidArgument
@@ -82,136 +128,211 @@ func (s *CloudStorage) ExportRecording(options ExportOptions) (*ExportTask, erro
 	if options.AudioChannelID != nil {
 		audio = int32(*options.AudioChannelID)
 	}
-	s.op.enter()
-	s.mu.Lock()
-	if s.closed {
-		s.mu.Unlock()
-		s.op.leave()
+	if c == nil {
 		return nil, ErrClosed
 	}
-	handle := s.native
-	s.mu.Unlock()
-	task := &ExportTask{done: make(chan struct{})}
-	nativeTask, code := handle.Export(start, end, int32(options.VideoChannelID), audio,
-		native.CloudStorageExportCallbacks{
-			OnProgress: func(value float64) {
-				task.updateProgress(value)
-			},
-			OnCompleted: func(code int32, path string, duration int64) {
-				logCloudStorageResult("cloud_storage_export_terminal", nativeError(code))
-				task.complete(exportResult{
-					file: RecordingFile{Path: path, Duration: time.Duration(duration) * time.Millisecond},
-					err:  nativeError(code),
-				})
-			},
-		})
-	s.op.leave()
+	c.op.enter()
+	device, err := c.openDeviceLocked(deviceID)
+	if err != nil {
+		c.op.leave()
+		return nil, err
+	}
+	task := &ExportTask{client: c, device: device, contextDone: make(chan struct{}), queue: newCallbackQueue()}
+	nativeTask, code := device.Export(start, end, int32(options.VideoChannelID), audio, native.CloudStorageExportCallbacks{
+		OnProgress: func(value native.CloudStorageExportProgress) {
+			progress := ExportProgress{Fraction: value.Fraction, CoveredDuration: time.Duration(value.CoveredDurationMS) * time.Millisecond}
+			task.mu.Lock()
+			if !task.terminal && progress.Fraction >= task.progress.Fraction {
+				task.progress = progress
+			}
+			task.mu.Unlock()
+			if options.OnProgress != nil {
+				_ = task.queue.post(func() { options.OnProgress(progress) })
+			}
+		},
+		OnGap: func(value native.CloudStorageRecordingGap) {
+			gap := recordingGapFromNative(value)
+			if options.OnRecordingGap != nil {
+				_ = task.queue.postReliable(func() { options.OnRecordingGap(gap) })
+			}
+		},
+		OnCompleted: func(code int32, _ string, _ int64) {
+			logCloudStorageResult("cloud_storage_export_terminal", nativeError(code))
+		},
+	})
 	if code != 0 {
-		err := nativeError(code)
+		task.queue.close()
+		_ = c.closeDevice(device)
+		c.op.leave()
+		err = nativeError(code)
 		logCloudStorageResult("cloud_storage_export_start", err)
 		return nil, err
 	}
 	task.native = nativeTask
+	task.stopContext = context.AfterFunc(ctx, func() {
+		task.op.enter()
+		defer task.op.leave()
+		defer task.contextOnce.Do(func() { close(task.contextDone) })
+		task.mu.Lock()
+		if task.terminal {
+			task.mu.Unlock()
+			return
+		}
+		task.contextErr, task.cancelled = ctx.Err(), true
+		handle := task.native
+		task.mu.Unlock()
+		if handle != nil {
+			_ = handle.Cancel()
+		}
+	})
+	c.registerChildLocked(task)
+	c.op.leave()
 	logCloudStorageResult("cloud_storage_export_start", nil)
 	return task, nil
 }
 
-func (t *ExportTask) updateProgress(value float64) {
-	t.mu.Lock()
-	if !t.terminal && value > t.progress {
-		if value > 1 {
-			value = 1
-		}
-		t.progress = value
-	}
-	t.mu.Unlock()
-}
-
-func (t *ExportTask) complete(result exportResult) {
-	t.mu.Lock()
-	if !t.terminal {
-		t.result = result
-		if result.err == nil {
-			t.progress = 1
-		}
-		t.terminal = true
-		close(t.done)
-	}
-	t.mu.Unlock()
-}
-
-func (t *ExportTask) Progress() float64 {
+func (t *ExportTask) Progress() ExportProgress {
 	if t == nil {
-		return 0
+		return ExportProgress{}
 	}
+	t.op.enter()
+	defer t.op.leave()
 	t.mu.Lock()
-	value := t.progress
+	handle, value := t.native, t.progress
 	t.mu.Unlock()
+	if handle != nil {
+		if current, code := handle.Progress(); code == 0 {
+			value = ExportProgress{Fraction: current.Fraction, CoveredDuration: time.Duration(current.CoveredDurationMS) * time.Millisecond}
+			t.mu.Lock()
+			if !t.terminal {
+				t.progress = value
+			}
+			t.mu.Unlock()
+		}
+	}
 	return value
 }
 
-func (t *ExportTask) destroy() error {
+func (t *ExportTask) Cancel() error {
 	if t == nil {
 		return ErrClosed
 	}
 	t.op.enter()
 	defer t.op.leave()
 	t.mu.Lock()
+	if t.terminal {
+		t.mu.Unlock()
+		return nil
+	}
+	t.cancelled = true
 	handle := t.native
 	t.mu.Unlock()
 	if handle == nil {
-		return nil
+		return ErrClosed
 	}
-	if err := nativeError(handle.Close()); err != nil {
-		return err
+	err := nativeError(handle.Cancel())
+	logCloudStorageResult("cloud_storage_export_cancel", err)
+	return err
+}
+
+func (t *ExportTask) finishWait() {
+	t.mu.Lock()
+	handle, client, device, stopContext := t.native, t.client, t.device, t.stopContext
+	t.mu.Unlock()
+	if handle == nil {
+		t.mu.Lock()
+		t.resultErr, t.terminal = ErrClosed, true
+		t.mu.Unlock()
+		return
+	}
+	path, duration, code := handle.Wait()
+	if stopContext != nil && stopContext() {
+		t.contextOnce.Do(func() { close(t.contextDone) })
+	}
+	<-t.contextDone
+	t.op.enter()
+	nativeReport, reportCode := handle.Report()
+	result := ExportResult{Report: exportReportFromNative(nativeReport)}
+	err := nativeError(code)
+	if code == 0 {
+		file := newRecordingFile(path, time.Duration(duration)*time.Millisecond)
+		result.File = &file
+	}
+	if reportCode != 0 && err == nil {
+		err = nativeError(reportCode)
+	}
+	closeErr := nativeError(handle.Close())
+	deviceErr := client.closeDevice(device)
+	if err == nil {
+		if closeErr != nil {
+			err = closeErr
+		} else if deviceErr != nil {
+			err = deviceErr
+		}
 	}
 	t.mu.Lock()
-	if t.native == handle {
-		t.native = nil
+	if err != nil && (errors.Is(err, ErrStopped) || errors.Is(err, ErrCancelled)) {
+		if t.contextErr != nil {
+			err = fmt.Errorf("%w: %w", ErrCancelled, withCancellationContext(err, t.contextErr))
+		} else if t.cancelled {
+			err = fmt.Errorf("%w: %w", ErrCancelled, err)
+		}
 	}
+	t.result, t.resultErr = result, err
+	t.progress.CoveredDuration = result.Report.CoveredDuration
+	t.native, t.device, t.client, t.stopContext, t.terminal = nil, nil, nil, nil, true
 	t.mu.Unlock()
+	t.op.leave()
+	t.queue.close()
+	client.unregisterChild(t)
+}
+
+func cloneExportResult(value ExportResult) ExportResult {
+	result := value
+	if value.File != nil {
+		file := *value.File
+		result.File = &file
+	}
+	result.Report.Segments = append([]ExportSegment(nil), value.Report.Segments...)
+	result.Report.UnprocessedRanges = append([]RecordingRange(nil), value.Report.UnprocessedRanges...)
+	result.Report.Gaps = make([]RecordingGap, len(value.Report.Gaps))
+	for index, gap := range value.Report.Gaps {
+		result.Report.Gaps[index] = gap
+		result.Report.Gaps[index].Tracks = append([]RecordingTrack(nil), gap.Tracks...)
+		result.Report.Gaps[index].Reasons = append([]RecordingGapReason(nil), gap.Reasons...)
+	}
+	return result
+}
+
+func (t *ExportTask) Wait() (ExportResult, error) {
+	if t == nil {
+		return ExportResult{}, ErrClosed
+	}
+	if t.queue != nil && t.queue.inHandler() {
+		return ExportResult{}, ErrInUse
+	}
+	t.waitOnce.Do(t.finishWait)
+	t.mu.Lock()
+	result, err := cloneExportResult(t.result), t.resultErr
+	t.mu.Unlock()
+	logCloudStorageResult("cloud_storage_export_wait", err)
+	return result, err
+}
+
+func (t *ExportTask) preflightClientClose() error {
+	if t.queue != nil && t.queue.inHandler() {
+		return ErrInUse
+	}
 	return nil
 }
 
-func (t *ExportTask) Wait() (RecordingFile, error) {
-	if t == nil || t.done == nil {
-		return RecordingFile{}, ErrClosed
+func (t *ExportTask) closeFromClient() error {
+	if err := t.Cancel(); err != nil && !errors.Is(err, ErrClosed) {
+		return err
 	}
-	<-t.done
-	t.mu.Lock()
-	result := t.result
-	t.mu.Unlock()
-	if err := t.destroy(); err != nil && result.err == nil {
-		result.err = err
+	_, err := t.Wait()
+	if errors.Is(err, ErrInUse) {
+		return err
 	}
-	logCloudStorageResult("cloud_storage_export_wait", result.err)
-	return result.file, result.err
-}
-
-func (t *ExportTask) Stop() (RecordingFile, error) {
-	if t == nil || t.done == nil {
-		return RecordingFile{}, ErrClosed
-	}
-	t.op.enter()
-	t.mu.Lock()
-	if t.terminal {
-		t.mu.Unlock()
-		t.op.leave()
-		return t.Wait()
-	}
-	handle := t.native
-	t.mu.Unlock()
-	if handle == nil {
-		t.op.leave()
-		return RecordingFile{}, ErrClosed
-	}
-	path, duration, code := handle.Stop()
-	t.complete(exportResult{
-		file: RecordingFile{Path: path, Duration: time.Duration(duration) * time.Millisecond},
-		err:  nativeError(code),
-	})
-	t.op.leave()
-	file, err := t.Wait()
-	logCloudStorageResult("cloud_storage_export_stop", err)
-	return file, err
+	return nil
 }

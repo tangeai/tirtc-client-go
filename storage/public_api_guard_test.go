@@ -35,16 +35,13 @@ func TestPublicAPIDump(t *testing.T) {
 }
 
 func TestPublicAPISignatures(t *testing.T) {
-	var _ func(storage.InitOptions) error = storage.Init
-	var _ func() error = storage.Shutdown
-	var _ func(string) (*storage.CloudStorage, error) = storage.New
-	var _ func(*storage.CloudStorage, context.Context, time.Time, time.Time) ([]storage.RecordingRange, error) = (*storage.CloudStorage).ListRecordings
-	var _ func(*storage.CloudStorage, context.Context, string, string) ([]storage.RecordingDay, error) = (*storage.CloudStorage).ListRecordingDays
-	var _ func(*storage.CloudStorage, context.Context, string, string, string) ([]storage.RecordingDay, error) = (*storage.CloudStorage).ListRecordingDaysInTimeZone
-	var _ func(*storage.CloudStorage, string) error = (*storage.CloudStorage).UpdateToken
-	var _ func(*storage.CloudStorage, storage.ReplayOptions) (*storage.Replay, error) = (*storage.CloudStorage).NewReplay
-	var _ func(*storage.CloudStorage, storage.ExportOptions) (*storage.ExportTask, error) = (*storage.CloudStorage).ExportRecording
-	var _ func(*storage.CloudStorage) error = (*storage.CloudStorage).Close
+	var _ func(storage.ClientOptions) (*storage.Client, error) = storage.NewClient
+	var _ func(*storage.Client, context.Context, string, time.Time, time.Time) ([]storage.RecordingRange, error) = (*storage.Client).ListRecordings
+	var _ func(*storage.Client, context.Context, string, string, string) ([]storage.RecordingDay, error) = (*storage.Client).ListRecordingDays
+	var _ func(*storage.Client, context.Context, string, string, string, string) ([]storage.RecordingDay, error) = (*storage.Client).ListRecordingDaysInTimeZone
+	var _ func(*storage.Client, string, storage.ReplayOptions) (*storage.Replay, error) = (*storage.Client).NewReplay
+	var _ func(*storage.Client, context.Context, string, storage.ExportOptions) (*storage.ExportTask, error) = (*storage.Client).ExportRecording
+	var _ func(*storage.Client) error = (*storage.Client).Close
 
 	var _ func(*storage.Replay, time.Time, time.Time) error = (*storage.Replay).Play
 	var _ func(*storage.Replay, time.Time, time.Time, time.Time) error = (*storage.Replay).PlayAt
@@ -58,8 +55,11 @@ func TestPublicAPISignatures(t *testing.T) {
 	var _ func(*storage.Replay, storage.StartRecordingOptions) (*storage.RecordingTask, error) = (*storage.Replay).StartRecording
 	var _ func(*storage.Replay) error = (*storage.Replay).Close
 
-	_ = storage.InitOptions{AppID: "", CacheDir: "", Endpoint: "", ConsoleLogEnabled: false}
-	_ = storage.ReplayOptions{OnTimeChanged: func(time.Time) {}, OnCompleted: func() {}, OnError: func(error) {}}
-	_ = storage.ExportOptions{StartTime: time.Time{}, EndTime: time.Time{}, VideoChannelID: 0, AudioChannelID: nil}
+	var _ func(*storage.ExportTask) storage.ExportProgress = (*storage.ExportTask).Progress
+	var _ func(*storage.ExportTask) (storage.ExportResult, error) = (*storage.ExportTask).Wait
+	var _ func(*storage.ExportTask) error = (*storage.ExportTask).Cancel
+	_ = storage.ClientOptions{AppID: "", AccessKeyID: "", AccessKeySecret: "", CacheDir: "", Endpoint: "", ConsoleLogEnabled: false}
+	_ = storage.ReplayOptions{OnTimeChanged: func(time.Time) {}, OnCompleted: func() {}, OnError: func(error) {}, OnRecordingGap: func(storage.RecordingGap) {}}
+	_ = storage.ExportOptions{StartTime: time.Time{}, EndTime: time.Time{}, VideoChannelID: 0, AudioChannelID: nil, OnProgress: func(storage.ExportProgress) {}, OnRecordingGap: func(storage.RecordingGap) {}}
 	_ = storage.StartRecordingOptions{VideoChannelID: 0, AudioChannelID: nil}
 }

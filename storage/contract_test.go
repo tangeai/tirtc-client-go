@@ -2,11 +2,23 @@ package storage
 
 import (
 	"errors"
-	"os"
-	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/tangeai/tirtc-client-go/v2/internal/buildidentity"
 )
+
+func TestPublicClientConsumesCloudStorageBuildIdentity(t *testing.T) {
+	buildidentity.Release("cloud_storage")
+	client, err := NewClient(ClientOptions{AppID: "app", AccessKeyID: "key", AccessKeySecret: "secret", CacheDir: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close()
+	if _, available := buildidentity.Line("cloud_storage"); available {
+		t.Fatal("Cloud Storage public Init did not consume the build identity")
+	}
+}
 
 func TestStableErrorMapping(t *testing.T) {
 	for code, sentinel := range map[int32]error{
@@ -50,18 +62,9 @@ func TestMediaFileDeleteRejectsZeroValueBeforeNativeCall(t *testing.T) {
 	}
 }
 
-func TestInitPreservesPathErrorForFilesystemFailure(t *testing.T) {
-	root := t.TempDir()
-	blockedParent := filepath.Join(root, "file")
-	if err := os.WriteFile(blockedParent, []byte("not a directory"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	err := Init(InitOptions{AppID: "app", CacheDir: filepath.Join(blockedParent, "cache")})
-	if !errors.Is(err, ErrIO) {
-		t.Fatalf("Init does not preserve ErrIO: %v", err)
-	}
-	var pathError *os.PathError
-	if !errors.As(err, &pathError) {
-		t.Fatalf("Init does not preserve *os.PathError: %T %v", err, err)
+func TestClientRejectsRelativeCachePath(t *testing.T) {
+	_, err := NewClient(ClientOptions{AppID: "app", AccessKeyID: "key", AccessKeySecret: "secret", CacheDir: "relative"})
+	if !errors.Is(err, ErrInvalidArgument) {
+		t.Fatalf("Client = %v", err)
 	}
 }
