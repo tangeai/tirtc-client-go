@@ -29,10 +29,12 @@ typedef struct TiVideoSnapshotFile {
 #define TI_VIDEO_SNAPSHOT_FILE_INITIALIZER {NULL}
 
 /*
- * Deletes a TiRTC- or Ti Cloud Storage-generated temporary MP4 or JPEG under the active Runtime
- * cache root. Either the RTC or Ti Cloud Storage product lease must be initialized. The operation
- * is idempotent. Paths outside the TiRTC media cache, directories, and symbolic links are rejected;
- * this function is not a general-purpose filesystem delete primitive.
+ * Deletes a TiRTC- or Ti Cloud Storage-generated temporary MP4 or JPEG. A successfully published
+ * file retains deletion ownership after its task, output, and product leases are destroyed.
+ * Deleting an already absent path under the active Runtime media cache is idempotent; after a
+ * published file is deleted, repeating the call requires an active product lease. Other paths,
+ * directories, and symbolic links are rejected; this is not a general-purpose filesystem delete
+ * primitive.
  */
 TI_API TiError TI_CALL ti_local_media_file_delete(const char* file_path);
 

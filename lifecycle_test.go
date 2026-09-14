@@ -51,6 +51,12 @@ func TestClientRejectsMissingCredentialsBeforeFilesystemWrites(t *testing.T) {
 	}
 }
 
+func TestClosedClientRejectsUploadLogs(t *testing.T) {
+	if _, err := new(Client).UploadLogs(); !errors.Is(err, ErrClosed) {
+		t.Fatalf("UploadLogs = %v", err)
+	}
+}
+
 func TestConnectionClosePreflightsOutputBinding(t *testing.T) {
 	client, err := NewClient(testClientOptions(t.TempDir()))
 	if err != nil {

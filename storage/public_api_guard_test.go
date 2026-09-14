@@ -36,6 +36,7 @@ func TestPublicAPIDump(t *testing.T) {
 
 func TestPublicAPISignatures(t *testing.T) {
 	var _ func(storage.ClientOptions) (*storage.Client, error) = storage.NewClient
+	var _ func(*storage.Client) (string, error) = (*storage.Client).UploadLogs
 	var _ func(*storage.Client, context.Context, string, time.Time, time.Time) ([]storage.RecordingRange, error) = (*storage.Client).ListRecordings
 	var _ func(*storage.Client, context.Context, string, string, string) ([]storage.RecordingDay, error) = (*storage.Client).ListRecordingDays
 	var _ func(*storage.Client, context.Context, string, string, string, string) ([]storage.RecordingDay, error) = (*storage.Client).ListRecordingDaysInTimeZone

@@ -1,9 +1,16 @@
 package storage
 
 import (
+	"errors"
 	"testing"
 	"time"
 )
+
+func TestClosedClientRejectsUploadLogs(t *testing.T) {
+	if _, err := new(Client).UploadLogs(); !errors.Is(err, ErrClosed) {
+		t.Fatalf("UploadLogs = %v", err)
+	}
+}
 
 func TestMultipleCloudStorageClientsHaveIndependentApplicationIdentity(t *testing.T) {
 	cache := t.TempDir()

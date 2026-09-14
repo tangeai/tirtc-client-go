@@ -2,7 +2,17 @@
 
 `go/` 是 `github.com/tangeai/tirtc-client-go/v2` 的开发工程。根 package `tirtc` 提供 headless RTC client，`storage` 子 package 提供云录像查询、回放和导出。Go 只投影 Runtime public C surface；Token 签发、刷新、连接状态和媒体处理都由 Runtime 完成。
 
+这里的 `Client` 表示调用 TiRTC 或 Ti Cloud Storage 服务并持有本地资源树的 SDK 根对象，不表示只负责接收媒体。Go SDK 只提供 AK/SK 托管鉴权；Connection 发布还是订阅媒体，都不改变它相对于 TiRTC 服务的 Client 角色。产品名中的 Server SDK 只描述典型部署位置和信任边界，不表示 `Client` 会监听或对外提供 TiRTC 服务。
+
 当前支持 Go 1.25、`CGO_ENABLED=1` 下的 `darwin/arm64` 与 `linux/amd64`。每个 module 版本同时携带两个平台的 public header、动态库和许可证。
+
+## 运行与构建环境
+
+- macOS 只支持 Apple Silicon，最低版本是 macOS 11.5。
+- Linux 只支持 glibc x86_64。当前候选制品的最高符号需求是 `GLIBC_2.35`、`GLIBCXX_3.4.30` 和 `CXXABI_1.3.9`，并在 Ubuntu 22.04 x86_64 容器中实际构建和启动。部署系统必须提供这些或更新的符号版本；Alpine/musl 不是受支持目标。
+- 构建应用需要 Go 1.25、`CGO_ENABLED=1` 和本机 C 工具链。Linux 上的 `tirtc-build` 还需要 `patchelf`；macOS 使用 Xcode Command Line Tools 提供的 `install_name_tool` 和 `codesign`。完成构建后，部署时保留整个 `dist/`，不需要 Go 工具链。
+
+`go_verify.sh` 从最终 `dist/` 的全部可执行文件和 Native library 重新检查上述 macOS deployment target 与 Linux ABI 符号版本；README 中的数值不替代候选制品证据。
 
 ## 安装与构建
 

@@ -131,6 +131,8 @@ func (c *Client) ListRecordings(ctx context.Context, deviceID string, startTime,
 
 func (c *Client) NewReplay(deviceID string, options ReplayOptions) (*Replay, error)
 
+func (c *Client) UploadLogs() (string, error)
+
 type ClientOptions struct {
 	AppID             string
 	AccessKeyID       string

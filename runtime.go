@@ -99,7 +99,15 @@ func (c *Client) Close() error {
 	return err
 }
 
-func UploadLogs() (string, error) {
+func (c *Client) UploadLogs() (string, error) {
+	if c == nil {
+		return "", ErrClosed
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.closed || c.closing || c.native == nil {
+		return "", ErrClosed
+	}
 	logID, code := native.UploadLogs()
 	err := nativeError(code)
 	logSDKResult("runtime_upload_logs", err)

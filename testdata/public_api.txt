@@ -34,7 +34,6 @@ var (
 FUNCTIONS
 
 func ErrorName(code int32) string
-func UploadLogs() (string, error)
 
 TYPES
 
@@ -116,6 +115,8 @@ func NewClient(options ClientOptions) (*Client, error)
 func (c *Client) Close() error
 
 func (c *Client) NewConnection(options ConnOptions) (*Conn, error)
+
+func (c *Client) UploadLogs() (string, error)
 
 type ClientOptions struct {
 	AppID             string

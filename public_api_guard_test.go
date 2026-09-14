@@ -37,7 +37,7 @@ func TestPublicAPIDump(t *testing.T) {
 
 func TestPublicAPISignatures(t *testing.T) {
 	var _ func(tirtc.ClientOptions) (*tirtc.Client, error) = tirtc.NewClient
-	var _ func() (string, error) = tirtc.UploadLogs
+	var _ func(*tirtc.Client) (string, error) = (*tirtc.Client).UploadLogs
 	var _ func(*tirtc.Client, tirtc.ConnOptions) (*tirtc.Conn, error) = (*tirtc.Client).NewConnection
 	var _ func(*tirtc.Client) error = (*tirtc.Client).Close
 	var _ func(tirtc.AudioOutputOptions) (*tirtc.AudioOutput, error) = tirtc.NewAudioOutput

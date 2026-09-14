@@ -276,6 +276,24 @@ func (c *Client) ListRecordingDaysInTimeZone(
 	return result, nil
 }
 
+func (c *Client) UploadLogs() (string, error) {
+	if c == nil {
+		return "", ErrClosed
+	}
+	c.op.enter()
+	defer c.op.leave()
+	c.mu.Lock()
+	if c.closed || c.closing || c.native == nil {
+		c.mu.Unlock()
+		return "", ErrClosed
+	}
+	c.mu.Unlock()
+	logID, code := native.UploadLogs()
+	err := nativeError(code)
+	logCloudStorageResult("runtime_upload_logs", err)
+	return logID, err
+}
+
 func (c *Client) Close() (resultErr error) {
 	defer func() { logCloudStorageResult("cloud_storage_dispose", resultErr) }()
 	if c == nil {

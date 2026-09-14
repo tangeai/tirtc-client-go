@@ -14,6 +14,11 @@ TI_API TiError TI_CALL ti_ohos_audio_input_use_default_device(TiAudioInput* inpu
 TI_API TiError TI_CALL ti_ohos_audio_output_use_default_device(TiAudioOutput* output);
 TI_API TiError TI_CALL ti_ohos_video_input_use_system_camera(TiVideoInput* input,
                                                              TiCameraFacing facing);
+/**
+ * Sets the native rendering target. The output retains its own reference until the target is
+ * replaced, cleared, or the output is destroyed; the caller may release its reference after this
+ * function returns successfully.
+ */
 TI_API TiError TI_CALL ti_ohos_video_output_set_native_window(TiVideoOutput* output,
                                                               OHNativeWindow* native_window);
 TI_API TiError TI_CALL ti_ohos_video_output_clear_target(TiVideoOutput* output);

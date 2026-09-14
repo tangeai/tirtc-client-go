@@ -70,14 +70,13 @@ typedef struct TiRtcManagedConnectOptions {
 } TiRtcManagedConnectOptions;
 #define TI_RTC_MANAGED_CONNECT_OPTIONS_INITIALIZER {NULL, NULL, 0, 0}
 
-typedef void(TI_CALL* TiRtcConnectAttemptOnCompleteFn)(TiRtcConnectAttempt* attempt,
-                                                       TiError error, void* user_data);
+typedef void(TI_CALL* TiRtcConnectAttemptOnCompleteFn)(TiRtcConnectAttempt* attempt, TiError error,
+                                                       void* user_data);
 typedef struct TiRtcConnectAttemptCallbacks {
   TiRtcConnectAttemptOnCompleteFn on_complete;
   TiCallbackDispatcher dispatcher;
 } TiRtcConnectAttemptCallbacks;
-#define TI_RTC_CONNECT_ATTEMPT_CALLBACKS_INITIALIZER \
-  {NULL, TI_CALLBACK_DISPATCHER_INITIALIZER}
+#define TI_RTC_CONNECT_ATTEMPT_CALLBACKS_INITIALIZER {NULL, TI_CALLBACK_DISPATCHER_INITIALIZER}
 
 typedef struct TiRtcConnServiceStartOptions {
   const char* device_id;
@@ -272,10 +271,11 @@ TI_API TiError TI_CALL tirtc_conn_set_callbacks(TiRtcConn* connection,
 TI_API TiError TI_CALL tirtc_conn_connect(TiRtcConn* connection,
                                           const TiRtcConnConnectOptions* options);
 /* Acceptance is synchronous; token issuance and Nano connect run on a bounded Native attempt. */
-TI_API TiError TI_CALL tirtc_conn_connect_managed(
-    TiRtcConn* connection, const TiRtcManagedConnectOptions* options,
-    const TiRtcConnectAttemptCallbacks* callbacks, void* user_data,
-    TiRtcConnectAttempt** out_attempt);
+TI_API TiError TI_CALL tirtc_conn_connect_managed(TiRtcConn* connection,
+                                                  const TiRtcManagedConnectOptions* options,
+                                                  const TiRtcConnectAttemptCallbacks* callbacks,
+                                                  void* user_data,
+                                                  TiRtcConnectAttempt** out_attempt);
 TI_API TiError TI_CALL tirtc_connect_attempt_cancel(TiRtcConnectAttempt* attempt);
 /* destroy returns TI_ERROR_IN_USE until the cancelled Native connect call has left its cleanup
  * barrier; the terminal callback may already have been delivered. */
