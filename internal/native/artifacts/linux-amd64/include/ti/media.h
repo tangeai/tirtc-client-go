@@ -431,6 +431,8 @@ typedef struct TiEncodedVideoOutputCallbacks {
  * thread or a later operation needs the frame, and release every retained or created reference.
  * Input submission does not consume the caller's reference.
  */
+TI_API TiError TI_CALL ti_audio_frame_create_copy(const TiAudioFrameInfo* info,
+                                                  TiAudioFrame** out_frame);
 TI_API TiError TI_CALL ti_audio_frame_get_info(const TiAudioFrame* frame,
                                                TiAudioFrameInfo* out_info);
 TI_API TiAudioFrame* TI_CALL ti_audio_frame_retain(const TiAudioFrame* frame);
@@ -464,9 +466,19 @@ TI_API TiError TI_CALL ti_audio_input_set_callbacks(TiAudioInput* input,
                                                     const TiAudioInputCallbacks* callbacks,
                                                     void* user_data);
 TI_API TiError TI_CALL ti_audio_input_get_state(TiAudioInput* input, TiInputState* out_state);
+/*
+ * Selects caller-submitted PCM as the input source. The selector is idempotent while idle and
+ * unbound. It returns TI_ERROR_IN_USE once the input is running or attached.
+ */
+TI_API TiError TI_CALL ti_audio_input_use_submitted_frames(TiAudioInput* input);
 /* Device capture may be started before an RTC binding is attached. */
 TI_API TiError TI_CALL ti_audio_input_start(TiAudioInput* input);
 TI_API TiError TI_CALL ti_audio_input_stop(TiAudioInput* input);
+/*
+ * Submits one caller-owned mono S16LE 10 ms block. Supported rates are 8000 Hz (80 samples) and
+ * 16000 Hz (160 samples). The call is synchronous and does not consume the frame reference.
+ */
+TI_API TiError TI_CALL ti_audio_input_submit_frame(TiAudioInput* input, const TiAudioFrame* frame);
 TI_API TiError TI_CALL ti_audio_input_destroy(TiAudioInput* input);
 
 TI_API TiError TI_CALL ti_encoded_audio_input_create(TiEncodedAudioInput** out_input);

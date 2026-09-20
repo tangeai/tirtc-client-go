@@ -1,6 +1,7 @@
 package tirtc
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -52,6 +53,7 @@ func NewClient(options ClientOptions) (*Client, error) {
 }
 
 func (c *Client) Close() error {
+	var resultErr error
 	if c == nil {
 		return ErrClosed
 	}
@@ -81,10 +83,13 @@ func (c *Client) Close() error {
 	}
 	for _, connection := range connections {
 		if err := connection.closeFromClient(); err != nil {
-			c.mu.Lock()
-			c.closing = false
-			c.mu.Unlock()
-			return err
+			if !connection.released() {
+				c.mu.Lock()
+				c.closing = false
+				c.mu.Unlock()
+				return errors.Join(resultErr, err)
+			}
+			resultErr = errors.Join(resultErr, err)
 		}
 	}
 	err := nativeError(handle.Close())
@@ -95,8 +100,9 @@ func (c *Client) Close() error {
 	}
 	c.closing = false
 	c.mu.Unlock()
-	logSDKResult("client_close", err)
-	return err
+	resultErr = errors.Join(resultErr, err)
+	logSDKResult("client_close", resultErr)
+	return resultErr
 }
 
 func (c *Client) UploadLogs() (string, error) {

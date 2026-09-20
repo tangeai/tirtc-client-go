@@ -91,7 +91,6 @@ func errorSentinel(code int32) error {
 		6120: ErrRecordingOverrun,
 		6121: ErrIO,
 		6125: ErrLogExport,
-		6126: ErrLogExport,
 		6127: ErrLogUpload,
 		6128: ErrLogUpload,
 		6129: ErrLogUpload,

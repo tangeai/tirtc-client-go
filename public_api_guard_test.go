@@ -56,6 +56,9 @@ func TestPublicAPISignatures(t *testing.T) {
 	var _ func(*tirtc.Conn, uint8, time.Duration, []byte) error = (*tirtc.Conn).SendStreamMessage
 	var _ func(*tirtc.Conn, uint8) error = (*tirtc.Conn).RequestVideoKeyframe
 	var _ func(*tirtc.Conn, tirtc.StartRecordingOptions) (*tirtc.RecordingTask, error) = (*tirtc.Conn).StartRecording
+	var _ func(*tirtc.Conn, tirtc.RawDumpOptions) (*tirtc.RawDump, error) = (*tirtc.Conn).StartRawDump
+	var _ func(*tirtc.RawDump) (tirtc.RawDumpArchive, error) = (*tirtc.RawDump).Stop
+	var _ func(*tirtc.RawDump) error = (*tirtc.RawDump).Close
 	var _ func(*tirtc.Conn) error = (*tirtc.Conn).Close
 
 	_ = tirtc.ClientOptions{AppID: "", AccessKeyID: "", AccessKeySecret: "", CacheDir: "", Endpoint: "", ConsoleLogEnabled: false}
@@ -64,6 +67,7 @@ func TestPublicAPISignatures(t *testing.T) {
 		OnCommand:       func(uint32, []byte) {},
 		OnStreamMessage: func(uint8, time.Duration, []byte) {},
 	}
+	_ = tirtc.RawDumpOptions{AudioStreamIDs: []uint8{0}, VideoStreamIDs: []uint8{15}}
 	_ = tirtc.AudioOutputOptions{
 		AGCLevel: tirtc.AudioProcessingDisabled, ANSLevel: tirtc.AudioProcessingDisabled,
 		Buffer: tirtc.OutputBufferOptions{}, OnFrame: func(tirtc.AudioFrame) {},

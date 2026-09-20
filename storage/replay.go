@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"sync"
 	"time"
 
@@ -16,6 +17,7 @@ type Replay struct {
 	speed   ReplaySpeed
 	deps    map[replayDependency]struct{}
 	tasks   map[*RecordingTask]struct{}
+	dumps   map[*RawDump]struct{}
 	closed  bool
 	client  *Client
 	device  *native.CloudStorage
@@ -37,7 +39,8 @@ func (c *Client) NewReplay(deviceID string, options ReplayOptions) (*Replay, err
 		return nil, err
 	}
 	replay := &Replay{queue: newCallbackQueue(), options: options, client: c, device: device,
-		deps: make(map[replayDependency]struct{}), tasks: make(map[*RecordingTask]struct{})}
+		deps: make(map[replayDependency]struct{}), tasks: make(map[*RecordingTask]struct{}),
+		dumps: make(map[*RawDump]struct{})}
 	nativeReplay, code := device.NewReplay(native.CloudStorageReplayCallbacks{
 		Dispatch: func(task func()) {
 			// Keep generation checks in the Runtime task until the user handler runs.
@@ -250,15 +253,30 @@ func (r *Replay) Close() (resultErr error) {
 		r.op.leave()
 		return ErrInUse
 	}
+	dumps := make([]*RawDump, 0, len(r.dumps))
+	for dump := range r.dumps {
+		dumps = append(dumps, dump)
+	}
+	r.mu.Unlock()
+	for _, dump := range dumps {
+		if err := dump.Close(); err != nil {
+			if !dump.released() {
+				r.op.leave()
+				return errors.Join(resultErr, err)
+			}
+			resultErr = errors.Join(resultErr, err)
+		}
+	}
+	r.mu.Lock()
 	handle := r.native
 	r.mu.Unlock()
 	if err := nativeError(handle.Stop()); err != nil {
 		r.op.leave()
-		return err
+		return errors.Join(resultErr, err)
 	}
 	if err := nativeError(handle.Close()); err != nil {
 		r.op.leave()
-		return err
+		return errors.Join(resultErr, err)
 	}
 	r.mu.Lock()
 	r.closed = true
@@ -271,9 +289,9 @@ func (r *Replay) Close() (resultErr error) {
 	finishNativeClose(&r.op, r.queue)
 	if client != nil {
 		client.unregisterChild(r)
-		return client.closeDevice(device)
+		return errors.Join(resultErr, client.closeDevice(device))
 	}
-	return nil
+	return resultErr
 }
 
 func (r *Replay) preflightClientClose() error {
@@ -294,7 +312,14 @@ func (r *Replay) preflightClientClose() error {
 	return nil
 }
 
+func (r *Replay) released() bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.closed
+}
+
 func (r *Replay) closeFromClient() error {
+	var resultErr error
 	r.mu.Lock()
 	dependencies := make([]replayDependency, 0, len(r.deps))
 	for dependency := range r.deps {
@@ -304,21 +329,33 @@ func (r *Replay) closeFromClient() error {
 	for task := range r.tasks {
 		tasks = append(tasks, task)
 	}
+	dumps := make([]*RawDump, 0, len(r.dumps))
+	for dump := range r.dumps {
+		dumps = append(dumps, dump)
+	}
 	r.mu.Unlock()
+	for _, dump := range dumps {
+		if err := dump.Close(); err != nil {
+			if !dump.released() {
+				return errors.Join(resultErr, err)
+			}
+			resultErr = errors.Join(resultErr, err)
+		}
+	}
 	for _, task := range tasks {
 		if _, err := task.Stop(); err != nil {
 			task.mu.Lock()
 			done := task.done
 			task.mu.Unlock()
 			if !done {
-				return err
+				return errors.Join(resultErr, err)
 			}
 		}
 	}
 	for _, dependency := range dependencies {
 		if err := dependency.detachFromClient(); err != nil {
-			return err
+			return errors.Join(resultErr, err)
 		}
 	}
-	return r.Close()
+	return errors.Join(resultErr, r.Close())
 }

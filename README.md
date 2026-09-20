@@ -73,4 +73,4 @@ go test -race ./...
 
 `script/build_candidate.sh` 从同一批 Runtime 生成双 tuple candidate。`script/go_verify.sh` 运行两平台 contract 和单设备 RTC smoke；`tool/ti_cloud_storage.py` 运行两平台云存 Example；`tool/upload_logs.py` 从同一 candidate 执行一次真实日志上传并产生身份绑定 summary。`tool/release_gate.py` 要求完整六条产品 lane 与 UploadLogs 证据后才允许公开发布。
 
-完整声明见 [Go RTC API Reference](../docs/rtc/api-reference/go.md) 和 [Go Ti Cloud Storage API Reference](../docs/cloud-storage/public/api-reference/go.md)。
+完整声明以本 module 的公开类型、Go doc 与上述两个 canonical Example 为准。

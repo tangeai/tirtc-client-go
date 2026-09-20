@@ -4,6 +4,15 @@ package storage // import "github.com/tangeai/tirtc-client-go/v2/storage"
 CONSTANTS
 
 const (
+	RawDumpStopUnknown       = tirtc.RawDumpStopUnknown
+	RawDumpStopUser          = tirtc.RawDumpStopUser
+	RawDumpStopTimeLimit     = tirtc.RawDumpStopTimeLimit
+	RawDumpStopByteLimit     = tirtc.RawDumpStopByteLimit
+	RawDumpStopSourceClosed  = tirtc.RawDumpStopSourceClosed
+	RawDumpStopResourceLimit = tirtc.RawDumpStopResourceLimit
+	RawDumpStopWriteFailed   = tirtc.RawDumpStopWriteFailed
+)
+const (
 	AudioCodecNone  = tirtc.AudioCodecNone
 	AudioCodecG711A = tirtc.AudioCodecG711A
 	AudioCodecAAC   = tirtc.AudioCodecAAC
@@ -250,6 +259,23 @@ type OutputState = tirtc.OutputState
 
 type PixelFormat = tirtc.PixelFormat
 
+type RawDump struct {
+	// Has unexported fields.
+}
+
+func (d *RawDump) Close() error
+
+func (d *RawDump) Stop() (RawDumpArchive, error)
+
+type RawDumpArchive = tirtc.RawDumpArchive
+
+type RawDumpOptions struct {
+	AudioChannelIDs []uint8
+	VideoChannelIDs []uint8
+}
+
+type RawDumpStopReason = tirtc.RawDumpStopReason
+
 type RecordingDay struct {
 	Date         string
 	HasRecording bool
@@ -327,6 +353,8 @@ func (r *Replay) Seek(target time.Time) error
 func (r *Replay) SetSpeed(speed ReplaySpeed) error
 
 func (r *Replay) Speed() ReplaySpeed
+
+func (r *Replay) StartRawDump(options RawDumpOptions) (*RawDump, error)
 
 func (r *Replay) StartRecording(options StartRecordingOptions) (*RecordingTask, error)
 

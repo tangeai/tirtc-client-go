@@ -33,6 +33,20 @@ typedef struct TiRtcStartRecordingOptions {
 
 #define TIRTC_START_RECORDING_OPTIONS_INITIALIZER {TI_RTC_STREAM_ID_NONE, TI_RTC_STREAM_ID_NONE}
 
+typedef struct TiRtcRawDumpOptions {
+  /* Downlink audio stream IDs selected from this connection. */
+  const uint8_t* audio_stream_ids;
+  size_t audio_stream_id_count;
+  /* Downlink video stream IDs selected from this connection. */
+  const uint8_t* video_stream_ids;
+  size_t video_stream_id_count;
+  /* Uplink audio stream IDs used by an AudioInput or EncodedAudioInput attachment. */
+  const uint8_t* uplink_audio_stream_ids;
+  size_t uplink_audio_stream_id_count;
+} TiRtcRawDumpOptions;
+
+#define TI_RTC_RAW_DUMP_OPTIONS_INITIALIZER {NULL, 0, NULL, 0, NULL, 0}
+
 typedef uint32_t TiRtcConnectLinkMode;
 #define TI_RTC_CONNECT_LINK_MODE_AUTOMATIC ((TiRtcConnectLinkMode)0)
 #define TI_RTC_CONNECT_LINK_MODE_DIRECT_ONLY ((TiRtcConnectLinkMode)1)
@@ -169,7 +183,9 @@ typedef struct TiRtcAudioOutputMetricsSnapshot {
  * `accepted_source_frame_count` counts frames admitted to that queue and never exceeds observed.
  * `missing_source_duration_ms` accumulates positive source-PTS gaps using codec sample duration;
  * receiver arrival stalls with continuous PTS and local queue rejection do not create source gaps.
- * A transport generation or codec tuple change resets the PTS anchor without resetting counters.
+ * Stopping every receive subscription and starting the next one opens a new playback timeline, so
+ * its first representable PTS may be lower than the previous playback. Codec or bitstream changes
+ * replace decoder context without resetting the PTS anchor of an active playback timeline.
  * Attach starts all fields at zero, detach freezes the final value until the next attach, and
  * Ti Cloud Storage Replay does not contribute to this RTC-scoped snapshot.
  */
@@ -286,6 +302,9 @@ TI_API TiError TI_CALL tirtc_conn_send_command(TiRtcConn* connection,
 TI_API TiError TI_CALL tirtc_conn_send_stream_message(TiRtcConn* connection, uint8_t stream_id,
                                                       const TiRtcStreamMessage* message);
 TI_API TiError TI_CALL tirtc_conn_destroy(TiRtcConn* connection);
+TI_API TiError TI_CALL tirtc_conn_start_raw_dump(TiRtcConn* connection,
+                                                 const TiRtcRawDumpOptions* options,
+                                                 TiRawDump** out_dump);
 TI_API TiError TI_CALL tirtc_conn_subscribe_audio(TiRtcConn* connection, uint8_t stream_id);
 TI_API TiError TI_CALL tirtc_conn_unsubscribe_audio(TiRtcConn* connection, uint8_t stream_id);
 TI_API TiError TI_CALL tirtc_conn_subscribe_video(TiRtcConn* connection, uint8_t stream_id);

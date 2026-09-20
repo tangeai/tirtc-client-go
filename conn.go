@@ -28,6 +28,7 @@ type Conn struct {
 	closed      bool
 	deps        map[connectionDependency]struct{}
 	tasks       map[*RecordingTask]struct{}
+	dumps       map[*RawDump]struct{}
 	connectDone chan struct{}
 }
 
@@ -49,7 +50,8 @@ func (c *Client) NewConnection(options ConnOptions) (*Conn, error) {
 		return nil, ErrClosed
 	}
 	connection := &Conn{client: c, options: options, state: ConnIdle,
-		deps: make(map[connectionDependency]struct{}), tasks: make(map[*RecordingTask]struct{})}
+		deps: make(map[connectionDependency]struct{}), tasks: make(map[*RecordingTask]struct{}),
+		dumps: make(map[*RawDump]struct{})}
 	handle, code := c.native.NewConn(connection.nativeCallbacks())
 	if code != 0 {
 		err := nativeError(code)
@@ -295,14 +297,27 @@ func (c *Conn) Close() (resultErr error) {
 		c.opMu.Unlock()
 		return ErrInUse
 	}
+	dumps := make([]*RawDump, 0, len(c.dumps))
+	for dump := range c.dumps {
+		dumps = append(dumps, dump)
+	}
 	handle := c.native
 	state := c.state
 	connectDone := c.connectDone
 	c.mu.Unlock()
+	for _, dump := range dumps {
+		if err := dump.Close(); err != nil {
+			if !dump.released() {
+				c.opMu.Unlock()
+				return errors.Join(resultErr, err)
+			}
+			resultErr = errors.Join(resultErr, err)
+		}
+	}
 	if connectDone != nil {
 		if err := nativeError(handle.Disconnect()); err != nil {
 			c.opMu.Unlock()
-			return err
+			return errors.Join(resultErr, err)
 		}
 		c.opMu.Unlock()
 		<-connectDone
@@ -311,25 +326,43 @@ func (c *Conn) Close() (resultErr error) {
 		if c.closed || c.native == nil {
 			c.mu.Unlock()
 			c.opMu.Unlock()
-			return nil
+			return resultErr
+		}
+		if len(c.deps) != 0 || len(c.tasks) != 0 {
+			c.mu.Unlock()
+			c.opMu.Unlock()
+			return errors.Join(resultErr, ErrInUse)
+		}
+		dumps = dumps[:0]
+		for dump := range c.dumps {
+			dumps = append(dumps, dump)
 		}
 		handle = c.native
 		state = c.state
 		c.mu.Unlock()
+		for _, dump := range dumps {
+			if err := dump.Close(); err != nil {
+				if !dump.released() {
+					c.opMu.Unlock()
+					return errors.Join(resultErr, err)
+				}
+				resultErr = errors.Join(resultErr, err)
+			}
+		}
 	}
 	defer c.opMu.Unlock()
 	if err := c.mailbox.beginClose(); err != nil {
-		return err
+		return errors.Join(resultErr, err)
 	}
 	if state == ConnConnecting || state == ConnConnected {
 		if err := nativeError(handle.Disconnect()); err != nil {
 			c.mailbox.cancelClose()
-			return err
+			return errors.Join(resultErr, err)
 		}
 	}
 	if err := nativeError(handle.Close()); err != nil {
 		c.mailbox.cancelClose()
-		return err
+		return errors.Join(resultErr, err)
 	}
 	c.mu.Lock()
 	c.closed = true
@@ -343,7 +376,7 @@ func (c *Conn) Close() (resultErr error) {
 		c.client.mu.Unlock()
 		c.client = nil
 	}
-	return nil
+	return resultErr
 }
 
 func (c *Conn) attachDependency(dependency connectionDependency,
@@ -404,7 +437,14 @@ func (c *Conn) preflightClientClose() error {
 	return nil
 }
 
+func (c *Conn) released() bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.closed
+}
+
 func (c *Conn) closeFromClient() error {
+	var resultErr error
 	c.mu.Lock()
 	dependencies := make([]connectionDependency, 0, len(c.deps))
 	for dependency := range c.deps {
@@ -414,7 +454,19 @@ func (c *Conn) closeFromClient() error {
 	for task := range c.tasks {
 		tasks = append(tasks, task)
 	}
+	dumps := make([]*RawDump, 0, len(c.dumps))
+	for dump := range c.dumps {
+		dumps = append(dumps, dump)
+	}
 	c.mu.Unlock()
+	for _, dump := range dumps {
+		if err := dump.Close(); err != nil {
+			if !dump.released() {
+				return errors.Join(resultErr, err)
+			}
+			resultErr = errors.Join(resultErr, err)
+		}
+	}
 	for _, task := range tasks {
 		if _, err := task.Stop(); err != nil {
 			task.mu.Lock()
@@ -427,9 +479,9 @@ func (c *Conn) closeFromClient() error {
 	}
 	for _, dependency := range dependencies {
 		if err := dependency.detachFromClient(); err != nil {
-			return err
+			return errors.Join(resultErr, err)
 		}
 	}
-	return c.Close()
+	return errors.Join(resultErr, c.Close())
 }
 func validStreamID(id uint8) bool { return id <= 15 }

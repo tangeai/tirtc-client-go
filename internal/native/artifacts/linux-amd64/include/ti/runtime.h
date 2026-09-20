@@ -20,6 +20,36 @@ typedef struct TiBuildInfo {
   uint32_t commit_count;
 } TiBuildInfo;
 
+typedef struct TiRawDump TiRawDump;
+
+typedef uint32_t TiRawDumpStopReason;
+#define TI_RAW_DUMP_STOP_REASON_UNKNOWN ((TiRawDumpStopReason)0)
+#define TI_RAW_DUMP_STOP_REASON_USER ((TiRawDumpStopReason)1)
+#define TI_RAW_DUMP_STOP_REASON_TIME_LIMIT ((TiRawDumpStopReason)2)
+#define TI_RAW_DUMP_STOP_REASON_BYTE_LIMIT ((TiRawDumpStopReason)3)
+#define TI_RAW_DUMP_STOP_REASON_SOURCE_CLOSED ((TiRawDumpStopReason)4)
+#define TI_RAW_DUMP_STOP_REASON_RESOURCE_LIMIT ((TiRawDumpStopReason)5)
+#define TI_RAW_DUMP_STOP_REASON_WRITE_FAILED ((TiRawDumpStopReason)6)
+
+typedef struct TiRawDumpArchive {
+  // Runtime-owned strings remain valid until ti_raw_dump_destroy(). The archive
+  // file is cache-managed and may be removed by a later successful capture or
+  // successful ti_logging_upload(). Copy it first when longer retention is needed.
+  const char* capture_id;
+  const char* file_path;
+  uint64_t file_size;
+  const char* sha256;
+  uint64_t captured_duration_ms;
+  uint8_t capture_complete;
+  TiRawDumpStopReason stop_reason;
+  uint64_t unsaved_packet_count;
+  uint64_t unsaved_byte_count;
+  uint8_t empty;
+} TiRawDumpArchive;
+
+#define TI_RAW_DUMP_ARCHIVE_INITIALIZER \
+  {NULL, NULL, 0, NULL, 0, 0, TI_RAW_DUMP_STOP_REASON_UNKNOWN, 0, 0, 1u}
+
 typedef void(TI_CALL* TiCallbackTaskFn)(void* task_data);
 typedef void(TI_CALL* TiCallbackDispatchFn)(TiCallbackTaskFn task, void* task_data,
                                             void* user_data);
@@ -68,6 +98,8 @@ TI_API const char* TI_CALL ti_build_version_string(void);
 TI_API TiError TI_CALL ti_logging_set_sink(const TiLogSinkOptions* options);
 TI_API TiError TI_CALL ti_logging_write(TiLogLevel level, const char* tag, const char* message);
 TI_API TiError TI_CALL ti_logging_upload(char* out_log_id, uint32_t out_log_id_capacity);
+TI_API TiError TI_CALL ti_raw_dump_stop(TiRawDump* dump, TiRawDumpArchive* out_archive);
+TI_API TiError TI_CALL ti_raw_dump_destroy(TiRawDump* dump);
 
 #ifdef __cplusplus
 }

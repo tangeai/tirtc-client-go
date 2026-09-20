@@ -158,6 +158,15 @@ typedef struct TiCloudStorageStartRecordingOptions {
 #define TI_CLOUD_STORAGE_START_RECORDING_OPTIONS_INITIALIZER \
   {TI_CLOUD_STORAGE_CHANNEL_ID_NONE, TI_CLOUD_STORAGE_CHANNEL_ID_NONE}
 
+typedef struct TiCloudStorageRawDumpOptions {
+  const uint8_t* audio_channel_ids;
+  size_t audio_channel_id_count;
+  const uint8_t* video_channel_ids;
+  size_t video_channel_id_count;
+} TiCloudStorageRawDumpOptions;
+
+#define TI_CLOUD_STORAGE_RAW_DUMP_OPTIONS_INITIALIZER {NULL, 0, NULL, 0}
+
 typedef struct TiCloudStorageExportOptions {
   int64_t start_time_ms;
   int64_t end_time_ms;
@@ -290,6 +299,9 @@ TI_API TiError TI_CALL ti_cloud_storage_replay_get_current_time_ms(
     const TiCloudStorageReplay* replay, uint8_t* out_has_value, int64_t* out_time_ms);
 TI_API TiError TI_CALL ti_cloud_storage_replay_stop(TiCloudStorageReplay* replay);
 TI_API TiError TI_CALL ti_cloud_storage_replay_destroy(TiCloudStorageReplay* replay);
+TI_API TiError TI_CALL ti_cloud_storage_replay_start_raw_dump(
+    TiCloudStorageReplay* replay, const TiCloudStorageRawDumpOptions* options,
+    TiRawDump** out_dump);
 
 TI_API TiError TI_CALL ti_cloud_storage_audio_output_attach(TiAudioOutput* output,
                                                             TiCloudStorageReplay* replay,

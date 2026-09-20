@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"errors"
 	"path/filepath"
 	"sync"
 	"time"
@@ -333,10 +334,14 @@ func (c *Client) Close() (resultErr error) {
 	}
 	for _, child := range children {
 		if err := child.closeFromClient(); err != nil {
-			c.mu.Lock()
-			c.closing = false
-			c.mu.Unlock()
-			return err
+			replay, releasedReplay := child.(*Replay)
+			if !releasedReplay || !replay.released() {
+				c.mu.Lock()
+				c.closing = false
+				c.mu.Unlock()
+				return errors.Join(resultErr, err)
+			}
+			resultErr = errors.Join(resultErr, err)
 		}
 	}
 	c.op.enter()
@@ -345,7 +350,7 @@ func (c *Client) Close() (resultErr error) {
 		c.mu.Lock()
 		c.closing = false
 		c.mu.Unlock()
-		return err
+		return errors.Join(resultErr, err)
 	}
 	c.mu.Lock()
 	c.closed = true
@@ -356,5 +361,5 @@ func (c *Client) Close() (resultErr error) {
 	// the C destroy barrier completed. Mark the handle closed, then release the operation
 	// gate before draining that already-admitted user work so callback reentry cannot deadlock.
 	finishNativeClose(&c.op, c.queue)
-	return nil
+	return resultErr
 }

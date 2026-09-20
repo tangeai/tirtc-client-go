@@ -54,6 +54,9 @@ func TestPublicAPISignatures(t *testing.T) {
 	var _ func(*storage.Replay) (time.Time, bool, error) = (*storage.Replay).CurrentTime
 	var _ func(*storage.Replay) error = (*storage.Replay).Stop
 	var _ func(*storage.Replay, storage.StartRecordingOptions) (*storage.RecordingTask, error) = (*storage.Replay).StartRecording
+	var _ func(*storage.Replay, storage.RawDumpOptions) (*storage.RawDump, error) = (*storage.Replay).StartRawDump
+	var _ func(*storage.RawDump) (storage.RawDumpArchive, error) = (*storage.RawDump).Stop
+	var _ func(*storage.RawDump) error = (*storage.RawDump).Close
 	var _ func(*storage.Replay) error = (*storage.Replay).Close
 
 	var _ func(*storage.ExportTask) storage.ExportProgress = (*storage.ExportTask).Progress
@@ -63,4 +66,5 @@ func TestPublicAPISignatures(t *testing.T) {
 	_ = storage.ReplayOptions{OnTimeChanged: func(time.Time) {}, OnCompleted: func() {}, OnError: func(error) {}, OnRecordingGap: func(storage.RecordingGap) {}}
 	_ = storage.ExportOptions{StartTime: time.Time{}, EndTime: time.Time{}, VideoChannelID: 0, AudioChannelID: nil, OnProgress: func(storage.ExportProgress) {}, OnRecordingGap: func(storage.RecordingGap) {}}
 	_ = storage.StartRecordingOptions{VideoChannelID: 0, AudioChannelID: nil}
+	_ = storage.RawDumpOptions{AudioChannelIDs: []uint8{0}, VideoChannelIDs: []uint8{255}}
 }

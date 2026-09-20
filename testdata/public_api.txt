@@ -143,6 +143,8 @@ func (c *Conn) SendCommand(commandID uint32, data []byte) error
 
 func (c *Conn) SendStreamMessage(streamID uint8, timestamp time.Duration, data []byte) error
 
+func (c *Conn) StartRawDump(options RawDumpOptions) (*RawDump, error)
+
 func (c *Conn) StartRecording(options StartRecordingOptions) (*RecordingTask, error)
 
 func (c *Conn) State() ConnState
@@ -268,6 +270,40 @@ const (
 	PixelI420
 	PixelNV12
 	PixelRGBA8888
+)
+type RawDump struct {
+	// Has unexported fields.
+}
+
+func (d *RawDump) Close() error
+
+func (d *RawDump) Stop() (RawDumpArchive, error)
+
+type RawDumpArchive struct {
+	CaptureID, Path, SHA256              string
+	Size                                 uint64
+	CapturedDuration                     time.Duration
+	CaptureComplete                      bool
+	StopReason                           RawDumpStopReason
+	UnsavedPacketCount, UnsavedByteCount uint64
+	Empty                                bool
+}
+
+type RawDumpOptions struct {
+	AudioStreamIDs []uint8
+	VideoStreamIDs []uint8
+}
+
+type RawDumpStopReason uint32
+
+const (
+	RawDumpStopUnknown       RawDumpStopReason = 0
+	RawDumpStopUser          RawDumpStopReason = 1
+	RawDumpStopTimeLimit     RawDumpStopReason = 2
+	RawDumpStopByteLimit     RawDumpStopReason = 3
+	RawDumpStopSourceClosed  RawDumpStopReason = 4
+	RawDumpStopResourceLimit RawDumpStopReason = 5
+	RawDumpStopWriteFailed   RawDumpStopReason = 6
 )
 type RecordingFile struct {
 	Path     string
