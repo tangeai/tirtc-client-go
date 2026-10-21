@@ -131,6 +131,39 @@ typedef struct TiRtcConnMetricsSnapshot {
   uint64_t connected_monotonic_ms;
 } TiRtcConnMetricsSnapshot;
 
+/** Selects one of the four independent RTC uplink input paths. */
+typedef uint32_t TiRtcUplinkMediaKind;
+#define TI_RTC_UPLINK_MEDIA_AUDIO ((TiRtcUplinkMediaKind)1)
+#define TI_RTC_UPLINK_MEDIA_ENCODED_AUDIO ((TiRtcUplinkMediaKind)2)
+#define TI_RTC_UPLINK_MEDIA_VIDEO ((TiRtcUplinkMediaKind)3)
+#define TI_RTC_UPLINK_MEDIA_ENCODED_VIDEO ((TiRtcUplinkMediaKind)4)
+
+/** Describes the current Facade routing conditions without implying that frames are flowing. */
+typedef uint32_t TiRtcUplinkRouteState;
+#define TI_RTC_UPLINK_ROUTE_NOT_BOUND ((TiRtcUplinkRouteState)0)
+#define TI_RTC_UPLINK_ROUTE_NO_TRANSPORT ((TiRtcUplinkRouteState)1)
+#define TI_RTC_UPLINK_ROUTE_WAITING_SUBSCRIBER ((TiRtcUplinkRouteState)2)
+#define TI_RTC_UPLINK_ROUTE_READY ((TiRtcUplinkRouteState)3)
+
+/**
+ * Connection-lifetime totals for completed Facade uplink delivery decisions.
+ *
+ * The tuple is `(connection, stream_id, media_kind)`. Totals start at connection creation and do
+ * not reset across input start/stop, detach/re-attach, subscription changes, or reconnects. A
+ * frame is counted only after a valid running input reaches the bound Facade send decision. Frames
+ * rejected before that point, including unbound and invalid submissions, are outside this scope.
+ * Each completed decision increments exactly one counter. A successful transport result proves
+ * only that the local transport call accepted the frame; it does not prove Nano transmission or
+ * remote receipt. Counters saturate at UINT64_MAX.
+ */
+typedef struct TiRtcUplinkMetricsSnapshot {
+  TiRtcUplinkRouteState route_state;
+  uint64_t sent_to_transport_frames;
+  uint64_t dropped_no_transport_frames;
+  uint64_t dropped_no_subscriber_frames;
+  uint64_t dropped_transport_rejected_frames;
+} TiRtcUplinkMetricsSnapshot;
+
 typedef struct TiRtcOutputStartupMetrics {
   uint8_t has_connect_start;
   uint8_t has_connected;
@@ -354,6 +387,25 @@ TI_API TiError TI_CALL tirtc_encoded_video_output_detach(TiEncodedVideoOutput* o
 
 TI_API TiError TI_CALL tirtc_conn_get_metrics_snapshot(TiRtcConn* connection,
                                                        TiRtcConnMetricsSnapshot* out_snapshot);
+/**
+ * Copies one RTC uplink tuple snapshot without changing counters or routing.
+ *
+ * This synchronous query may be called from any thread, including a valid public callback, while
+ * the caller keeps `connection` alive. The connection and all fields are read under one internal
+ * lock. `READY` means only that a binding, transport, and matching audio/video subscription gate
+ * currently exist; use the input state for capture lifecycle and compare counter deltas to observe
+ * actual transport acceptance. Input state and this snapshot are independent reads, not a
+ * cross-object transaction.
+ *
+ * Null pointers, `stream_id > 15`, or an unknown `media_kind` return
+ * `TI_ERROR_INVALID_ARGUMENT`. After both pointers pass validation, `out_metrics` is cleared before
+ * validating the tuple. A logically destroyed handle returns `TI_ERROR_NOT_INITIALIZED`; already
+ * freed handles are outside the contract. Unbound valid tuples return `TI_ERROR_OK`, retain their
+ * connection-lifetime totals, and report `TI_RTC_UPLINK_ROUTE_NOT_BOUND`.
+ */
+TI_API TiError TI_CALL tirtc_conn_get_uplink_metrics_snapshot(
+    TiRtcConn* connection, uint8_t stream_id, TiRtcUplinkMediaKind media_kind,
+    TiRtcUplinkMetricsSnapshot* out_metrics);
 TI_API TiError TI_CALL tirtc_audio_output_get_metrics_snapshot(
     TiAudioOutput* output, TiRtcAudioOutputMetricsSnapshot* out_snapshot);
 /** Copies the current attachment-scoped RTC source-continuity facts into `out_snapshot`. */

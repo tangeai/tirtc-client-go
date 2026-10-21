@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	releaseVersion = "2.5.0"
-	buildTimeUTC = "2026-09-20T13:38:59Z"
-	sourceRevision = "b2878b8e185c967a70afed529385e1486890dde8"
-	sourceDirty = 0
+	releaseVersion = "2.6.0-alpha.1"
+	buildTimeUTC = "2026-10-21T14:35:07Z"
+	sourceRevision = "da8ab59bd1b73d225ff533fac697df774dbd1884"
+	sourceDirty = 1
 )
 
 var logged sync.Map

@@ -2,19 +2,19 @@
   "artifacts": [
     {
       "path": "lib/libavcodec.a",
-      "sha256": "be6b57818363ffcd06509168487e8a89a9f30124ca41f3ee8251312cb0c37d93"
+      "sha256": "cb4bcecb6ebc070e89a8e3041bb6a49d6f4ee9d5c0414aae85420785ba1e1a8f"
     },
     {
       "path": "lib/libavformat.a",
-      "sha256": "cd3b3097d403472b82ab7f668fe094c2b5d6776dd28a3cea8c320ca719e383ca"
+      "sha256": "baf686fb1f9b5ea23fef5638e4413610d90ce64603126f058bc5009666bcd877"
     },
     {
       "path": "lib/libavutil.a",
-      "sha256": "25110844999f6a2eb01001c85ac55346c8df4beffaaa01ece2d846574c2ba400"
+      "sha256": "f6c35f07dfc91fe496897b3cdae18022c24dd0f3d5af588d7ab262d215ac9711"
     },
     {
       "path": "lib/libswresample.a",
-      "sha256": "d5b73f9f8fd6e3bc9e28f7bf2f65f6fac7e8bbda67a530bea1595ace1ab9aad9"
+      "sha256": "423b874b9d7c79e0fe25afd868fe86325373a59b34381e2e9ec08233202e74c3"
     },
     {
       "path": "lib/libswscale.a",
@@ -73,7 +73,7 @@
     "c_flags": "-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections",
     "cc": "/usr/bin/clang-21",
     "cmake_generator": "Ninja",
-    "cmake_version": "4.4.2",
+    "cmake_version": "4.4.4",
     "compiler_id": "Clang",
     "compiler_target": "",
     "compiler_version": "21.1.8",

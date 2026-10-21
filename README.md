@@ -12,8 +12,6 @@
 - Linux 只支持 glibc x86_64。当前候选制品的最高符号需求是 `GLIBC_2.35`、`GLIBCXX_3.4.30` 和 `CXXABI_1.3.9`，并在 Ubuntu 22.04 x86_64 容器中实际构建和启动。部署系统必须提供这些或更新的符号版本；Alpine/musl 不是受支持目标。
 - 构建应用需要 Go 1.25、`CGO_ENABLED=1` 和本机 C 工具链。Linux 上的 `tirtc-build` 还需要 `patchelf`；macOS 使用 Xcode Command Line Tools 提供的 `install_name_tool` 和 `codesign`。完成构建后，部署时保留整个 `dist/`，不需要 Go 工具链。
 
-`go_verify.sh` 从最终 `dist/` 的全部可执行文件和 Native library 重新检查上述 macOS deployment target 与 Linux ABI 符号版本；README 中的数值不替代候选制品证据。
-
 ## 安装与构建
 
 应用把 SDK 与构建工具固定到同一版本：
@@ -63,14 +61,8 @@ Recording、Export 和 Snapshot 返回 Runtime cache 中的临时文件。应用
 - [`example/client`](example/client/README.md) 展示单设备 RTC 签发、建连、四类 Output、控制消息、录像、截图和清理。
 - [`example/storage`](example/storage/README.md) 展示云录像查询、四类 Output、回放控制、缺口事件、覆盖报告、录像、导出和截图。
 
-两份 Example 都只 import 公开 module，凭据只从环境变量读取；它们也是候选包真实验收使用的 canonical clients。
+两份 Example 都只 import 公开 module，凭据只从环境变量读取。
 
-## 验证与发布
+## 仓库入口
 
-```bash
-go test -race ./...
-```
-
-`script/build_candidate.sh` 从同一批 Runtime 生成双 tuple candidate。`script/go_verify.sh` 运行两平台 contract 和单设备 RTC smoke；`tool/ti_cloud_storage.py` 运行两平台云存 Example；`tool/upload_logs.py` 从同一 candidate 执行一次真实日志上传并产生身份绑定 summary。`tool/release_gate.py` 要求完整六条产品 lane 与 UploadLogs 证据后才允许公开发布。
-
-完整声明以本 module 的公开类型、Go doc 与上述两个 canonical Example 为准。
+测试责任、实现、候选证据与缺口见 [TEST.html](https://gitlab.tange-ai.com/tirtc-nexus/tirtc/-/blob/develop/go/TEST.html)，执行使用 [go-test](https://gitlab.tange-ai.com/tirtc-nexus/tirtc/-/blob/develop/.agents/skills/go-test/SKILL.md)。公开发布使用 [sdk-release-publish](https://gitlab.tange-ai.com/tirtc-nexus/tirtc/-/blob/develop/.agents/skills/sdk-release-publish/SKILL.md)。完整公开声明以 Go 类型、Go doc 与两个 canonical Example 为准。
