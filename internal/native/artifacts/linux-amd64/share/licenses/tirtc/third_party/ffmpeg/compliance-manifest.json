@@ -5,7 +5,7 @@
     "profile_sha256": "bf5a4308b0e8fd168a760da022e949bda0c3654fe03c2efcdf864fb5347b4108",
     "source_tree_sha256": "5ba0a8cd7eb681f81b46166bed91507b100e46de3fa473b8c7ed80fc921c8829"
   },
-  "build_manifest_sha256": "6b042d759ba653f5c5048f64330bb63b50430d59093003c03e660093fcd65a0f",
+  "build_manifest_sha256": "2257e6d4147330f40d8f03154d579c5de00bee5ffa4a22f4b38ecdeb2bce95a6",
   "delivery_relink_coverage": {
     "runtime_sdk_outputs": [
       "libtirtc_media.so"
@@ -40,23 +40,13 @@
     },
     {
       "path": "build-manifest.json",
-      "sha256": "6b042d759ba653f5c5048f64330bb63b50430d59093003c03e660093fcd65a0f",
+      "sha256": "2257e6d4147330f40d8f03154d579c5de00bee5ffa4a22f4b38ecdeb2bce95a6",
       "size": 3839
     },
     {
       "path": "relink/README.md",
       "sha256": "6d4bd7b2b76fdd618fd997326a421e660b6643ae3c8d9c1743694d4b76057f02",
       "size": 903
-    },
-    {
-      "path": "relink/linux-x64/libtirtc_media.so/inputs/files/0bfe32821989d74d-libtirtc_third_tencent_xlog.a",
-      "sha256": "0bfe32821989d74dbbd4a0798d67d8dc12d8f1bd9ac3d00cf6cd28d1de5f0bb8",
-      "size": 322714
-    },
-    {
-      "path": "relink/linux-x64/libtirtc_media.so/inputs/files/1c1ef7736e044f4d-libcrypto.a",
-      "sha256": "1c1ef7736e044f4d8fb0ceb23e59fae771ab1e1ea879896d08aff53ce0ce9ffa",
-      "size": 11031226
     },
     {
       "path": "relink/linux-x64/libtirtc_media.so/inputs/files/1ee5fb856e23d73a-libtirtc_runtime_facade.a",
@@ -74,9 +64,9 @@
       "size": 224070
     },
     {
-      "path": "relink/linux-x64/libtirtc_media.so/inputs/files/25f96e94693f5a95-libtirtc_runtime_foundation_logging.a",
-      "sha256": "25f96e94693f5a95b0289be72bc7db7fea400737507cbc6ebda84bb76fea3c62",
-      "size": 1030630
+      "path": "relink/linux-x64/libtirtc_media.so/inputs/files/2513eae918d35817-libcrypto.a",
+      "sha256": "2513eae918d35817813c62f4956fb462ffe341377673a3962c43bffce40a5c2c",
+      "size": 11031226
     },
     {
       "path": "relink/linux-x64/libtirtc_media.so/inputs/files/2a4b0dcb0e43c2d5-libopencore-amrnb.a",
@@ -102,6 +92,11 @@
       "path": "relink/linux-x64/libtirtc_media.so/inputs/files/5732ef4ed7605117-libtirtc_third_miniz.a",
       "sha256": "5732ef4ed760511737bb32fdb98e0c361bf0f3114232f62e2eaef33f5511d4b0",
       "size": 111692
+    },
+    {
+      "path": "relink/linux-x64/libtirtc_media.so/inputs/files/58d180a261a07e59-libtirtc_runtime_foundation_logging.a",
+      "sha256": "58d180a261a07e59f01c7e4929c913dfe184d09df7928d3a2d5f4f48cf210487",
+      "size": 1030630
     },
     {
       "path": "relink/linux-x64/libtirtc_media.so/inputs/files/5f4e67320cd38078-libssl.a",
@@ -144,6 +139,11 @@
       "size": 541660
     },
     {
+      "path": "relink/linux-x64/libtirtc_media.so/inputs/files/b1dcbd738c31b129-libtirtc_third_tencent_xlog.a",
+      "sha256": "b1dcbd738c31b12910fbdd2965feb1b5ac4e432698c91ef8b425693ed1de0645",
+      "size": 322714
+    },
+    {
       "path": "relink/linux-x64/libtirtc_media.so/inputs/files/bd30571d0ea70328-libtirtc_runtime_transport.a",
       "sha256": "bd30571d0ea7032882c6f025437ee5af840fa47232959223ad076f83e86b8f96",
       "size": 287238
@@ -180,7 +180,7 @@
     },
     {
       "path": "relink/linux-x64/libtirtc_media.so/recipe.json",
-      "sha256": "ecc2c63abdbcac217275587fa2b7196363bc0fa2c31715c0dc3fa821ae9ef2af",
+      "sha256": "193586b25b7466ff2aaf59c81d291f75ab9680066f741e468ec3255fa61c7731",
       "size": 9689
     },
     {
@@ -204,11 +204,11 @@
   "platform": "linux-x64",
   "relink_outputs": [
     {
-      "baseline_sha256": "1f52bd2cb057cca49929e6d5cfec449e2e33130c5af2b29ce592da6317a3f977",
+      "baseline_sha256": "dcca2ac05b994fec71558dcbabfbfd06b182f9869ff783adb5747ed188c7434b",
       "input_count": 26,
       "output_name": "libtirtc_media.so",
       "recipe": "relink/linux-x64/libtirtc_media.so/recipe.json",
-      "recipe_sha256": "ecc2c63abdbcac217275587fa2b7196363bc0fa2c31715c0dc3fa821ae9ef2af"
+      "recipe_sha256": "193586b25b7466ff2aaf59c81d291f75ab9680066f741e468ec3255fa61c7731"
     }
   ],
   "schema_version": 2,
