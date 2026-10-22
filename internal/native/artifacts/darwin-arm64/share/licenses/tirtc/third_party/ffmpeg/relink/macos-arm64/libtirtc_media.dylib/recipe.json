@@ -1,5 +1,5 @@
 {
-  "baseline_sha256": "49bb494fa242ad072626b6845e88503812707f00d273a5f1a5422242567e5b4c",
+  "baseline_sha256": "f583e85d5d3aa16753267bb30cd6ee6088306580ef23f486ad23cc99493650cd",
   "build_identity": {
     "fingerprint": "5b606f8036344b58e9f3f8a721841ded4e2959df39fef66e1e0362c0a6c55b8c",
     "platform": "macos-arm64",
@@ -31,41 +31,41 @@
         "-Xlinker",
         "-force_load",
         "-Xlinker",
-        "{INPUT_ROOT}/files/5bf2f81bd4a27d91-libtirtc_runtime_facade.a",
+        "{INPUT_ROOT}/files/7029d195b2ef1f70-libtirtc_runtime_facade.a",
         "-Xlinker",
         "-force_load",
         "-Xlinker",
-        "{INPUT_ROOT}/files/25a06e19b9995af7-libtirtc_runtime_storage.a",
+        "{INPUT_ROOT}/files/90418f55c8e04866-libtirtc_runtime_storage.a",
         "-Xlinker",
         "-force_load",
         "-Xlinker",
-        "{INPUT_ROOT}/files/1d0e24f28fe57519-libtirtc_runtime_transport.a",
+        "{INPUT_ROOT}/files/16199be6f6eb7b19-libtirtc_runtime_transport.a",
         "-Xlinker",
         "-force_load",
         "-Xlinker",
-        "{INPUT_ROOT}/files/3e626e4a2e77f92d-libtirtc_runtime_media.a",
+        "{INPUT_ROOT}/files/eb782d9f83a7b945-libtirtc_runtime_media.a",
         "-Xlinker",
         "-force_load",
         "-Xlinker",
-        "{INPUT_ROOT}/files/5204b8d51457990b-libtirtc_runtime_audio.a",
+        "{INPUT_ROOT}/files/3b7d4a6b74f0f261-libtirtc_runtime_audio.a",
         "-Xlinker",
         "-force_load",
         "-Xlinker",
-        "{INPUT_ROOT}/files/b35dc476615007c4-libtirtc_runtime_video.a",
+        "{INPUT_ROOT}/files/7cd6cb425fa1c2d8-libtirtc_runtime_video.a",
         "-Xlinker",
         "-force_load",
         "-Xlinker",
-        "{INPUT_ROOT}/files/2822821ca3bdafd9-libtirtc_runtime_media_contract.a",
-        "{INPUT_ROOT}/files/2fdcf1382a5132a8-libopus.a",
-        "{INPUT_ROOT}/files/998f1606c64dd22a-libopencore-amrnb.a",
-        "{INPUT_ROOT}/files/66a765f4c8701f76-libwebrtc-audio-processing-2.a",
-        "{INPUT_ROOT}/files/634f6df91fdcbdf6-libtirtc_third_webrtc_neteq.a",
-        "{INPUT_ROOT}/files/179fe863f54e186a-libtirtc_third_tencent_xlog.a",
+        "{INPUT_ROOT}/files/b21b3f264c08f2ac-libtirtc_runtime_media_contract.a",
+        "{INPUT_ROOT}/files/8a435138690431e7-libopus.a",
+        "{INPUT_ROOT}/files/b2ce91b1fb3038d8-libopencore-amrnb.a",
+        "{INPUT_ROOT}/files/d8fab376a3ac2272-libwebrtc-audio-processing-2.a",
+        "{INPUT_ROOT}/files/ad268553fad61452-libtirtc_third_webrtc_neteq.a",
+        "{INPUT_ROOT}/files/8bf5b4248cf21986-libtirtc_third_tencent_xlog.a",
         "{INPUT_ROOT}/files/b63432c81a522693-libTiRTC.dylib",
         "{INPUT_ROOT}/files/948996b5778d8aca-libtgrtc.dylib",
         "{INPUT_ROOT}/files/2b68006a63750d5f-libTiRTC.a",
         "-lm",
-        "{INPUT_ROOT}/files/66a765f4c8701f76-libwebrtc-audio-processing-2.a",
+        "{INPUT_ROOT}/files/d8fab376a3ac2272-libwebrtc-audio-processing-2.a",
         "-framework",
         "AudioToolbox",
         "-framework",
@@ -89,17 +89,17 @@
         "{FFMPEG_LIB_DIR}/libswresample.a",
         "{FFMPEG_LIB_DIR}/libswscale.a",
         "{FFMPEG_LIB_DIR}/libavutil.a",
-        "{INPUT_ROOT}/files/c94e1d94ca1ba701-libtirtc_runtime_auth.a",
+        "{INPUT_ROOT}/files/8eccea3a91484c4d-libtirtc_runtime_auth.a",
         "-Xlinker",
         "-force_load",
         "-Xlinker",
-        "{INPUT_ROOT}/files/bf11d64894d10d5a-libtirtc_runtime_foundation_logging.a",
-        "{INPUT_ROOT}/files/179fe863f54e186a-libtirtc_third_tencent_xlog.a",
-        "{INPUT_ROOT}/files/1d6451a88d2876ed-libtirtc_third_tencent_xlog_comm.a",
-        "{INPUT_ROOT}/files/2da9becaaa523a19-libtirtc_third_tencent_xlog_boost.a",
-        "{INPUT_ROOT}/files/a8855c4298550157-libtirtc_third_tencent_xlog_zstd.a",
+        "{INPUT_ROOT}/files/5d7072e95def961a-libtirtc_runtime_foundation_logging.a",
+        "{INPUT_ROOT}/files/8bf5b4248cf21986-libtirtc_third_tencent_xlog.a",
+        "{INPUT_ROOT}/files/77a9e54a2be4e109-libtirtc_third_tencent_xlog_comm.a",
+        "{INPUT_ROOT}/files/4502b188c486fcfe-libtirtc_third_tencent_xlog_boost.a",
+        "{INPUT_ROOT}/files/762f0d03b8e37cc4-libtirtc_third_tencent_xlog_zstd.a",
         "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/lib/libz.tbd",
-        "{INPUT_ROOT}/files/e222f65190a2a0b1-libtirtc_third_miniz.a",
+        "{INPUT_ROOT}/files/0941e1f8e8104798-libtirtc_third_miniz.a",
         "-framework",
         "Foundation",
         "-lobjc",
@@ -107,11 +107,11 @@
         "-Xlinker",
         "-force_load",
         "-Xlinker",
-        "{INPUT_ROOT}/files/952f80ac856441f5-libtirtc_runtime_foundation_http.a",
+        "{INPUT_ROOT}/files/19c130324ffbe3d6-libtirtc_runtime_foundation_http.a",
         "-framework",
         "Security",
-        "{INPUT_ROOT}/files/982c837cfb7ea3f7-libssl.a",
-        "{INPUT_ROOT}/files/a17ecc74f7e0609b-libcrypto.a"
+        "{INPUT_ROOT}/files/881a60e28a960dde-libssl.a",
+        "{INPUT_ROOT}/files/8adef60d90ec4bc8-libcrypto.a"
       ],
       "tool": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++",
       "tool_basename": "clang++"
@@ -119,29 +119,19 @@
   ],
   "inputs": [
     {
-      "path": "files/179fe863f54e186a-libtirtc_third_tencent_xlog.a",
-      "sha256": "179fe863f54e186a7557565ad86fa37470a38067ff35af1eacfb9ebb19a2dfe6",
-      "size": 225704
+      "path": "files/0941e1f8e8104798-libtirtc_third_miniz.a",
+      "sha256": "0941e1f8e810479813598701ee02752b76b251afdf065971d8a0141fdbc43e80",
+      "size": 98944
     },
     {
-      "path": "files/1d0e24f28fe57519-libtirtc_runtime_transport.a",
-      "sha256": "1d0e24f28fe575192236e8a5f574a6a4c89abc8864e2142b415ce9369352e15b",
+      "path": "files/16199be6f6eb7b19-libtirtc_runtime_transport.a",
+      "sha256": "16199be6f6eb7b194dd4d6e88caa0d2729be5df8d6bce5592d609d158dffb69a",
       "size": 231256
     },
     {
-      "path": "files/1d6451a88d2876ed-libtirtc_third_tencent_xlog_comm.a",
-      "sha256": "1d6451a88d2876edcf08a505a812d2b8922c7d5e8764a8f51e15092a81a0cdc0",
-      "size": 97504
-    },
-    {
-      "path": "files/25a06e19b9995af7-libtirtc_runtime_storage.a",
-      "sha256": "25a06e19b9995af7d06ccf8655c2630598a262b8a704c79b82e2a7c92c5de1f2",
-      "size": 652920
-    },
-    {
-      "path": "files/2822821ca3bdafd9-libtirtc_runtime_media_contract.a",
-      "sha256": "2822821ca3bdafd91e884b49f23776f86db655249aba92709593a1ab14765791",
-      "size": 28168
+      "path": "files/19c130324ffbe3d6-libtirtc_runtime_foundation_http.a",
+      "sha256": "19c130324ffbe3d66487eb595a5d12ea6154f5f3ffff6c9f6dda83677c172e41",
+      "size": 788104
     },
     {
       "path": "files/2b68006a63750d5f-libTiRTC.a",
@@ -149,39 +139,19 @@
       "size": 1442400
     },
     {
-      "path": "files/2da9becaaa523a19-libtirtc_third_tencent_xlog_boost.a",
-      "sha256": "2da9becaaa523a19c87ae24bbde473f21e98dcf9a3ed6d53f654471d6a2449b5",
-      "size": 163136
-    },
-    {
-      "path": "files/2fdcf1382a5132a8-libopus.a",
-      "sha256": "2fdcf1382a5132a82fa6c193c1ba60225bd0696c5015d50ca998e522fe152923",
-      "size": 648088
-    },
-    {
-      "path": "files/3e626e4a2e77f92d-libtirtc_runtime_media.a",
-      "sha256": "3e626e4a2e77f92d1dfb48d69a3e6de3ef53334aadec8f7a30dad23b2b41a7ec",
-      "size": 620320
-    },
-    {
-      "path": "files/5204b8d51457990b-libtirtc_runtime_audio.a",
-      "sha256": "5204b8d51457990b690ad86bf7e74ef316b0e9571f08a234d894d45832a43018",
+      "path": "files/3b7d4a6b74f0f261-libtirtc_runtime_audio.a",
+      "sha256": "3b7d4a6b74f0f261f2e1e64992465e0516edcb9dbf3c6e3a91540c3a95bf4da4",
       "size": 268776
     },
     {
-      "path": "files/5bf2f81bd4a27d91-libtirtc_runtime_facade.a",
-      "sha256": "5bf2f81bd4a27d9189deec35f29e1ab545b11d95729bbdbbc49fb81619a12a38",
-      "size": 1780536
+      "path": "files/4502b188c486fcfe-libtirtc_third_tencent_xlog_boost.a",
+      "sha256": "4502b188c486fcfefce2d40dc81ad3dec407c683f76e53013d163168edf28589",
+      "size": 163136
     },
     {
-      "path": "files/634f6df91fdcbdf6-libtirtc_third_webrtc_neteq.a",
-      "sha256": "634f6df91fdcbdf6482624f4ef888504ea4fa0d498dee04a64360682d5385263",
-      "size": 530128
-    },
-    {
-      "path": "files/66a765f4c8701f76-libwebrtc-audio-processing-2.a",
-      "sha256": "66a765f4c8701f768a67b99be5ba206f2a88af71b73f2ca943c62c5ad334d604",
-      "size": 3473424
+      "path": "files/5d7072e95def961a-libtirtc_runtime_foundation_logging.a",
+      "sha256": "5d7072e95def961aec53868c48939c4fe1a8c39706a5d4d06f6e26e8fea7788b",
+      "size": 720160
     },
     {
       "path": "files/6b6d58cc868545d8-tirtc_media_exports_macos.txt",
@@ -189,39 +159,74 @@
       "size": 6818
     },
     {
+      "path": "files/7029d195b2ef1f70-libtirtc_runtime_facade.a",
+      "sha256": "7029d195b2ef1f70c41163f5bac8017b143a54480a576f3c6068ddd29dc849c6",
+      "size": 1780536
+    },
+    {
+      "path": "files/762f0d03b8e37cc4-libtirtc_third_tencent_xlog_zstd.a",
+      "sha256": "762f0d03b8e37cc4af50760b1264182419951a999112b84cc8921eb3093082e6",
+      "size": 430816
+    },
+    {
+      "path": "files/77a9e54a2be4e109-libtirtc_third_tencent_xlog_comm.a",
+      "sha256": "77a9e54a2be4e1090fe81d199e9f92bbea413e4fac55491ecac5964f61d56f1d",
+      "size": 97504
+    },
+    {
+      "path": "files/7cd6cb425fa1c2d8-libtirtc_runtime_video.a",
+      "sha256": "7cd6cb425fa1c2d867b57f5342cd82cfe45e9ceb2c8660cf3b5349826288d91e",
+      "size": 248392
+    },
+    {
+      "path": "files/881a60e28a960dde-libssl.a",
+      "sha256": "881a60e28a960ddeb373ca2699cc622424b919e1d100f7ba26d6c857255d077d",
+      "size": 1344288
+    },
+    {
+      "path": "files/8a435138690431e7-libopus.a",
+      "sha256": "8a435138690431e73c7edf542d63e50a96a29203fd61b236f69d97514c6c674c",
+      "size": 648088
+    },
+    {
+      "path": "files/8adef60d90ec4bc8-libcrypto.a",
+      "sha256": "8adef60d90ec4bc875e2992055fc2d77c90fcbaf66ee1752c66dc0183f23c0f0",
+      "size": 6819048
+    },
+    {
+      "path": "files/8bf5b4248cf21986-libtirtc_third_tencent_xlog.a",
+      "sha256": "8bf5b4248cf21986f4cbcacf916c40c8e5fa084a25bbd397d18c34c7ace5bcc8",
+      "size": 225704
+    },
+    {
+      "path": "files/8eccea3a91484c4d-libtirtc_runtime_auth.a",
+      "sha256": "8eccea3a91484c4d7fda4bb67ddaed661617c37045056fa5cab9ecf69fb34546",
+      "size": 127632
+    },
+    {
+      "path": "files/90418f55c8e04866-libtirtc_runtime_storage.a",
+      "sha256": "90418f55c8e048668ddbdb5b3a60aed608545367bee107c780ee83b2784b20e2",
+      "size": 652920
+    },
+    {
       "path": "files/948996b5778d8aca-libtgrtc.dylib",
       "sha256": "948996b5778d8aca63ca0bf306def344372a8f85a4fc46aa41e5bb0cae601dd3",
       "size": 2952240
     },
     {
-      "path": "files/952f80ac856441f5-libtirtc_runtime_foundation_http.a",
-      "sha256": "952f80ac856441f54caf95fb484cee21cdc7ec61264b7c012c9036cf8d36051d",
-      "size": 788104
+      "path": "files/ad268553fad61452-libtirtc_third_webrtc_neteq.a",
+      "sha256": "ad268553fad614523d12f670e5e6ecdd99b28b298675884c4871f2957b7f391a",
+      "size": 530128
     },
     {
-      "path": "files/982c837cfb7ea3f7-libssl.a",
-      "sha256": "982c837cfb7ea3f73301b9a2cc35651a0bc9ca315527cbbac688ed82cf636513",
-      "size": 1344288
+      "path": "files/b21b3f264c08f2ac-libtirtc_runtime_media_contract.a",
+      "sha256": "b21b3f264c08f2ac0741bbb44ae4f97da15401350023a031b8e46132470678d4",
+      "size": 28168
     },
     {
-      "path": "files/998f1606c64dd22a-libopencore-amrnb.a",
-      "sha256": "998f1606c64dd22ade4d3bc1b25dd513f727df2c51a4da59c2c030826dbca277",
+      "path": "files/b2ce91b1fb3038d8-libopencore-amrnb.a",
+      "sha256": "b2ce91b1fb3038d82d9115450acc111287ca829dbea346a57b954022104959a4",
       "size": 257744
-    },
-    {
-      "path": "files/a17ecc74f7e0609b-libcrypto.a",
-      "sha256": "a17ecc74f7e0609be1fc374cd1982c23ba5cf4d00b58ef6a23ac0c01cc5dd692",
-      "size": 6819048
-    },
-    {
-      "path": "files/a8855c4298550157-libtirtc_third_tencent_xlog_zstd.a",
-      "sha256": "a8855c429855015737a8ecfffc4c224ccd71c0945812de04c4a5a68b43c08c5e",
-      "size": 430816
-    },
-    {
-      "path": "files/b35dc476615007c4-libtirtc_runtime_video.a",
-      "sha256": "b35dc476615007c4e6ee659aa868acc2799fcdff6d779e9e8f68754b169b301c",
-      "size": 248392
     },
     {
       "path": "files/b63432c81a522693-libTiRTC.dylib",
@@ -229,19 +234,14 @@
       "size": 813808
     },
     {
-      "path": "files/bf11d64894d10d5a-libtirtc_runtime_foundation_logging.a",
-      "sha256": "bf11d64894d10d5a60c8d1f3403c998031c30a08e7b97149fb683177402f48a2",
-      "size": 720160
+      "path": "files/d8fab376a3ac2272-libwebrtc-audio-processing-2.a",
+      "sha256": "d8fab376a3ac2272bc7862c32417a5f1134afc093442dfc763a4a56f1c20e63b",
+      "size": 3473424
     },
     {
-      "path": "files/c94e1d94ca1ba701-libtirtc_runtime_auth.a",
-      "sha256": "c94e1d94ca1ba701f169949a35ae8cdc97a33c27615c829575a5c70f3e421422",
-      "size": 127632
-    },
-    {
-      "path": "files/e222f65190a2a0b1-libtirtc_third_miniz.a",
-      "sha256": "e222f65190a2a0b16e1543e973ef0d168713c125535e2e265965369f957f8bac",
-      "size": 98944
+      "path": "files/eb782d9f83a7b945-libtirtc_runtime_media.a",
+      "sha256": "eb782d9f83a7b9450578222ecb79913e0ef08bcc8c4646ade9edf001039ebf6f",
+      "size": 620320
     },
     {
       "path": "files/efc094789da20871-tirtc_media_aggregate_anchor.c.o",
