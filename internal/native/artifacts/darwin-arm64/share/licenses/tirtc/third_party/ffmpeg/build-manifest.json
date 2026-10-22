@@ -2,23 +2,23 @@
   "artifacts": [
     {
       "path": "lib/libavcodec.a",
-      "sha256": "682eb1de4ed7f33e5a711fa3648b4bed7fe292d035f720c0fac75999eaef7dd0"
+      "sha256": "b24463f691dac969f28f1bfda21419160795ce7e05e54f59306e39305023c3fc"
     },
     {
       "path": "lib/libavformat.a",
-      "sha256": "884f3b557d010d133da5a1ba61a5a96f263f8a49a4e47dab4e63a270ba2e2781"
+      "sha256": "4b193b2cfc9b8a0002533b4d397262f7bd129f9b581e3ed628ac0fda5f2a3148"
     },
     {
       "path": "lib/libavutil.a",
-      "sha256": "343c6b4c78a032687cf8b4dbfb192d34a597000ad6549e8b210afbb96770b654"
+      "sha256": "5a0df74fef44d5eca22d56d4661e3164f887028f7ec3419991c5d078a00c8f4c"
     },
     {
       "path": "lib/libswresample.a",
-      "sha256": "c5c2108d669ca2b02b08412050b8f8175cc4a09c98cfbc629100e42084b3e467"
+      "sha256": "6e8de6dac0b998ee11754090981c09e8df64cb3a098b14636ac662d9b3a34c71"
     },
     {
       "path": "lib/libswscale.a",
-      "sha256": "362316e78985d6a62fbfbce9969937e6e0b422bc580a58fe372dd958c9c8ea7b"
+      "sha256": "11fffa9d89c267cefc9a91b017c6a29b32a954e8a697257cd630c3c3dd4bb6ae"
     }
   ],
   "capabilities": {
@@ -51,8 +51,8 @@
       "file"
     ]
   },
-  "configuration": "--prefix=/ --disable-autodetect --disable-shared --enable-static --enable-pic --disable-programs --disable-doc --disable-everything --enable-small --enable-avcodec --enable-avutil --enable-swresample --enable-swscale --disable-avdevice --disable-avfilter --enable-avformat --disable-network --disable-protocols --disable-demuxers --disable-muxers --disable-filters --disable-bsfs --disable-indevs --disable-outdevs --disable-hwaccels --disable-bzlib --disable-iconv --disable-lzma --disable-sdl2 --disable-xlib --disable-zlib --disable-appkit --disable-audiotoolbox --disable-avfoundation --disable-coreimage --disable-metal --disable-securetransport --disable-videotoolbox --disable-vulkan --disable-debug --enable-muxer=mp4 --enable-protocol=file --enable-decoder=h264 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=aac --enable-decoder=amrnb --enable-decoder=opus --enable-encoder=mjpeg --enable-encoder=aac --enable-parser=h264 --enable-parser=hevc --arch=arm64 --target-os=darwin --pkg-config=/usr/bin/false --cc=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang --cxx=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ --ar=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar --ranlib=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib --strip=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip --nm=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/nm --extra-cflags='-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections -arch arm64 -Werror=unguarded-availability-new -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -mmacosx-version-min=11.5 -Os' --extra-ldflags='-fPIC -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -mmacosx-version-min=11.5' --sysroot=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk --host-cc=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang --host-cflags='-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections -arch arm64 -Werror=unguarded-availability-new -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -mmacosx-version-min=11.5'",
-  "fingerprint": "994d23b1d13621891f7e138a2d99d509cf162743ba5e1f233a134f0032ba8441",
+  "configuration": "--prefix=/ --disable-autodetect --disable-shared --enable-static --enable-pic --disable-programs --disable-doc --disable-everything --enable-small --enable-avcodec --enable-avutil --enable-swresample --enable-swscale --disable-avdevice --disable-avfilter --enable-avformat --disable-network --disable-protocols --disable-demuxers --disable-muxers --disable-filters --disable-bsfs --disable-indevs --disable-outdevs --disable-hwaccels --disable-bzlib --disable-iconv --disable-lzma --disable-sdl2 --disable-xlib --disable-zlib --disable-appkit --disable-audiotoolbox --disable-avfoundation --disable-coreimage --disable-metal --disable-securetransport --disable-videotoolbox --disable-vulkan --disable-debug --enable-muxer=mp4 --enable-protocol=file --enable-decoder=h264 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=aac --enable-decoder=amrnb --enable-decoder=opus --enable-encoder=mjpeg --enable-encoder=aac --enable-parser=h264 --enable-parser=hevc --arch=arm64 --target-os=darwin --pkg-config=/usr/bin/false --cc=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang --cxx=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ --ar=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar --ranlib=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib --strip=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip --nm=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/nm --extra-cflags='-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections -arch arm64 -Werror=unguarded-availability-new -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -mmacosx-version-min=11.5 -Os' --extra-ldflags='-fPIC -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -mmacosx-version-min=11.5' --sysroot=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk --host-cc=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang --host-cflags='-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections -arch arm64 -Werror=unguarded-availability-new -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -mmacosx-version-min=11.5'",
+  "fingerprint": "5b606f8036344b58e9f3f8a721841ded4e2959df39fef66e1e0362c0a6c55b8c",
   "libraries": [
     "avformat",
     "avcodec",
@@ -70,21 +70,21 @@
   "toolchain": {
     "ar": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar",
     "build_type": "Release",
-    "c_flags": "-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections -arch arm64 -Werror=unguarded-availability-new -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -mmacosx-version-min=11.5",
+    "c_flags": "-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections -arch arm64 -Werror=unguarded-availability-new -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -mmacosx-version-min=11.5",
     "cc": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
     "cmake_generator": "Ninja",
-    "cmake_version": "4.2.3",
+    "cmake_version": "3.31.1-g0a10cd6",
     "compiler_id": "AppleClang",
     "compiler_target": "",
-    "compiler_version": "21.0.0.21000334",
+    "compiler_version": "21.0.0.21000101",
     "cxx": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++",
-    "cxx_flags": "-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections -arch arm64 -Werror=unguarded-availability-new -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -mmacosx-version-min=11.5",
+    "cxx_flags": "-O3 -DNDEBUG -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections -arch arm64 -Werror=unguarded-availability-new -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -mmacosx-version-min=11.5",
     "deployment_target": "11.5",
-    "ld_flags": "-fPIC -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -mmacosx-version-min=11.5",
+    "ld_flags": "-fPIC -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -mmacosx-version-min=11.5",
     "make": "/usr/bin/make",
     "nm": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/nm",
     "ranlib": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib",
-    "sdk_sysroot": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk",
+    "sdk_sysroot": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
     "strip": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip",
     "toolchain_file": "",
     "toolchain_file_sha256": ""
