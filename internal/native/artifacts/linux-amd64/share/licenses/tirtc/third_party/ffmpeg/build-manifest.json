@@ -2,19 +2,19 @@
   "artifacts": [
     {
       "path": "lib/libavcodec.a",
-      "sha256": "e9a93a67da689db8b1d9ce0c7844cf753333ca89d5698b73a3a409be4ed1aa6f"
+      "sha256": "45f29d2b37c06afc9c069a3d60558edb4b219929006b06330e729445b99b7094"
     },
     {
       "path": "lib/libavformat.a",
-      "sha256": "126760e196a69cc5418ff6f6a9b4599a37bc0a13222b10837071f9c213ff2f2e"
+      "sha256": "c5b213ba88e6f611012af8148d606f925b2916d22969107825afe8e96416042c"
     },
     {
       "path": "lib/libavutil.a",
-      "sha256": "0f1419c510a42c5aaf99fa8bcf929775a126c7ecb6487686c027a12a3e81d7e4"
+      "sha256": "aa8f6c7c912673ef78b638f73e3c3be3b9875659a6e5aec4821328757d52266d"
     },
     {
       "path": "lib/libswresample.a",
-      "sha256": "b28259ca398c38825d4c79e9cc2a38addedb38ae446f1548b02e42d85c6f8390"
+      "sha256": "2906093a2598d04a6266f18a462b623b9517981cdc4601aa91dd2f215ca9878f"
     },
     {
       "path": "lib/libswscale.a",
