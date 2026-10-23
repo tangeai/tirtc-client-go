@@ -1,5 +1,5 @@
 {
-  "baseline_sha256": "e19d79974fc2b24062b6ba84e41c0aaadbf7eba24d376248b1fa61836aacddb4",
+  "baseline_sha256": "c64530e0e28de2aa3487d2616d0f044767ec21a7d8a16ce589100b61151a2fcb",
   "build_identity": {
     "fingerprint": "cd9ef871bc81f9ff49d3eab97ef62336190b0e4cf337f6e9d07934cc88220675",
     "platform": "linux-x64",
@@ -14,7 +14,7 @@
         "-DNDEBUG",
         "-shared",
         "-Xlinker",
-        "--version-script={INPUT_ROOT}/files/2091ff72f5012af4-tirtc_media_exports_linux.map",
+        "--version-script={INPUT_ROOT}/files/7db4a489c7e744e0-tirtc_media_exports_linux.map",
         "-Xlinker",
         "-soname",
         "-Xlinker",
@@ -29,10 +29,10 @@
         "--push-state",
         "-Xlinker",
         "--whole-archive",
-        "{INPUT_ROOT}/files/1ee5fb856e23d73a-libtirtc_runtime_facade.a",
+        "{INPUT_ROOT}/files/8e593da7331058fb-libtirtc_runtime_facade.a",
         "{INPUT_ROOT}/files/948fccd5bfd01fb3-libtirtc_runtime_storage.a",
-        "{INPUT_ROOT}/files/bd30571d0ea70328-libtirtc_runtime_transport.a",
-        "{INPUT_ROOT}/files/3fd5317a628ae4a1-libtirtc_runtime_media.a",
+        "{INPUT_ROOT}/files/f299d0beb521834e-libtirtc_runtime_transport.a",
+        "{INPUT_ROOT}/files/5c1f988f8dcafeaa-libtirtc_runtime_media.a",
         "{INPUT_ROOT}/files/d3ad71d402c546b9-libtirtc_runtime_audio.a",
         "{INPUT_ROOT}/files/8bd59a6f9a7fb1ee-libtirtc_runtime_video.a",
         "{INPUT_ROOT}/files/e022e7dd6ff077fc-libtirtc_runtime_media_contract.a",
@@ -42,7 +42,7 @@
         "{INPUT_ROOT}/files/2a4b0dcb0e43c2d5-libopencore-amrnb.a",
         "{INPUT_ROOT}/files/95aef8518ae56d2c-libwebrtc-audio-processing-2.a",
         "{INPUT_ROOT}/files/41566d4e62cf957d-libtirtc_third_webrtc_neteq.a",
-        "{INPUT_ROOT}/files/9c384eaf262e2660-libtirtc_third_tencent_xlog.a",
+        "{INPUT_ROOT}/files/2dd2e86642a3988f-libtirtc_third_tencent_xlog.a",
         "-ldl",
         "-lm",
         "-Wl,--no-as-needed",
@@ -66,10 +66,10 @@
         "--push-state",
         "-Xlinker",
         "--whole-archive",
-        "{INPUT_ROOT}/files/8fa16edf60ff2e16-libtirtc_runtime_foundation_logging.a",
+        "{INPUT_ROOT}/files/3c6008aff5b9b0b1-libtirtc_runtime_foundation_logging.a",
         "-Xlinker",
         "--pop-state",
-        "{INPUT_ROOT}/files/9c384eaf262e2660-libtirtc_third_tencent_xlog.a",
+        "{INPUT_ROOT}/files/2dd2e86642a3988f-libtirtc_third_tencent_xlog.a",
         "-Xlinker",
         "--start-group",
         "{INPUT_ROOT}/files/c50fcfb78b4f19de-libtirtc_third_tencent_xlog_comm.a",
@@ -87,7 +87,7 @@
         "-Xlinker",
         "--pop-state",
         "{INPUT_ROOT}/files/5f4e67320cd38078-libssl.a",
-        "{INPUT_ROOT}/files/6b9eb401d39b27a9-libcrypto.a",
+        "{INPUT_ROOT}/files/02626d228eddc91d-libcrypto.a",
         "-lz"
       ],
       "tool": "/usr/bin/clang++-21",
@@ -96,14 +96,9 @@
   ],
   "inputs": [
     {
-      "path": "files/1ee5fb856e23d73a-libtirtc_runtime_facade.a",
-      "sha256": "1ee5fb856e23d73ab421d3dc6927b192bc41951f4a6cc202c3947ad448a2a0cb",
-      "size": 1940860
-    },
-    {
-      "path": "files/2091ff72f5012af4-tirtc_media_exports_linux.map",
-      "sha256": "2091ff72f5012af4b1e8bd16c3fed74a225bc734228c03a1d2344e3068dbcb2f",
-      "size": 7412
+      "path": "files/02626d228eddc91d-libcrypto.a",
+      "sha256": "02626d228eddc91d668977f3d4cfe59cbf15e49a11ecead2306bcea54eb67c5e",
+      "size": 11031226
     },
     {
       "path": "files/229b9b574bd1bf7e-libtirtc_third_tencent_xlog_boost.a",
@@ -116,9 +111,14 @@
       "size": 364726
     },
     {
-      "path": "files/3fd5317a628ae4a1-libtirtc_runtime_media.a",
-      "sha256": "3fd5317a628ae4a146d6cb7251f426c0c9120303a287c80480da14462406407f",
-      "size": 838826
+      "path": "files/2dd2e86642a3988f-libtirtc_third_tencent_xlog.a",
+      "sha256": "2dd2e86642a3988f741c3f354a4800971522782a422adfd62c0bb3624a00f8d7",
+      "size": 322714
+    },
+    {
+      "path": "files/3c6008aff5b9b0b1-libtirtc_runtime_foundation_logging.a",
+      "sha256": "3c6008aff5b9b0b108e61d901bb1dc481d29257a748b73577a42ce306c2b057a",
+      "size": 1037386
     },
     {
       "path": "files/41566d4e62cf957d-libtirtc_third_webrtc_neteq.a",
@@ -136,14 +136,14 @@
       "size": 111692
     },
     {
+      "path": "files/5c1f988f8dcafeaa-libtirtc_runtime_media.a",
+      "sha256": "5c1f988f8dcafeaab4305a1c7f0130f42dd4137d01456b192efb2dd09aa5fb65",
+      "size": 863878
+    },
+    {
       "path": "files/5f4e67320cd38078-libssl.a",
       "sha256": "5f4e67320cd3807846ca08ddac0fa3a9ae4877530eb17db6544b8027066dccce",
       "size": 2057536
-    },
-    {
-      "path": "files/6b9eb401d39b27a9-libcrypto.a",
-      "sha256": "6b9eb401d39b27a92f89126c23d48aa54689492f1dbbdb86a4f8eec28be4bd67",
-      "size": 11031226
     },
     {
       "path": "files/714f8c2f664273e1-libtirtc_runtime_foundation_http.a",
@@ -151,14 +151,19 @@
       "size": 1056666
     },
     {
+      "path": "files/7db4a489c7e744e0-tirtc_media_exports_linux.map",
+      "sha256": "7db4a489c7e744e0b3a7c060f5b9b496af71ffc181fcbae46bd8dc538c1f2d8a",
+      "size": 7509
+    },
+    {
       "path": "files/8bd59a6f9a7fb1ee-libtirtc_runtime_video.a",
       "sha256": "8bd59a6f9a7fb1eec55b8f1fb138cc3d27633e176878272369f137d4fbaa7f31",
       "size": 137082
     },
     {
-      "path": "files/8fa16edf60ff2e16-libtirtc_runtime_foundation_logging.a",
-      "sha256": "8fa16edf60ff2e16b0e9a8b55003b13faff65b5920a57db01b1560b1031fa1c3",
-      "size": 1030630
+      "path": "files/8e593da7331058fb-libtirtc_runtime_facade.a",
+      "sha256": "8e593da7331058fb2adc16d5c4a354800dc41fed3532d9ce298ce59f332bafb5",
+      "size": 1975994
     },
     {
       "path": "files/948fccd5bfd01fb3-libtirtc_runtime_storage.a",
@@ -176,11 +181,6 @@
       "size": 170700
     },
     {
-      "path": "files/9c384eaf262e2660-libtirtc_third_tencent_xlog.a",
-      "sha256": "9c384eaf262e26606772dc8bf69fd4aec9065b7b34b97c4f502edaa42f3c896c",
-      "size": 322714
-    },
-    {
       "path": "files/9fbb1250b45d6b03-tirtc_media_aggregate_anchor.c.o",
       "sha256": "9fbb1250b45d6b037f553f99bf99e79fdd05dbb20da2b0709992fb719dec84d5",
       "size": 1032
@@ -189,11 +189,6 @@
       "path": "files/a513710288fb98d0-libtirtc_third_tencent_xlog_zstd.a",
       "sha256": "a513710288fb98d0a94bc377d20a691203cb767099b4b48f12d02f26f474492a",
       "size": 541660
-    },
-    {
-      "path": "files/bd30571d0ea70328-libtirtc_runtime_transport.a",
-      "sha256": "bd30571d0ea7032882c6f025437ee5af840fa47232959223ad076f83e86b8f96",
-      "size": 287238
     },
     {
       "path": "files/c50fcfb78b4f19de-libtirtc_third_tencent_xlog_comm.a",
@@ -209,6 +204,11 @@
       "path": "files/e022e7dd6ff077fc-libtirtc_runtime_media_contract.a",
       "sha256": "e022e7dd6ff077fc1efd73017d332e7bc8499e45f12cddde09b643d3bf72c32d",
       "size": 41696
+    },
+    {
+      "path": "files/f299d0beb521834e-libtirtc_runtime_transport.a",
+      "sha256": "f299d0beb521834e3aa57f157e056fa584a95a36821236c6e38ec15f1847179a",
+      "size": 286726
     },
     {
       "path": "library-dirs/229d6fba2e110afd/libTiRTC.a",

@@ -114,6 +114,10 @@ typedef uint32_t TiAudioAnsLevel;
 #define TI_AUDIO_ANS_LEVEL_MEDIUM ((TiAudioAnsLevel)2)
 #define TI_AUDIO_ANS_LEVEL_HIGH ((TiAudioAnsLevel)3)
 
+typedef uint32_t TiAudioInputMode;
+#define TI_AUDIO_INPUT_MODE_BUILT_IN ((TiAudioInputMode)0)
+#define TI_AUDIO_INPUT_MODE_CUSTOM ((TiAudioInputMode)1)
+
 typedef uint32_t TiVideoDecoderPreference;
 #define TI_VIDEO_DECODER_PREFERENCE_AUTO ((TiVideoDecoderPreference)0)
 #define TI_VIDEO_DECODER_PREFERENCE_SOFTWARE ((TiVideoDecoderPreference)1)
@@ -425,6 +429,9 @@ typedef struct TiEncodedVideoOutputCallbacks {
 #define TI_ENCODED_VIDEO_OUTPUT_CALLBACKS_INITIALIZER \
   {NULL, NULL, NULL, TI_CALLBACK_DISPATCHER_INITIALIZER}
 
+typedef void(TI_CALL* TiAudioInputOnPcmCapturedFn)(TiAudioInput* input, const TiAudioFrame* frame,
+                                                   void* user_data);
+
 /*
  * Frame objects are immutable and thread-safe reference-counted values. A callback lends its
  * frame reference for the duration of that callback. Retain it before returning when another
@@ -467,6 +474,18 @@ TI_API TiError TI_CALL ti_audio_input_set_callbacks(TiAudioInput* input,
                                                     void* user_data);
 TI_API TiError TI_CALL ti_audio_input_get_state(TiAudioInput* input, TiInputState* out_state);
 /*
+ * Selects the built-in microphone route or caller-submitted PCM route. The route may only change
+ * while the input is stopped and unbound. BUILT_IN requires capture_enabled == 1.
+ */
+TI_API TiError TI_CALL ti_audio_input_set_mode(TiAudioInput* input, TiAudioInputMode mode,
+                                               uint8_t capture_enabled);
+/* Captured frames are lent for the callback duration and are delivered outside the capture thread.
+ */
+TI_API TiError TI_CALL ti_audio_input_set_pcm_callback(TiAudioInput* input,
+                                                       TiAudioInputOnPcmCapturedFn callback,
+                                                       void* user_data,
+                                                       const TiCallbackDispatcher* dispatcher);
+/*
  * Selects caller-submitted PCM as the input source. The selector is idempotent while idle and
  * unbound. It returns TI_ERROR_IN_USE once the input is running or attached.
  */
@@ -479,6 +498,12 @@ TI_API TiError TI_CALL ti_audio_input_stop(TiAudioInput* input);
  * 16000 Hz (160 samples). The call is synchronous and does not consume the frame reference.
  */
 TI_API TiError TI_CALL ti_audio_input_submit_frame(TiAudioInput* input, const TiAudioFrame* frame);
+/*
+ * Atomically admits arbitrary non-empty, sample-aligned mono S16LE bytes for the CUSTOM route.
+ * Successful admission copies the bytes before returning; internal processing uses 10 ms blocks.
+ */
+TI_API TiError TI_CALL ti_audio_input_submit_pcm(TiAudioInput* input, const uint8_t* pcm,
+                                                 size_t byte_count);
 TI_API TiError TI_CALL ti_audio_input_destroy(TiAudioInput* input);
 
 TI_API TiError TI_CALL ti_encoded_audio_input_create(TiEncodedAudioInput** out_input);

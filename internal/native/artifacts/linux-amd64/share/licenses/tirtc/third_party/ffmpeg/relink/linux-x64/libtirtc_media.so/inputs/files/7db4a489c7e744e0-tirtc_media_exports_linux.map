@@ -8,10 +8,13 @@
     ti_audio_input_destroy;
     ti_audio_input_get_state;
     ti_audio_input_set_callbacks;
+    ti_audio_input_set_mode;
     ti_audio_input_set_options;
+    ti_audio_input_set_pcm_callback;
     ti_audio_input_start;
     ti_audio_input_stop;
     ti_audio_input_submit_frame;
+    ti_audio_input_submit_pcm;
     ti_audio_input_use_submitted_frames;
     ti_audio_output_create;
     ti_audio_output_destroy;

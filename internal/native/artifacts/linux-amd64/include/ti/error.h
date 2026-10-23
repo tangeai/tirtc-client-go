@@ -65,6 +65,7 @@ typedef int32_t TiError;
 #define TI_ERROR_LOG_UPLOAD_OBJECT_FAILED ((TiError)6133)
 #define TI_ERROR_NETWORK_UNAVAILABLE ((TiError)6136)
 #define TI_ERROR_ENDPOINT_DNS_RESOLUTION_FAILED ((TiError)6137)
+#define TI_ERROR_AUDIO_INPUT_BUFFER_FULL ((TiError)6139)
 
 TI_API const char* TI_CALL ti_error_to_string(TiError error);
 

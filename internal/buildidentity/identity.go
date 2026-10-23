@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	releaseVersion = "2.6.0-alpha.6"
-	buildTimeUTC = "2026-10-23T01:18:30Z"
-	sourceRevision = "bc47056e653aa84406af3a717d4377a57d7f4478"
+	releaseVersion = "2.6.0-alpha.8"
+	buildTimeUTC = "2026-10-23T07:53:30Z"
+	sourceRevision = "ed3398ab967f681a1e03170afc4f541379243682"
 	sourceDirty = 0
 )
 
